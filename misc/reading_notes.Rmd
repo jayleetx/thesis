@@ -1,0 +1,38 @@
+---
+title: "Reading Notes"
+author: "Jay Lee"
+date: "9/19/2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+### Bram, 2003 - Voting Procedures
+
+STV algorithm, page 220 - uses the Hare quota
+
+"to rank *all* candidates for whom one has preferences is not always rational under STV." (223)
+
+- differences in second choices don't hurt your first candidate, but they change the order of eliminations and can thus help/hurt your second preferences (strategic voting)
+
+### Bartholdi and Orlin, 1990 - STV Resists Strategic Voting
+
+It's NP-complete, even in the one-elected case, to determine if voting dishonestly will elect a more preferred candidate to the one elected under your true preferences. This is true purely as a result of the STV algorithm, even if you know perfectly how every single other person voted. It is also NP-complete to recognize when an STV election is non-monotonic, that is an increase in individual support for a candidate will cause them to lose instead of win.
+
+### O'Neil - Fast Algorithms for Counting Ranked Ballots
+
+Using a tree-based (instead of list-based) structure for counting STV is faster, especially under certain counting methods.
+
+### Burnett and Kogan, 2014 - Ballot (and voter) “exhaustion” under Instant Runoff Voting: An examination of four ranked-choice elections
+
+The "guaranteed majority" argument of RCV isn't great because exhausted ballots mean that the final winner doesn't necessarily have a majority of all ballots cast.
+
+"even individuals who mark three distinct choices often face the prospect of exhaustion, so education alone will not fix the problem" (49)
+
+### Donovan et al., 2016 - Campaign civility under preferential and plurality voting
+
+Surveys show that people like campaigns better and consider them more positive in preferential voting systems than in FPTP.
+

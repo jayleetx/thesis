@@ -1,0 +1,40 @@
+---
+title: "Lit Review & Intro"
+author: "Jay Lee"
+date: "9/19/2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# An introduction to RCV
+
+Ranked choice voting (RCV), also known as the alternative vote (AV) or instant-runoff voting (IRV) is an alternative voting method to the plurality, first-past-the-post system more familiar to American voters. Each voter, instead of choosing their highest preference among a set of candidates for an office, ranks some subset of the candidates in order of preference.
+
+The RCV tabulation algorithm generally proceeds as follows: (make this less clinical, come on buddy)
+
+1. For each voter, identify their most preferred candidate that has not yet been eliminated. Count up these preferences by candidate.
+
+2. If one candidate has a majority (50% + 1) of the unexhausted votes, they are declared the winner and counting stops.
+
+3. The candidate with the lowest number of votes is eliminated.
+
+4. The ballots counted for that candidate are each transferred to the voter's next choice if one exists, or if one does not exist the ballot is "exhausted" and removed from counting for further rounds.
+
+5. Return to beginning.
+
+# Definitions
+
+Jay you should get pictures for all of these examples
+
+- Overvote. The case when a voter ranks multiple candidates in the same slot. This slot is typically thrown out entirely in counting, because it's often not possible to determine which candidate was preferred.
+
+- Undervote. The case when a voter does not rank candidates in all of the slots available to them. This is different than other definitions of "undervote", which refer to a voter participating in one election on a ballot but not another one. This is not a problem in counting, and is explicitly allowed in the laws of most jurisdictions.
+
+- Skipped vote. The case when a voter ranks no candidate at slot $x$, but ranks a candidate at slot $y > x$. This is typically not a problem in counting, but different jurisdictions have different rules about whether a voter's ballot is exhausted at this point or continues on to their next ranked choice.
+
+- Duplicated vote. The case when a voter ranks the same candidate for distinct slots $x$ and $y$. This is typically not a problem for counting, and the first ranking for the candidate is used.
+
+All of these except for undervotes are really only interpretable as "ballot mistakes": for example, even if a voter truly prefers two candidates equally, the ballot instructions make it clear that ranking them at the same slot is not allowed.

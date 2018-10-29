@@ -1,0 +1,11 @@
+RCV data sources
+https://www.rankedchoicevoting.org/data_clearinghouse
+Validate against a few data sources?
+
+The goal with the areal matching is to get demographic data for each voting precinct
+
+Ideas for areal matching on census data
+--------------------------------------
+Aggregate up to higher boundaries
+Dasymetric mapping - this disaggregates based on some external population density data, so essentially we could get that and then lay the precinct map on top and get values (might not be super useful in the fully-populated San Francisco?)
+

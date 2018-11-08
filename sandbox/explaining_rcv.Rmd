@@ -9,11 +9,11 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# An introduction to RCV
+## What is ranked choice voting?
 
-Ranked choice voting (RCV), also known as the alternative vote (AV) or instant-runoff voting (IRV) is an alternative voting method to the plurality, first-past-the-post system more familiar to American voters. Each voter, instead of choosing their highest preference among a set of candidates for an office, ranks some subset of the candidates in order of preference.
+Ranked choice voting (RCV), also known as the alternative vote (AV) or instant-runoff voting (IRV) is an alternative voting method to the first-past-the-post (or "plurality", where the candidate with the most votes wins) system more familiar to American voters. Each voter, instead of choosing their highest preference among a set of candidates for an office, ranks some subset of the candidates in order of preference. The single-winner RCV tabulation algorithm generally proceeds as follows:
 
-The RCV tabulation algorithm generally proceeds as follows: (make this less clinical, come on buddy)
+<!-- Make this less clinical, come on buddy -->
 
 1. For each voter, identify their most preferred candidate that has not yet been eliminated. Count up these preferences by candidate.
 
@@ -23,18 +23,30 @@ The RCV tabulation algorithm generally proceeds as follows: (make this less clin
 
 4. The ballots counted for that candidate are each transferred to the voter's next choice if one exists, or if one does not exist the ballot is "exhausted" and removed from counting for further rounds.
 
-5. Return to beginning.
+5. Return to 1.
 
-# Definitions
+Most jurisdictions that use RCV have slightly different rules for edge cases and ballot errors, but this algorithm is what distinguishes RCV from other ranked voting systems (i.e. [Borda](https://www.electoral-reform.org.uk/voting-systems/types-of-voting-system/borda-count/), [Condorcet](http://web.math.princeton.edu/math_alive/Voting/Lab1/Condorcet.html), [Contingent](https://www.uk-engage.org/2013/09/electoral-systems-whats-the-difference-between-contingent-voting-and-alternative-voting-systems/)). A close variant of RCV is the single transferrable vote (STV) method, which can be used to elect multiple candidates, i.e. for a school board, instead of just one. In fact, RCV is just the single-winner implementation of the standard STV algorithm. In the US, this is used in Cambridge, MA and Minneapolis, MN to elect multi-member offices.
 
-Jay you should get pictures for all of these examples
+# Frequently Used Terms
 
-- Overvote. The case when a voter ranks multiple candidates in the same slot. This slot is typically thrown out entirely in counting, because it's often not possible to determine which candidate was preferred.
+Below are some definitions for frequently used terms later on. These are not all ubiquitous (for example, "undervote" has another meaning in most voting research), but we define them here for clarity later on.
 
-- Undervote. The case when a voter does not rank candidates in all of the slots available to them. This is different than other definitions of "undervote", which refer to a voter participating in one election on a ballot but not another one. This is not a problem in counting, and is explicitly allowed in the laws of most jurisdictions.
+- *Overvote*: when a voter ranks multiple candidates in the same slot. This slot is typically thrown out entirely in counting, because it's often not possible to determine which candidate was preferred.
 
-- Skipped vote. The case when a voter ranks no candidate at slot $x$, but ranks a candidate at slot $y > x$. This is typically not a problem in counting, but different jurisdictions have different rules about whether a voter's ballot is exhausted at this point or continues on to their next ranked choice.
+- *Undervote*: when a voter does not rank candidates in all of the slots available to them. This is different than other definitions of "undervote", which refer to a voter participating in one election on a ballot but not another one. This is not a problem in counting, and is explicitly allowed in the laws of most jurisdictions.
 
-- Duplicated vote. The case when a voter ranks the same candidate for distinct slots $x$ and $y$. This is typically not a problem for counting, and the first ranking for the candidate is used.
+- *Skipped vote*: when a voter ranks no candidate at slot $x$, but ranks a candidate at slot $y > x$. This is typically not a problem in counting, but different jurisdictions have different rules about whether a voter's ballot is exhausted at this point or continues on to their next ranked choice.
 
-All of these except for undervotes are really only interpretable as "ballot mistakes": for example, even if a voter truly prefers two candidates equally, the ballot instructions make it clear that ranking them at the same slot is not allowed.
+- *Duplicated vote*: when a voter ranks the same candidate for distinct slots $x$ and $y$. This is typically not a problem for counting, and the first ranking for the candidate is used.
+
+All of these except for undervotes are really only interpretable as "ballot mistakes": for example, even if a voter truly prefers two candidates equally, the ballot instructions (should) make it clear that ranking them at the same slot is not allowed.
+
+## Claims about RCV
+
+There are plenty of arguments both for and against implementing RCV in place of plurality in different jurisdictions (see the literature review), but here we'll focus on evaluating one major argument against it - RCV is harder for voters to participate in than a plurality system. There are two major reasons cited for this:
+
+- The physical design of an RCV ballot is usually more complicated than a plurality ballot, because there has to be a system to encode a more full preference among the candidates than just selecting one
+
+- The process of forming a multi-candidate preference inherently takes more mental energy than just choosing a favorite
+
+The first facet of this argument should be reflected in ballot errors made by voters. 

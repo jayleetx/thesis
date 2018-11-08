@@ -1,14 +1,14 @@
 ---
-author: 'Your R. Name'
-date: 'May 20xx'
+author: 'James J. Lee'
+date: 'May 2019'
 institution: 'Reed College'
 division: 'Mathematics and Natural Sciences'
-advisor: 'Advisor F. Name'
+advisor: 'Heather Kitada Smalley'
 #altadvisor: 'Your Other Advisor'
 # Delete line 6 if you only have one advisor
-department: 'Mathematics'
+department: 'Mathematics - Statistics'
 degree: 'Bachelor of Arts'
-title: 'My Final College Paper'
+title: 'Ballot Completion in Ranked Choice Voting'
 knit: "bookdown::render_book"
 site: bookdown::bookdown_site
 output: 

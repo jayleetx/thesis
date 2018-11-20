@@ -11,7 +11,10 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## What is ranked choice voting?
 
-Ranked choice voting (RCV), also known as the alternative vote (AV) or instant-runoff voting (IRV) is an alternative voting method to the first-past-the-post (or "plurality", where the candidate with the most votes wins) system more familiar to American voters. Each voter, instead of choosing their highest preference among a set of candidates for an office, ranks some subset of the candidates in order of preference. The single-winner RCV tabulation algorithm generally proceeds as follows:
+Ranked choice voting (RCV), also known as the alternative vote (AV) or instant-runoff voting (IRV) is an alternative voting method to the first-past-the-post (or "plurality", where the candidate with the most votes wins) system more familiar to American voters. Each voter, instead of choosing their highest preference among a set of candidates for an office, ranks some subset of the candidates in order of preference. This system (or a close variant) is used in Australia, Maine, and municipal elections in San Francisco, CA; Minneapolis, MN; and Cambridge, MA; among others.
+<!-- What's the best way to format these commas? -->
+
+The single-winner RCV tabulation algorithm generally proceeds as follows:
 
 <!-- Make this less clinical, come on buddy -->
 
@@ -45,8 +48,27 @@ All of these except for undervotes are really only interpretable as "ballot mist
 
 There are plenty of arguments both for and against implementing RCV in place of plurality in different jurisdictions (see the literature review), but here we'll focus on evaluating one major argument against it - RCV is harder for voters to participate in than a plurality system. There are two major reasons cited for this:
 
-- The physical design of an RCV ballot is usually more complicated than a plurality ballot, because there has to be a system to encode a more full preference among the candidates than just selecting one
+- The physical design of an RCV ballot is usually more complicated than a plurality ballot, because there has to be a system to encode a more full preference among the candidates than just selecting one candidate
 
-- The process of forming a multi-candidate preference inherently takes more mental energy than just choosing a favorite
+- The process of forming a multi-candidate preference inherently takes more mental energy than just choosing a favorite candidate
 
-The first facet of this argument should be reflected in ballot errors made by voters. 
+The first facet of this argument should be reflected in ballot errors made by voters. Compared to plurality voting, we expect more errors in an RCV ballot just because the ballot is more complicated. There are also more potentials for error in the RCV system generally. The only "errors" in a plurality ballot are incompletely marking a candidate (think incorrect Scantron bubbling, or hanging chads) or overvoting, both of which are potential pitfalls for a ranked choice ballot as well. On top of these, there are the potential errors of duplicated and skipped votes unique to ranked ballots^[These types of errors are not uniform, and some jurisdictions are more forgiving than others about rules for counting these errors. While it may be apparent that a voter who listed the same candidate 3 times (A-A-A) prefers that candidate, a candidate ranking of A-B-A is harder to extract a clear preference from. Skipped votes are where we see the most variance in jurisdiction counting rules: if a voter marks the ballot A-__-B, skipping the second slot, some jurisdictions will ignore the skip and treat B as the voter's second choice, while others will stop counting after A is eliminated (ignoring their vote for B), and others yet will throw out the ballot entirely.].
+<!-- Double check that all of these methods exists and find which places do them - I'm pretty sure I've seen them all, and they are all definitely possibilities for dealing with this error, but I gotta make sure they do exists in reality. -->
+
+The second facet should be reflected in incomplete ballots filled out by voters. Given that they understand how to encode their preferences on the ballot, there is still the non-trivial task of forming such a preference. Structurally, some of the factors this incompleteness should vary based on are:
+
+- The number of candidates running for a position
+
+- The number of candidates voters can rank
+
+- The number of seats elected in a given race
+
+This first variable is at the election level (different for every election), the second is at the jurisdiction level, and the third is a mix of both. For a clear example of these differences, consider a [2016 San Francisco Board of Supervisors race (District 3)](https://sfelections.org/results/20161108/data/20161206/d3/20161206_d3.pdf) versus a  [2017 Cambridge City Council race](https://www.cambridgema.gov/election2017/Council%20Order%20Round.htm).
+
+| Factor              | San Francisco 2016     | Cambridge 2017      |
+|---------------------|------------------------|---------------------|
+| Candidates running  | 2                      | 27                  |
+| Candidates rankable | 2 (Generally, up to 3) | 27 (Generally, all) |
+| Seats elected       | 1                      | 9                   |
+
+

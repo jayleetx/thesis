@@ -1,5 +1,5 @@
 ---
-author: 'James J. Lee'
+author: 'Jay Lee'
 date: 'May 2019'
 institution: 'Reed College'
 division: 'Mathematics and Natural Sciences'
@@ -8,9 +8,10 @@ advisor: 'Heather Kitada Smalley'
 # Delete line 6 if you only have one advisor
 department: 'Mathematics - Statistics'
 degree: 'Bachelor of Arts'
-title: 'Ballot Completion in Ranked Choice Voting'
+title: 'My Final College Paper'
 knit: "bookdown::render_book"
 site: bookdown::bookdown_site
+always_allow_html: yes
 output: 
   thesisdown::thesis_pdf: default
 #  thesisdown::thesis_gitbook: default

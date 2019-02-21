@@ -25,21 +25,16 @@ ggplot(census) + geom_sf()
 ggplot(precincts) + geom_sf()
 ggplot() + geom_sf(data = census) + geom_sf(data = precincts)
 
-# function for weighted joins #####
-# takes in two sf objects (polygons?) and returns the combination,
-# but weighted by area for the specified variables (character vector)
+# make weighted join function #####
 
-add_areas <- function(col) {
-  if(col %in% weighted) return(weighted.mean(col, area2))
-  else if(length(unique(col)) == 1) return(unique(col))
-  else return(NA)
-  
+#helper function
+combine <- function(x) {
+  if (length(unique(x)) == 1) as.character(unique(x)) else "MULTI"
 }
 
-# this is in the process of working?
-# the join & weight is fine
-# but the re-aggregation isn't quite working yet
-# problems because you want to sum the weighted within each precinct, but keep the constants constant
+# actual function
+# is there a good way to check the math on this?
+
 weighted_left_join <- function(data1, data2, weighted) {
   x <- dplyr::mutate(data1, index1 = 1:nrow(data1),
                      area1 = as.numeric(sf::st_area(geometry)))
@@ -51,15 +46,39 @@ weighted_left_join <- function(data1, data2, weighted) {
     mutate(summed_area = sum(intersect_area)) %>%
     ungroup() %>%
     mutate(overage = area2 - intersect_area) %>%
-    mutate_at(weighted, function (x) x * .$intersect_area / .$overall_area)
+    mutate_at(weighted, function (x) x * .$intersect_area / .$summed_area)
+  
+  weighted_df <- both %>%
+    group_by(index1) %>%
+    summarize_at(weighted, sum)
+  unweighted_df <- both %>%
+    group_by(index1) %>%
+    summarize_at(vars(-one_of(c(weighted, "index1"))), combine)
+  
+  bind_cols(weighted_df, unweighted_df) %>%
+    select(-geometry1, -index11, -index1) %>%
+    st_sf() %>%
+    select(PREC_2017, everything()) %>%
+    arrange(PREC_2017)
 
 }
 
+big_guy <- weighted_left_join(precincts, census, c("CENSUSAREA", "test_weight"))
+
+# test this??? #####
+# turns out drawing arbitrary polygons is difficult
+
+l1 <- rbind(c(0,0),c(0,6))
+l2 <- rbind(c(0,6),c(6,6))
+l3 <- rbind(c(6,6),c(6,0))
+l4 <- rbind(c(6,0),c(0,0))
+
+l5 <-rbind(c(3,0),c(3,6))
+l6 <-rbind(c(0,3),c(6,3))
+lines <- st_multilinestring(list(l1,l2,l3,l4,l5,l6))
+
+box4 <- st_cast(lines, "POLYGON")
 
 
-# join areas #####
 
-combined <- st_intersection(precincts2, census2) %>%
-  mutate(area = as.numeric(st_area(geometry))) # units are US survey feet ^2
-
-ggplot(combined) + geom_sf()
+shape <- st_polygon(list(box1, box2, box3, box4))

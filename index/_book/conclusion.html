@@ -22,7 +22,7 @@
   
   
 
-<meta name="author" content="Your R. Name">
+<meta name="author" content="Jay Lee">
 
 
 
@@ -46,6 +46,10 @@
 
 
 
+<script src="libs/htmlwidgets-1.2/htmlwidgets.js"></script>
+<script src="libs/d3-4.5.0/d3.min.js"></script>
+<script src="libs/sankey-1/sankey.js"></script>
+<script src="libs/sankeyNetwork-binding-0.4/sankeyNetwork.js"></script>
 
 
 <style type="text/css">
@@ -101,23 +105,18 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li><a href="./"></a></li>
 <li class="divider"></li>
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Introduction</a></li>
-<li class="chapter" data-level="1" data-path="1-rmd-basics.html"><a href="1-rmd-basics.html"><i class="fa fa-check"></i><b>1</b> R Markdown Basics</a><ul>
-<li class="chapter" data-level="1.1" data-path="1-rmd-basics.html"><a href="1-rmd-basics.html#lists"><i class="fa fa-check"></i><b>1.1</b> Lists</a></li>
-<li class="chapter" data-level="1.2" data-path="1-rmd-basics.html"><a href="1-rmd-basics.html#line-breaks"><i class="fa fa-check"></i><b>1.2</b> Line breaks</a></li>
-<li class="chapter" data-level="1.3" data-path="1-rmd-basics.html"><a href="1-rmd-basics.html#r-chunks"><i class="fa fa-check"></i><b>1.3</b> R chunks</a></li>
-<li class="chapter" data-level="1.4" data-path="1-rmd-basics.html"><a href="1-rmd-basics.html#inline-code"><i class="fa fa-check"></i><b>1.4</b> Inline code</a></li>
-<li class="chapter" data-level="1.5" data-path="1-rmd-basics.html"><a href="1-rmd-basics.html#including-plots"><i class="fa fa-check"></i><b>1.5</b> Including plots</a></li>
-<li class="chapter" data-level="1.6" data-path="1-rmd-basics.html"><a href="1-rmd-basics.html#loading-and-exploring-data"><i class="fa fa-check"></i><b>1.6</b> Loading and exploring data</a></li>
-<li class="chapter" data-level="1.7" data-path="1-rmd-basics.html"><a href="1-rmd-basics.html#additional-resources"><i class="fa fa-check"></i><b>1.7</b> Additional resources</a></li>
+<li class="chapter" data-level="1" data-path="1-litreview.html"><a href="1-litreview.html"><i class="fa fa-check"></i><b>1</b> What is ranked choice voting?</a><ul>
+<li class="chapter" data-level="1.1" data-path="1-litreview.html"><a href="1-litreview.html#frequently-used-terms"><i class="fa fa-check"></i><b>1.1</b> Frequently Used Terms</a></li>
+<li class="chapter" data-level="1.2" data-path="1-litreview.html"><a href="1-litreview.html#claims-about-rcv"><i class="fa fa-check"></i><b>1.2</b> Claims about RCV</a></li>
+<li class="chapter" data-level="1.3" data-path="1-litreview.html"><a href="1-litreview.html#history-of-rcv-in-the-us-sf-in-particular"><i class="fa fa-check"></i><b>1.3</b> History of RCV in the US (SF in particular)</a></li>
+<li class="chapter" data-level="1.4" data-path="1-litreview.html"><a href="1-litreview.html#why-or-why-not-implement-rcv"><i class="fa fa-check"></i><b>1.4</b> Why, or why not, implement RCV?</a><ul>
+<li class="chapter" data-level="1.4.1" data-path="1-litreview.html"><a href="1-litreview.html#pros"><i class="fa fa-check"></i><b>1.4.1</b> Pros</a></li>
+<li class="chapter" data-level="1.4.2" data-path="1-litreview.html"><a href="1-litreview.html#cons"><i class="fa fa-check"></i><b>1.4.2</b> Cons</a></li>
 </ul></li>
-<li class="chapter" data-level="2" data-path="2-math-sci.html"><a href="2-math-sci.html"><i class="fa fa-check"></i><b>2</b> Mathematics and Science</a><ul>
-<li class="chapter" data-level="2.1" data-path="2-math-sci.html"><a href="2-math-sci.html#math"><i class="fa fa-check"></i><b>2.1</b> Math</a></li>
-<li class="chapter" data-level="2.2" data-path="2-math-sci.html"><a href="2-math-sci.html#chemistry-101-symbols"><i class="fa fa-check"></i><b>2.2</b> Chemistry 101: Symbols</a><ul>
-<li class="chapter" data-level="2.2.1" data-path="2-math-sci.html"><a href="2-math-sci.html#typesetting-reactions"><i class="fa fa-check"></i><b>2.2.1</b> Typesetting reactions</a></li>
-<li class="chapter" data-level="2.2.2" data-path="2-math-sci.html"><a href="2-math-sci.html#other-examples-of-reactions"><i class="fa fa-check"></i><b>2.2.2</b> Other examples of reactions</a></li>
+<li class="chapter" data-level="1.5" data-path="1-litreview.html"><a href="1-litreview.html#research-into-sf"><i class="fa fa-check"></i><b>1.5</b> Research into SF?</a></li>
 </ul></li>
-<li class="chapter" data-level="2.3" data-path="2-math-sci.html"><a href="2-math-sci.html#physics"><i class="fa fa-check"></i><b>2.3</b> Physics</a></li>
-<li class="chapter" data-level="2.4" data-path="2-math-sci.html"><a href="2-math-sci.html#biology"><i class="fa fa-check"></i><b>2.4</b> Biology</a></li>
+<li class="chapter" data-level="2" data-path="2-methods.html"><a href="2-methods.html"><i class="fa fa-check"></i><b>2</b> Methods and Structure</a><ul>
+<li class="chapter" data-level="2.0.1" data-path="2-methods.html"><a href="2-methods.html#data-structure-and-source"><i class="fa fa-check"></i><b>2.0.1</b> Data Structure and Source</a></li>
 </ul></li>
 <li class="chapter" data-level="3" data-path="3-ref-labels.html"><a href="3-ref-labels.html"><i class="fa fa-check"></i><b>3</b> Tables, Graphics, References, and Labels</a><ul>
 <li class="chapter" data-level="3.1" data-path="3-ref-labels.html"><a href="3-ref-labels.html#tables"><i class="fa fa-check"></i><b>3.1</b> Tables</a></li>

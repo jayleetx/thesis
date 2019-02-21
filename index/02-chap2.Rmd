@@ -1,123 +1,34 @@
-# Mathematics and Science {#math-sci}
+# Methods and Structure {#methods}
 
-<!-- Required to number equations in HTML files -->
-<script type="text/x-mathjax-config">
-MathJax.Hub.Config({
-  TeX: { equationNumbers: { autoNumber: "AMS" } }
-});
-</script>
+Inevitably, the data format that would be ideal to conduct this research doesn't exist publicly (as it shouldn't - voter anonymity and such). The ideal model might be a logistic or other classification model that predicts whether a given voter has a ballot error or fills out the ballot incompletely, given their demographic qualities.
 
-## Math
+### Data Structure and Source
 
-\TeX\ is the best way to typeset mathematics. Donald Knuth designed \TeX\ when he got frustrated at how long it was taking the typesetters to finish his book, which contained a lot of mathematics.  One nice feature of _R Markdown_ is its ability to read LaTeX code directly.
+The data used comes from two main sources. From the San Francisco Elections Office <!-- Get an official title? -->, we have a cast ballot record of the election in question <!-- Put a date on this! -->. This is presented by the city as two text files:
+- The ballot image, a 45-character fixed-width file with fields corresponding to election, candidate, unique voter number (anonymized and disconnected from any voter registration ID), ranking, precinct, and other information. Each of these is encoded numerically, so each line of the file appears as a 45-digit number.
+- The lookup table, an 83-character fixed-width file that defines the encodings used to create the numerical values in the ballot image.
+<!-- Get the pictures that explain these! -->
 
-If you are doing a thesis that will involve lots of math, you will want to read the following section which has been commented out. If you're not going to use math, skip over or delete this next commented section.
+In the ballot file, each voter is spread across three rows of data (one for each ranking). We use the `clean_ballot()` function from our `rcv` R package <!-- cite this somehow? idk --> to read in the data for easier manipulation. From this data we have the full ranked preference set of candidates (up to 3) from each voter.
 
+Since the voter-level data is fully anonymized, we have no demographic information at the individual level. For any given voter, since the most identifying piece of information we have about them is their precinct, it is impossible to know any one voter's gender or ethnicity. To gain insight into these demographic trends, we instead aggregate up to the precinct level.
 
-<!-- MATH and PHYSICS majors: Uncomment the following section -->
-<!--
-$$\sum_{j=1}^n (\delta\theta_j)^2 \leq {{\beta_i^2}\over{\delta_i^2 + \rho_i^2}}
-\left[ 2\rho_i^2 + {\delta_i^2\beta_i^2\over{\delta_i^2 + \rho_i^2}} \right] \equiv \omega_i^2
-$$
+At the precinct level, we can now only study the rates of these ballot phenomena. For example, in Precinct 1703, we may see 14% of voters undervote. <!-- Get a real stat to use for this --> Rather than building a classification model (error / no error), we can now instead build regression models with a numerical dependent variable <!-- Better word for this --> - the rate of ballot error. Moving up this level of abstraction does remove some granularity from the model (inference and prediction at the precinct level is less specific than at the individual level), but this is the least we can do and still be able to access demographic information.
+<!-- Talk about the actual processes (and files) used to do this -->
 
-From Informational Dynamics, we have the following (Dave Braden):
+Now that we have precinct-level rates, we need to obtain precinct-level demographic information in order to build a model. Our source of demographic data is the 2010 U.S. Census (citation). While this data is slightly out of date (about 8 years), there is more certainty about the accuracy of the measurements collected. While a more temporally accurate data set like the yearly American Community Survey (ACS) could have been used, the error margins of this data set proved too large / complicated to be useful for this study.
 
-After _n_ such encounters the posterior density for $\theta$ is
+One consideration with this is that the voting population is not always representative of the general population. It might be more informative to obtain demographics about the voting population specifically, rather than the entire population of each precinct. <!-- Find out how many people in each precinct voted. Should be some easy math once you find the population of the precincts. --> However, the only information available about voters is their age (from the county voter registration file), and the discontinuity introduced by using two different data sets for demographic information is more of an  "error" to me than using a less accurate (but universal) census data set.
 
-$$
-\pi(\theta|X_1< y_1,\dots,X_n<y_n) \varpropto \pi(\theta) \prod_{i=1}^n\int_{-\infty}^{y_i}
-   \exp\left(-{(x-\theta)^2\over{2\sigma^2}}\right)\ dx
-$$
+We now encounter a problem. Since census regions (block groups, tracts) are set by the federal government, and election precincts are set by San Francisco County^[The city and county government are unified in this case, because the county comprises entirely of the city of San Francisco.], the regions don't line up nicely^[There's no inherent reason that they should, it's just unfortunate for this study.]. <!-- show a picture of this! You have two maps --> Given this mismatch, how do we obtain demographic estimates for our precincts?
 
-Another equation:
+Stated more generally: if we have a division of a geographic region and some non-constant properties^[A constant property is something that is identical across all of its points: if a precinct is inside State House District 4, any point or region inside of it is inside State House District 4. A non-constant property is not identical across its interior: if there are 100 people in a precinct, there are not 100 people inside any arbitrary sub-region of the district.] on the divisions, how do we estimate measures of these properties for other possible divisions?
+<!-- Is there research into this? What's up? -->
+There are a few possible ways of accomplishing this. The way we use assumes a uniform spatial distribution of all non-constant properties: any sub-region has proportion of the full region's property equal to the proportion of the area of the full region that the sub-region occupies. For example, if we split a region with 100 people into two sub-regions of equal area, we assume that there are 50 people in each sub-region.
+<!-- add a pic of the validation data because it's easier to comprehend -->
+To approach this method, we first spatially intersect the two division sets of the city: census tracts and election precincts. This creates a new division, where every new sub-region is a unique combination of tract and precinct <!-- This might not be true? What if there's a weird concave shape that gets split up? --> We can directly group these sub-regions together in one combination into the full set of precincts, and group them in another combination into the full set of census tracts. Using the uniform spatial assumption, we obtain demographic estimates for each of these sub-regions, then add them together in the precinct grouping to obtain demographic estimates for our precincts.
 
-$$\det\left|\,\begin{matrix}%
-c_0&c_1\hfill&c_2\hfill&\ldots&c_n\hfill\cr
-c_1&c_2\hfill&c_3\hfill&\ldots&c_{n+1}\hfill\cr
-c_2&c_3\hfill&c_4\hfill&\ldots&c_{n+2}\hfill\cr
-\,\vdots\hfill&\,\vdots\hfill&
-  \,\vdots\hfill&&\,\vdots\hfill\cr
-c_n&c_{n+1}\hfill&c_{n+2}\hfill&\ldots&c_{2n}\hfill\cr
-\end{matrix}\right|>0$$
+<!-- Add general example with the test data here, it's way easier to understand. -->
 
-
-Lapidus and Pindar, Numerical Solution of Partial Differential Equations in Science and
-Engineering.  Page 54
-
-$$
-\int_t\left\{\sum_{j=1}^3 T_j \left({d\phi_j\over dt}+k\phi_j\right)-kT_e\right\}w_i(t)\ dt=0,
-   \qquad\quad i=1,2,3.
-$$
-
-L\&P  Galerkin method weighting functions.  Page 55
-
-$$
-\sum_{j=1}^3 T_j\int_0^1\left\{{d\phi_j\over dt} + k\phi_j\right\} \phi_i\ dt
-   = \int_{0}^1k\,T_e\phi_idt, \qquad i=1,2,3 $$
-
-Another L\&P (p145)
-
-$$
-\int_{-1}^1\!\int_{-1}^1\!\int_{-1}^1 f\big(\xi,\eta,\zeta\big)
-   = \sum_{k=1}^n\sum_{j=1}^n\sum_{i=1}^n w_i w_j w_k f\big( \xi,\eta,\zeta\big).
-$$
-
-Another L\&P (p126)
-
-$$
-\int_{A_e} (\,\cdot\,) dx dy = \int_{-1}^1\!\int_{-1}^1 (\,\cdot\,) \det[J] d\xi d\eta.
-$$
--->
-
-## Chemistry 101: Symbols
-
-Chemical formulas will look best if they are not italicized. Get around math mode's automatic italicizing in LaTeX by using the argument `$\mathrm{formula here}$`, with your formula inside the curly brackets.  (Notice the use of the backticks here which enclose text that acts as code.)
-
-So, $\mathrm{Fe_2^{2+}Cr_2O_4}$ is written `$\mathrm{Fe_2^{2+}Cr_2O_4}$`.
-
-<!--
-The \noindent command below does what you'd expect:  it forces the current line/paragraph to not indent. This was done here to match the format of the LaTeX thesis PDF.
--->
-
-\noindent Exponent or Superscript: $\mathrm{O^-}$
-
-\noindent Subscript: $\mathrm{CH_4}$
-
-To stack numbers or letters as in $\mathrm{Fe_2^{2+}}$, the subscript is defined first, and then the superscript is defined.
-
-\noindent Bullet: CuCl $\bullet$ $\mathrm{7H_{2}O}$
-
-
-\noindent Delta: $\Delta$
-
-\noindent Reaction Arrows: $\longrightarrow$ or  $\xrightarrow{solution}$
-
-\noindent Resonance Arrows: $\leftrightarrow$
-
-\noindent Reversible Reaction Arrows: $\rightleftharpoons$
-
-### Typesetting reactions
-
-You may wish to put your reaction in an equation environment, which means that LaTeX will place the reaction where it fits and will number the equations for you. 
-
-\begin{equation}
-  \mathrm{C_6H_{12}O_6  + 6O_2} \longrightarrow \mathrm{6CO_2 + 6H_2O}
-  (\#eq:reaction)
-\end{equation}
-
-We can reference this combustion of glucose reaction via Equation \@ref(eq:reaction).
-
-### Other examples of reactions
-
-$\mathrm{NH_4Cl_{(s)}}$ $\rightleftharpoons$ $\mathrm{NH_{3(g)}+HCl_{(g)}}$
-
-\noindent $\mathrm{MeCH_2Br + Mg}$ $\xrightarrow[below]{above}$ $\mathrm{MeCH_2\bullet Mg \bullet Br}$
-
-## Physics
-
-Many of the symbols you will need can be found on the math page <http://web.reed.edu/cis/help/latex/math.html> and the Comprehensive LaTeX Symbol Guide (<http://mirror.utexas.edu/ctan/info/symbols/comprehensive/symbols-letter.pdf>).
-
-## Biology
-
-You will probably find the resources at <http://www.lecb.ncifcrf.gov/~toms/latex.html> helpful, particularly the links to bsts for various journals. You may also be interested in TeXShade for nucleotide typesetting (<http://homepages.uni-tuebingen.de/beitz/txe.html>).  Be sure to read the proceeding chapter on graphics and tables.
+This assumption of uniformity, like any assumption, may be unfounded. There are methods, some involving satellite imagery, to get more accurate information about population distribution. Quite honestly, these were just too complicated for the scope of this research. It is, however, more likely in an urban environment like San Francisco^[as compared to the entire state of California, which has urban pockets within suburban regions within a rural overall condition] that this unifrmity assumption will not drastically change our estimates.
 

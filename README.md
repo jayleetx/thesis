@@ -2,7 +2,7 @@
 
 Organization, for the most part...
 
-- `index` is the actual thesis documents. All that's in there is the blank template so far, so as things get written it'll get better.
+- `index` is the actual thesis documents. Mostly adding writing drafts straight into here as I go
 
 - `data` (not on GitHub for now) has data, both tabular and geospatial
 

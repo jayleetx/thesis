@@ -36,13 +36,16 @@ Below are some definitions for frequently used terms later on. These are not all
 
 - *Overvote*: when a voter ranks multiple candidates in the same slot. This slot is typically thrown out entirely in counting, because it's often not possible to determine which candidate was preferred.
 
-- *Undervote*: when a voter does not rank candidates in all of the slots available to them. This is different than other definitions of "undervote", which refer to a voter participating in one election on a ballot but not another one. This is not a problem in counting, and is explicitly allowed in the laws of most jurisdictions.
+- *Undervote*: when a voter does not rank candidates in all of the slots available to them. This is different than other definitions of "undervote", which refer to a voter participating in one election on a ballot but not another one. This is not a problem in counting, and is explicitly allowed in the laws of most jurisdictions. A plurality election analog would be voting in high-profile races (e.g. presidential), but not down-ticket decisions (e.g. local water board).
 
-- *Skipped vote*: when a voter ranks no candidate at slot $x$, but ranks a candidate at slot $y > x$. This is typically not a problem in counting, but different jurisdictions have different rules about whether a voter's ballot is exhausted at this point or continues on to their next ranked choice.
+- *Skipped vote*: when a voter ranks no candidate at slot $x$, but ranks a candidate at slot $y > x$. This is typically not a problem in counting, but different jurisdictions have different rules about whether a voter's ballot is exhausted at this point or continues on to their next ranked choice. Plurality voting has no analog to this, because each race only has one "ranking" (first!).
 
-- *Duplicated vote*: when a voter ranks the same candidate for distinct slots $x$ and $y$. This is typically not a problem for counting, and the first ranking for the candidate is used.
+- *Duplicated vote*: when a voter ranks the same candidate for distinct slots $x$ and $y$. This is typically not a problem for counting, and the first ranking for the candidate is used. Similar to a skipped vote, plurality voting has no analog to this.
 
-All of these except for undervotes are really only interpretable as "ballot mistakes": for example, even if a voter truly prefers two candidates equally, the ballot instructions (should) make it clear that ranking them at the same slot is not allowed.
+- *Ballot exhaustion*: as ballot counting progresses, some ballots will become "exhausted" when all the candidates selected are eliminated. Suppose the final count in an election is between candidates B and D, and a voter ranked candidates C-A-E. Their ballot would not be counted in this final round, as they expressed no preference for either candidate B or D. An analogous situation in a plurality election might be voting in the general election but not a runoff, that is only having a say in part of the election.
+
+<!-- Formatting? I don't want to say "votes" three times, but I don't know also if I'm allowed to mix the dash and space cases like this. -->
+Over-, skipped, and duplicated votes are really only interpretable as "ballot mistakes": for example, even if a voter truly prefers two candidates equally, the ballot instructions (should) make it clear that ranking them at the same slot is not allowed.
 
 ## Claims about RCV
 
@@ -71,4 +74,10 @@ This first variable is at the election level (different for every election), the
 | Candidates rankable | 2 (Generally, up to 3) | 27 (Generally, all) |
 | Seats elected       | 1                      | 9                   |
 
+
+## History of RCV in the US (SF in particular)
+
+## Research on its pros/cons
+
+## Research into SF?
 

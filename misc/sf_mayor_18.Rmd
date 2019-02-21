@@ -1,0 +1,94 @@
+---
+title: "SF Mayor Election 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(rcv)
+library(dplyr)
+library(rvest)
+library(knitr)
+library(kableExtra)
+library(networkD3)
+library(stringr)
+```
+
+### Read in the files
+
+```{r}
+ballot18 <- "http://www.sfelections.org/results/20180605/data/20180627/20180627_ballotimage.txt"
+lookup18 <- "http://www.sfelections.org/results/20180605/data/20180627/20180627_masterlookup.txt"
+```
+
+### Wrangle the raw data
+
+```{r message=FALSE}
+sf_mayor <- rcv::clean_ballot(ballot = ballot18, b_header = FALSE,
+                              lookup = lookup18, l_header = FALSE,
+                              format = "WinEDS")
+read_ballot <- rcv::readable(sf_mayor) %>%
+  arrange(desc(contest))
+
+kable(head(read_ballot, 10)) %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+A few lines from the top of the cleaned ballot.
+
+```{r echo=FALSE, eval=FALSE}
+# it's way overcounting NAs somewhere, haven't figured that out yet
+results <- rcv_tally(sf_mayor, rcvcontest = "Mayor")
+kable(results) %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+### Official results
+
+```{r echo=FALSE}
+link <- "https://sfelections.org/results/20180605/data/20180627/mayor/20180627_mayor.html"
+path <- '//*[@id="ResultsContainer"]/table'
+official <- read_html(link) %>%
+  html_nodes(xpath = path) %>%
+  html_table() %>%
+  as.data.frame()
+official2 <- select(official, matches("^[A-z]+\\.\\d$")) %>%
+  rbind(c("NA", as.numeric(unlist(.[16, -1])) - as.numeric(unlist(.[15, -1])))) %>%
+  slice(c(-1,-12:-17))
+official2[official2 == 0] <- NA
+official2 <- official2[c(1:8,10,9,11), ]
+rownames(official2) <- NULL
+official2$Round.1[9:10] <- official2$Round.2[9] <- 0
+colnames(official2) <- c('candidate', paste0("round", 1:9))
+official2 <- official2 %>%
+  arrange(candidate == "NA",
+          rowSums(is.na(.)),
+          dplyr::desc(.[ ,ncol(.)])) %>%
+  mutate_at(vars(starts_with('round')), as.numeric)
+kable(official2) %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+renamed <- mutate(official2,
+                  first = str_sub(candidate, 1, 1),
+                  last = str_extract(candidate, "[A-z]+$"),
+                  candidate = paste(first, last, sep = ". ")) %>%
+  select(-first, -last, -round1, -round2) %>%
+  slice(-c(9,10))
+renamed[9,1] <- "NA"
+```
+
+From Preliminary Report 10 - June 11, 2018
+
+Source: [San Francisco Department of Elections](https://sfelections.org/results/20180605/data/20180611/mayor/20180611_mayor.html)
+
+### Visualization
+
+Interactive - click & drag the bars, hover over the bars and flows for vote totals.
+
+```{r echo=FALSE}
+for_plotting <- make_d3list(results = renamed)
+sankeyNetwork(Links = for_plotting$values, Nodes = for_plotting$names,
+              Source = "source", Target = "target",
+              Value = "value", NodeID = "candidate", units = "voters",
+              fontSize = 10, nodeWidth = 20, width = 800)
+```
+

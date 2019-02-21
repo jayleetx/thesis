@@ -9,6 +9,7 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+## Physical Books
 
 ### Bram, 2003 - Voting Procedures
 
@@ -18,13 +19,84 @@ STV algorithm, page 220 - uses the Hare quota
 
 - differences in second choices don't hurt your first candidate, but they change the order of eliminations and can thus help/hurt your second preferences (strategic voting)
 
+## Arguments for RCV
+
 ### Bartholdi and Orlin, 1990 - STV Resists Strategic Voting
 
 It's NP-complete, even in the one-elected case, to determine if voting dishonestly will elect a more preferred candidate to the one elected under your true preferences. This is true purely as a result of the STV algorithm, even if you know perfectly how every single other person voted. It is also NP-complete to recognize when an STV election is non-monotonic, that is an increase in individual support for a candidate will cause them to lose instead of win.
 
-### O'Neil - Fast Algorithms for Counting Ranked Ballots
+### Donovan et al., 2016 - Campaign civility under preferential and plurality voting
 
-Using a tree-based (instead of list-based) structure for counting STV is faster, especially under certain counting methods.
+Surveys show that people are more satisfied with campaigns and consider them less negative in preferential voting systems than in FPTP.
+
+One example of this - the Kim/Leno cross-endorsement in the 2018 SF mayor's race.
+
+### Sightline Institute series - Archaic Elections Methods Cripple Democracy
+
+#### Part 1: Better Voting Systems Boost Turnout
+
+"The first elections following implementation of a fair voting method typically see small increases in ballot marking errors compared with previous elections (usually less than a 1 percentage point difference), but the massive increase in participation swamps this effect."
+
+Two-round elections disenfranchise voters - primary and runoff elections (and, God forbid, primary runoff elections) have less turnout across the board than their corresponding general elections. In particular, racial minorites have greater dips in participation across secondary elections compared to white voters.
+
+Plurality demotivates voters.
+<!-- More? -->
+
+HEY this cites stuff from a fairvote article that you also have, try to pull from that instead.
+"For example, San Francisco saw an estimated 168 percent increase, equivalent to nearly 120,000 voters, in participation in the final round of counting for its 2005 Assessor-Recorder election compared to the number of voters that likely would have turned out for a December runoff to decide the race."
+
+Efforts to boost turnout within these methods don't have as much effect as changing methods to ranked voting. Phone and direct mail get-out-the-vote campaigns "typically [yield] less than 1 percentage point boosts in voter turnout", and while in-person efforts are better they are less efficient at contacting voters.
+
+"[IRV] boosts turnout via elimination of low-turnout elections".
+
+#### Part 2: RCV Increases Voter Participation, Which Far Outweighs Small Uptick in Voter Error
+
+"error rates [increase] by less than 1 percentage point over plurality elections" This may be partially misleading - error rates are generally fractions of percentage points. Overall, however, this increase in ballot errors is overshadowed by increases in voter turnout.
+
+"generally, overvotes increase slightly with RCV while undervotes decrease", that is "more people participate in down-ballot elections when jurisdictions comduct them via RCV, but these voters also make more mistakes" - the combination of these two factors leads to a small (statistically insignificant) decrease in these uncountable votes (Kimball).
+
+Ballots with more candidates see an increase in overvoting, but a decrease in undervoting.
+
+Data is inconclusive on error rate gaps among demographic groups. While gaps in error rates among racial and socioeconomic groups exist across all voting methods, studies disagree on whether these gaps change under RCV compared to plurality.
+
+Voting by mail has lower rates of overvotes,"possibly because voters have more time to contemplate their ballot".
+
+#### Part 3: Ranked-Choice Voting Protects Voters' Voices by Increasing Participation in Each Round
+
+The phenomenon of ballot exhaustion is not unique to RCV - its analog in plurality voting would be voters participating in the general election, but not a primary or runoff election. To take an example, Oregon has closed primaries: voters can only vote in the primary for the party they are registered with. "This system actively excludes the nearly half of Oregon voters who don’t affiliate with either of the two major parties from the primary," which is only exacerbated by the increase in non-affiliated voters from the state's 2016 move to automatic voter registration.
+
+While there are valid concerns that RCV disenfranchises voters through ballot exhaustion (if a voter didn't rank any of the candidates from the final round of counting, they have no say in this final round), a Kimball study (Kimball) shows that "RCV [is] associated with a 24 percentage point reduction in voter drop-off compared with plurality elections that required a two-round election process". One possible explanation for this dissonance is that the ballot exhaustion in RCV is more immediately apparent than that of a runoff election, and less easy to blame on voter behavior.
+
+Voters who use more of their available ballot slots (less undervoting) are less likely to experience ballot exhaustion. Data is unclear whether racial and ethnic groups differ in rates of undervoting: white non-Hispanic voters were "more likely to rank three candidates than any other racial or ethnic group", but in 2005 this was reversed and they were "the least likely group to rank three candidates" (three is the maximum number of rankings allowed under the SF rules.
+
+### Hill - Instant Runoff Voting
+
+Problems with plurality: nonmajority winners, third party spoilers, partisan primaries disadvantage moderates, negative campaigning.
+
+IRV resolves these, in particular it allows both moderates and outsider (third-party) candidates a greater chance at office.
+
+### Richie, 2004 - Instant Runoff Voting: What Mexico (and Others) Could Learn
+
+2000 presidential vote: 43% Fox (PAN), 36% Ochoa (PRI), 17% Cardenas (PRD). Under this system with three strong parties, the winning candidate will almost certainly never have a majority of the vote. Ross perot is the strongest recent example of the "spoiler effect" in the US.
+"Great Britain hasn't had a government elected with majority support since the 1950s, Canada hasn't had a government elected with majority support for two decades and the United States hasn't had a president elected with a majority of the popular vote since 1988" (501). <!-- CIRCA 2004!!!!! See if this has changed? -->
+
+Weaknesses of plurality: no majority rule, spoiler candidates, negative campaigning.
+
+Weaknesses of two-round runoffs: candidates/taxpayers have to fund a second campaign/election, turnout almost always drops a bunch in the second round, and it doesn't fix any of the problems with plurality in general. "The more times that citizens are asked to vote, the less likely they are to vote in any given election" (505).
+
+One of the major reasons more US jurisdictions haven't implemented RCV is that "implementing instant runoff voting in the past would have required jurisdictions to switch to counting ballots by hand, which few were willing to do" (508). This is what Ireland has done for years, they count ballots by hand overnight. In 1997, Cambridge, MA was the first American jurisdiction to use modern ballot-scanning machines with ranked choice ballots. This is helped by the 2002 Help America Vote Act (HAVA), because most jurisdictions have modern voting equipment (touch screens or optical scanners) that can handle IRV after a one-time software upgrade, not any new hardware needed (510).
+
+No strategic voting in IRV: voters don't have to choose between "vot[ing] for their favorite candidate or for a candidate with a better chance of winning" (509), because they can rank their favorite first and still have their vote counted for the more popular candidate if their first choice loses.
+
+Usually IRV, runoffs, and plurality all elect the candidate with the greatest support. Under certain circumstances, however, these second two break down and give undemocratic results that IRV acts against (512).
+
+## Arguments against RCV
+
+### Center for Election Science - IRV Degrades to Plurality
+
+## Arguments against Plurality
+
+## Undervoting/overvoting, demographics
 
 ### Burnett and Kogan, 2014 - Ballot (and voter) “exhaustion” under Instant Runoff Voting: An examination of four ranked-choice elections
 
@@ -32,7 +104,47 @@ The "guaranteed majority" argument of RCV isn't great because exhausted ballots 
 
 "even individuals who mark three distinct choices often face the prospect of exhaustion, so education alone will not fix the problem" (49)
 
-### Donovan et al., 2016 - Campaign civility under preferential and plurality voting
+### Dennis, n.d. - Ballot-Marking Errors in the First San Francisco Instant Runoff Election
 
-Surveys show that people like campaigns better and consider them more positive in preferential voting systems than in FPTP.
+First IRV election in SF was Nov. 2004. Used to have a top two runoff, but the runoffs "were plagued by high costs and lower turnouts" (1).
 
+Different combinations of valid, under, and over votes lead to different things, a correct ballot is either VVV / VVU / VUU (4) - though these are not the only ballots that get counted.
+
+Higher rates of overvotes than expected under the technology, semi-correlated in districts with number of candidates on ballot (5). Almost 1/3 of ballots were undervotes (6).
+
+Asians felt that it was harder but filled it out more correctly, Hispanics felt it was easier (than Asians did) but filled it out more incorrectly (sort of - see page 7).
+^ this is analyzed at the district level, there are 11 (?) districts. Breaking down to precincts or block groups would be a better analysis.
+
+## Imputation
+
+### King et al., 2001 - Analyzing Incomplete Political Science Data: An Alternative Algorithm for Multiple Imputation
+
+Most statistical models don't deal well with missing data (though some exist - truncated/censored data models) - thus we have imputation. There is sometimes a valid "do not know" option that should not be treated as missing, but in other cases DNK should be treated as missing (income, for example: everybody's got one).
+<!-- Note to self - talk about this when talking about missing data. It's a totally valid preference to say "I only like one candidate" and only rank that one, so the data we're imputing isn't "missing" in the traditional sense. -->
+
+Three types of missing data
+
+- Missing completely at random (MCAR): There's nothing in the data set that can predict when a value will be missing. Formally, $P(missing \mid data) = P(missing)$. Under this regime, listwise deletion and multiple imputation are unbiased.
+
+- Missing at random (MAR): There is something in the data set that can predict when a value will be missing. Formally, $P(missing \mid data) = P(missing \mid observed\;data)$. Note that as you add useful variables, you can get better at predicting this. Under this regime, only multiple imputatino is unbiased.
+
+- Non-ignorable (NI): There's nothing present in the data set that can predict when a value will be missing, but the chance of a value being missing is related to the value itself. For example, rich people are maybe less likely to self-report income, but you have a data set that doesn't give you any predictive power as to what that missing income is. Formally, $P(missing \mid data) = P(missing \mid missing\;data)$. There's no empirical way to verify this case given the data - you can never really know if the missingness is NI or not. Nothing is unbiased in this case.
+
+Multiple imputation is creating multiple filled-in data sets, each time putting in possibly different values for each missing data (for a cell with higher certainty, the filled values will be more consistent than those for a less certain cell), then combining models fitted to each data set to obtain one aggregate model.
+
+
+## Spatial join things
+
+## Other?
+
+### Chevaleyre et al., 2007 - A Short Introduction to Computational Social Choice
+
+"Aggregating preferences means mapping a collection $P = \langle P_1,\dots,P_n \rangle$ of preference relations (or profiles) of individual agents into a collective preference relation $P^*$." (52)
+
+### O'Neill - Fast Algorithms for Counting Ranked Ballots
+
+Using a tree-based (instead of list-based) structure for counting STV is faster, especially under certain counting methods.
+
+### Doucette - Imputation, Social Choice, and Partial Preferences
+
+Describes his research a little and the methods he uses to impute missing vote choices. Assume voters are the same, then use all people who voted at least twice to predict second choices for single-option voters. Sounds like he builds a classifier to do it? What might be more interesting is some kind of multinomial classification model, that (based on first choice? demos? precinct/location?) gives you a probability of voting for X as your second choice, then randomly distributes votes based on these probabilities. That is - there's gonna be thousands of voters who listed "Jane Kim" as their first choice and nothing else. We shouldn't give them all the same (most likely) second choice, because what if it's 51-49 between Leno and Breed?

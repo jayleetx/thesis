@@ -9,3 +9,10 @@ Ideas for areal matching on census data
 Aggregate up to higher boundaries
 Dasymetric mapping - this disaggregates based on some external population density data, so essentially we could get that and then lay the precinct map on top and get values (might not be super useful in the fully-populated San Francisco?)
 
+
+
+
+Research note: go read some papers on imputation for categorical variables specifically. Most numerical methods rely on a normal assumption that obviously doesn't apply here.
+Some of these are for numerical-ish categorical variables (think Bernoulli), so make sure that this isn't the case in the selected method.
+ALTHOUGH what you could do is try to predict "Is rank 1 candidate X", "Is rank 1 candidate Y", etc. and then just take the highest probability and call that the predicted guess.
+So so so so so many questions on how to do this. Also I really hope somebody has put something in R to do this because it's gonna be a hell of a lot of coding otherwise.

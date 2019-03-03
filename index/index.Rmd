@@ -8,7 +8,7 @@ advisor: 'Heather Kitada Smalley'
 # Delete line 6 if you only have one advisor
 department: 'Mathematics - Statistics'
 degree: 'Bachelor of Arts'
-title: 'My Final College Paper'
+title: 'Ballot Completion in Ranked Choice Voting'
 knit: "bookdown::render_book"
 site: bookdown::bookdown_site
 always_allow_html: yes

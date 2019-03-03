@@ -21,6 +21,10 @@ STV algorithm, page 220 - uses the Hare quota
 
 ## Arguments for RCV
 
+### John, Smith, and Zack, 2018 - The alternative votes: Do changes in single-member voting systems affect descriptive representation of women and minorities?
+
+Increase in proportion of minority candidates after AV introduced, and an increase in the chance that a woman or a minority woman will win an election.
+
 ### Bartholdi and Orlin, 1990 - STV Resists Strategic Voting
 
 It's NP-complete, even in the one-elected case, to determine if voting dishonestly will elect a more preferred candidate to the one elected under your true preferences. This is true purely as a result of the STV algorithm, even if you know perfectly how every single other person voted. It is also NP-complete to recognize when an STV election is non-monotonic, that is an increase in individual support for a candidate will cause them to lose instead of win.
@@ -53,7 +57,7 @@ Efforts to boost turnout within these methods don't have as much effect as chang
 
 "error rates [increase] by less than 1 percentage point over plurality elections" This may be partially misleading - error rates are generally fractions of percentage points. Overall, however, this increase in ballot errors is overshadowed by increases in voter turnout.
 
-"generally, overvotes increase slightly with RCV while undervotes decrease", that is "more people participate in down-ballot elections when jurisdictions comduct them via RCV, but these voters also make more mistakes" - the combination of these two factors leads to a small (statistically insignificant) decrease in these uncountable votes (Kimball).
+"generally, overvotes increase slightly with RCV while undervotes decrease", that is "more people participate in down-ballot elections when jurisdictions conduct them via RCV, but these voters also make more mistakes" - the combination of these two factors leads to a small (statistically insignificant) decrease in these uncountable votes (Kimball).
 
 Ballots with more candidates see an increase in overvoting, but a decrease in undervoting.
 
@@ -97,6 +101,22 @@ Usually IRV, runoffs, and plurality all elect the candidate with the greatest su
 ## Arguments against Plurality
 
 ## Undervoting/overvoting, demographics
+
+### McDaniel, 2018 - Does More Choice Lead to Reduced Racially Polarized Voting? Assessing the Impact of Ranked-Choice Voting in Mayoral Elections
+
+No reduction in racially polarized voting, some increase between white and Asian voters.
+
+### Neely and McDaniel, 2015 - Overvoting and the Equality of Voice under Instant-Runoff Voting in San Francisco
+
+No evidence that undervoting is increasing over time. There is still a demographic gap in levels of overvoting, but this isn't disparate from under plurality elections.
+
+### Neely and Cook, 2008 - Whose Votes Count?: Undervotes, Overvotes, and Ranking in San Francisco's Instant-Runoff Elections
+
+RCV increases overvotes and decreases undervotes, based on both demographics and "the electoral environment". Likelihood of ranking candidates is due less to racial categories than voter education and prior exposure to RCV.
+
+### McDaniel, 2016 - Writing the Rules to Rank the Candidates: Examining the Impact of Instant-Runoff Voting on Racial Group Turnout in San Francisco Mayoral Elections
+
+RCV increases info costs and blurs "typical" racial voting lines. This widens the "demographic gap" in voting among some segments (age, education) but narrows it in others (income, some racial/ethnic groups). White and Black voters see turnout drops in SF
 
 ### Burnett and Kogan, 2014 - Ballot (and voter) “exhaustion” under Instant Runoff Voting: An examination of four ranked-choice elections
 

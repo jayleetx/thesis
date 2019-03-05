@@ -1,7 +1,6 @@
-# this starts to analyze data from the June 2018 SF mayoral elex
-
-library(rcv)
 library(dplyr)
+library(rcv)
+library(ggplot2)
 
 # load & transform data #####
 
@@ -31,17 +30,6 @@ by_precinct <-  sf_no_vote %>%
   summarize(over_pct = mean(over),
             under_pct = mean(under),
             turnout = n())
-  
-
-# spatial things below the break #####
-
-library(sf)
-library(ggplot2)
-library(fuzzyjoin)
-library(stringr)
-
-# data from https://sfelections.sfgov.org/sites/default/files/Documents/Maps/2017lines.zip
-precinct_shp <- st_read(dsn = "data/sf_precinct_shp", layer = "SF_DOE_Precincts_2017", stringsAsFactors = FALSE)
 
 sf_precincts <- by_precinct %>%
   fuzzy_full_join(precinct_shp, by = c("precinct" = "PREC_2017"), match_fun = str_detect) %>%
@@ -60,29 +48,3 @@ ggplot(sf_precincts) +
   geom_sf(aes(fill = under_pct)) +
   scale_fill_gradient(low = 'white') +
   theme_void()
-
-
-# start using the census ####
-
-census <- readr::read_csv('data/planning_database.csv') %>%
-  select(1:9, 14:16, 29:78, 128:135, 190:195, 202:251) %>% # need more specs on which columns to use
-  filter(State == "06", County == "075")
-
-# map from https://www.census.gov/geo/maps-data/data/cbf/cbf_blkgrp.html
-cali_block_groups <- st_read(dsn = "data/ca_census_shp", stringsAsFactors = FALSE) %>%
-  filter(COUNTY == "075") %>%
-  mutate(BLKGRP = as.numeric(BLKGRP)) %>%
-  full_join(census, by = c("TRACT" = "Tract", "BLKGRP" = "Block_group")) %>%
-  mutate(GEO_ID = str_extract(GEO_ID, "\\d+$"),
-         check = GEO_ID == GIDBG)
-
-match <- select(cali_block_groups,
-               GEO_ID, GIDBG, TRACT, BLKGRP,
-               GIDBG, check)
-# one thing in the census is missing from the shape file,
-#which is fine because it's a flag (nobody lives there, zero area)
-
-ggplot(match) +
-  geom_sf() +
-  theme_void()
-# FUCK the Farallon Islands

@@ -1,8 +1,16 @@
 # Methods and Structure {#methods}
 
+```{r include = FALSE}
+library(here)
+source(here('sandbox', 'precinct_math.R'))
+```
+
+
 Inevitably, the data format that would be ideal to conduct this research doesn't exist publicly (as it shouldn't - voter anonymity and such). The ideal model might be a logistic or other classification model that predicts whether a given voter has a ballot error or fills out the ballot incompletely, given their demographic qualities.
 
-### Data Structure and Source
+## Data Structure and Source
+
+### Election-specific data
 
 The data used comes from two main sources. From the San Francisco Elections Office <!-- Get an official title? -->, we have a cast ballot record of the election in question <!-- Put a date on this! -->. This is presented by the city as two text files:
 - The ballot image, a 45-character fixed-width file with fields corresponding to election, candidate, unique voter number (anonymized and disconnected from any voter registration ID), ranking, precinct, and other information. Each of these is encoded numerically, so each line of the file appears as a 45-digit number.
@@ -16,19 +24,90 @@ Since the voter-level data is fully anonymized, we have no demographic informati
 At the precinct level, we can now only study the rates of these ballot phenomena. For example, in Precinct 1703, we may see 14% of voters undervote. <!-- Get a real stat to use for this --> Rather than building a classification model (error / no error), we can now instead build regression models with a numerical dependent variable <!-- Better word for this --> - the rate of ballot error. Moving up this level of abstraction does remove some granularity from the model (inference and prediction at the precinct level is less specific than at the individual level), but this is the least we can do and still be able to access demographic information.
 <!-- Talk about the actual processes (and files) used to do this -->
 
+### Demographic data
+
 Now that we have precinct-level rates, we need to obtain precinct-level demographic information in order to build a model. Our source of demographic data is the 2010 U.S. Census (citation). While this data is slightly out of date (about 8 years), there is more certainty about the accuracy of the measurements collected. While a more temporally accurate data set like the yearly American Community Survey (ACS) could have been used, the error margins of this data set proved too large / complicated to be useful for this study.
 
 One consideration with this is that the voting population is not always representative of the general population. It might be more informative to obtain demographics about the voting population specifically, rather than the entire population of each precinct. <!-- Find out how many people in each precinct voted. Should be some easy math once you find the population of the precincts. --> However, the only information available about voters is their age (from the county voter registration file), and the discontinuity introduced by using two different data sets for demographic information is more of an  "error" to me than using a less accurate (but universal) census data set.
 
 We now encounter a problem. Since census regions (block groups, tracts) are set by the federal government, and election precincts are set by San Francisco County^[The city and county government are unified in this case, because the county comprises entirely of the city of San Francisco.], the regions don't line up nicely^[There's no inherent reason that they should, it's just unfortunate for this study.]. <!-- show a picture of this! You have two maps --> Given this mismatch, how do we obtain demographic estimates for our precincts?
 
-Stated more generally: if we have a division of a geographic region and some non-constant properties^[A constant property is something that is identical across all of its points: if a precinct is inside State House District 4, any point or region inside of it is inside State House District 4. A non-constant property is not identical across its interior: if there are 100 people in a precinct, there are not 100 people inside any arbitrary sub-region of the district.] on the divisions, how do we estimate measures of these properties for other possible divisions?
-<!-- Is there research into this? What's up? -->
+Stated more generally: if we have a division of a geographic region and some set of properties on the divisions, how do we estimate measures of these properties for other possible divisions?
+
+#### Areal Interpolation
+
+One field of GIS (geographic information system) research that looks into this is called *areal interpolation*. The goal of areal interpolation is to take a variable distributed over a set of "source zones" and estimate its distribution over a set of "target zones". These two zoning systems must overlap at least partially to get any estimate for the target zones (e.g. information about Oregon doesn't directly tell us anything about information in Washington, under any zoning system), but are incompatible in some way^[A set of "compatible" zoning systems would be something like the US Census' hierarchical systems: multiple blocks are combined to make a block group, multiple block groups are combined into a census tract, etc. Since the areas overlap neatly, you can directly add together certain numbers (like population) from block groups to get a very accurate estimate for the census tract.].
+
+Types of AI:
+
+- Areal Weighting (what I'm doing)
+
+- Density weighting (doesn't really apply I think)
+
+Talk about intensive versus extensive data and how that differs.
+
+Probably drop this paragraph.
 There are a few possible ways of accomplishing this. The way we use assumes a uniform spatial distribution of all non-constant properties: any sub-region has proportion of the full region's property equal to the proportion of the area of the full region that the sub-region occupies. For example, if we split a region with 100 people into two sub-regions of equal area, we assume that there are 50 people in each sub-region.
 <!-- add a pic of the validation data because it's easier to comprehend -->
 To approach this method, we first spatially intersect the two division sets of the city: census tracts and election precincts. This creates a new division, where every new sub-region is a unique combination of tract and precinct <!-- This might not be true? What if there's a weird concave shape that gets split up? --> We can directly group these sub-regions together in one combination into the full set of precincts, and group them in another combination into the full set of census tracts. Using the uniform spatial assumption, we obtain demographic estimates for each of these sub-regions, then add them together in the precinct grouping to obtain demographic estimates for our precincts.
 
 <!-- Add general example with the test data here, it's way easier to understand. -->
 
-This assumption of uniformity, like any assumption, may be unfounded. There are methods, some involving satellite imagery, to get more accurate information about population distribution. Quite honestly, these were just too complicated for the scope of this research. It is, however, more likely in an urban environment like San Francisco^[as compared to the entire state of California, which has urban pockets within suburban regions within a rural overall condition] that this unifrmity assumption will not drastically change our estimates.
+This assumption of uniformity, like any assumption, may be unfounded. There are methods, some involving satellite imagery and street location, to get more accurate information about population distribution. Quite honestly, these were just too complicated for the scope of this research. It is, however, more likely in an urban environment like San Francisco^[as compared to the entire state of California, which has urban pockets within suburban regions within a rural overall condition] that this unifrmity assumption will not drastically change our estimates.
 
+#### Shit to add
+
+R package used, and why
+Validation - general choropleth matching
+Talk about percentages versus counts, once you figure out what's going on there
+
+#### Precinct Consolidation
+
+One peculiarity in San Francisco is the combination of certain precincts during elections. California state law allows for counties to "consolidate" precincts with low numbers of registered voters during an election. This eases administration by not requiring counties to set up and staff a full polling place in a precinct with few voters, while still giving voters a physical polling location in their approximate area^[This method of precinct consolidation may change with the 2018 California Voter's Choice Act, which lets counties (except for Los Angeles County) move fully to vote-by-mail in combination with voting centers (California Senate Bill 450).]. While San Francisco does this less often than other counties, there are still some precincts that are consolidated each election.
+
+The areal interpolation process produces demographic estimates for areas in the map, however, which are non-consolidated. This causes a mismatch: we have demographic data for individual precincts, but election data for the consolidated precincts. To address this issue, we have split the election data (a count of overvotes and undervotes) in the consolidated precincts into their two component precincts. This split is weighted by the population of each precinct in 2010^[The most simple weight would be 50-50 for each split, but this is inaccurate for many of these precincts: see the gap in the weights for Pct 7527/7528. The flaw in this method was discovered after calculating turnout of over 1000% for Precinct 7527...]. For example, suppose Precinct X/Y had 100 undervotes, the population of Precinct X in 2010 was 325, and the population of Precinct Y in 2010 was 175. Then the "population split" between X and Y is 65%-35%, and we adjust the undervotes accordingly: Precinct X should have 65 of the 100 undervotes, and Precinct Y should have the remaining 35.
+
+Examples of this in the data are below. The first table is the initial data, with full consolidated counts doubled in the precincts (and thus doubled across rows), and the second table is the data with proper weights applied.
+
+```{r}
+original <- sf_unadjusted %>%
+  as.data.frame() %>%
+  select(1,6,2:5) %>%
+  filter(str_detect(precinct, '/')) %>%
+  slice(1:6)
+
+knitr::kable(original, 
+      col.names = c("Election Pct.", "Pct. Number", "Overvotes", "Not over", "Undervotes", "Not under"),
+      caption = "Consolidated Precincts - Original Data",
+      caption.short = "Combined Precincts - Original",
+      longtable = TRUE,
+      booktabs = TRUE)
+```
+
+```{r}
+adjusted <- double_cases %>%
+  as.data.frame() %>%
+  select(1,6, weight, 2:5) %>%
+  mutate_at(vars(ends_with('count')), function(x) x * .$weight) %>%
+  slice(1:6)
+
+knitr::kable(adjusted, 
+      col.names = c("Election Pct.", "Pct. Number", "Weight", "Overvotes", "Not over", "Undervotes", "Not under"),
+      caption = "Consolidated Precincts - Weighted Data",
+      caption.short = "Combined Precincts - Weighted",
+      longtable = TRUE,
+      booktabs = TRUE)
+```
+
+## Regressions
+
+Methods for regression:
+
+- Linear ?
+  + Pretty simple honestly
+
+- Logistic with the "binomial-style" input data
+  + This is more useful because our output (rate) is 0-1 limited.
+  + It also overweights precincts with more people - is this good?
+
+- For whatever goes in, I need to pick a better model selection method.

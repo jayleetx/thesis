@@ -30,6 +30,7 @@ census_ext <- select(census, 4:19)
 # intensive variables - things that apply to any given point in the region
 census_int <- select(census, 20:35)
 
+# maybe redo this with the 'areal' package? combines a bit
 ext_join <- st_interpolate_aw(census_ext, to = precincts, extensive = TRUE) %>%
   as.data.frame() %>%
   select(-geometry)

@@ -3,8 +3,9 @@ library(rcv)
 library(ggplot2)
 library(fuzzyjoin)
 library(stringr)
+library(here)
 
-source('sandbox/areal_interpolation.R')
+source(here('sandbox', 'areal_interpolation.R'))
 
 # load & transform data #####
 

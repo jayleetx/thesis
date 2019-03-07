@@ -1,14 +1,15 @@
 library(sf)
 library(dplyr)
 library(ggplot2)
+library(here)
 
 # get spatial datasets
-precincts <- st_read(dsn = "data/sf_precinct_shp",
+precincts <- st_read(dsn = here("data", "sf_precinct_shp"),
                      layer = "SF_DOE_Precincts_2017",
                      stringsAsFactors = FALSE) %>%
   st_transform(7132) %>%
   select(PREC_2017, Shape_Area)
-census <- st_read(dsn = "data/ca_census_shp", stringsAsFactors = FALSE) %>%
+census <- st_read(dsn = here("data", "ca_census_shp"), stringsAsFactors = FALSE) %>%
   filter(COUNTY == "075") %>%
   st_transform(7132) %>% # foot-unit projection designed for SF, so it's the one I'll use
   filter(lengths(st_within(st_centroid(.), precincts)) > 0) %>% # pulls uninhabited Farallon Islands
@@ -17,7 +18,7 @@ census <- st_read(dsn = "data/ca_census_shp", stringsAsFactors = FALSE) %>%
 ggplot() + geom_sf(data = census, color = "blue", fill = NA) +
   geom_sf(data = precincts, color = "red", fill = NA)
 
-census_data <- readr::read_csv('data/planning_database.csv') %>%
+census_data <- readr::read_csv(here('data', 'planning_database.csv')) %>%
   select(1:9, 14:16, 29:78, 128:135, 190:195, 202:251) %>% # need more specs on which columns to use
   filter(State == "06", County == "075") %>%
   select(GIDBG, TRACT = Tract, BLKGRP = Block_group, AREA = LAND_AREA, ends_with('CEN_2010'))

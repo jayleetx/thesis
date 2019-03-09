@@ -60,6 +60,8 @@ This assumption of uniformity, like any assumption, may be unfounded. There are 
 R package used, and why
 Validation - general choropleth matching
 Talk about percentages versus counts, once you figure out what's going on there
+It's about the weighting - the weight on an extensive variable is intersection / source, the weight on an intensive variable is intersection / target. Honestly you can just copy a bunch of what you sent to Andrew as a toy example.
+Minimal bounding box and the solution chosen - assume that every person lives in both a precinct and a census division, so any physical space that is only in one of these must have no people in it (well, it's really a function of the shapefile data being weird/coarse). Thus we clip both data sets to only include areas that the other also contains. This changes the shape of some of the edge data sets, but it gets rid of the issue of demographic info being "wasted" because it applies to a census tract but not a precinct, or precincts being underweighted demographically because they have space outside of a tract.
 
 #### Precinct Consolidation
 

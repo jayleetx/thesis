@@ -4,8 +4,9 @@ library(ggplot2)
 library(fuzzyjoin)
 library(stringr)
 library(here)
+library(leaps)
 
-source(here('sandbox', 'areal_interpolation.R'))
+source(here('code', 'areal_interpolation.R'))
 
 # load & transform data #####
 
@@ -57,95 +58,112 @@ sf_precincts[str_detect(sf_precincts$precinct, '/') %in% TRUE, count_cols] <- ro
 
 # and get precinct turnout
 sf_precincts <- mutate(sf_precincts,
+                       overvote_rate = over_count / (over_count + no_over_count),
+                       undervote_rate = under_count / (under_count + no_under_count),
                        turnout = under_count + no_under_count,
-                       turnout_rate = turnout / Tot_Population_CEN_2010)
+                       turnout_rate = turnout / Tot_Population_CEN_2010) %>%
+  na.omit()
 
-# every precinct should see inflated turnout due to population growth since 2010
-# also error due to the joining process and the doubles, whatevs
-# some will even be above 1
-ggplot(filter(sf_precincts, turnout_rate <= 1)) +
-  geom_sf(aes(fill = turnout_rate)) +
-  scale_fill_gradient(low = "white", high = "blue")
-
-# intermittent error with this plot - known bug
-# https://github.com/tidyverse/ggplot2/issues/2252
-# should be fixed as of updating RStudio
-ggplot(sf_precincts) +
-  geom_sf(aes(fill = log(over_pct))) +
-  scale_fill_gradient(low = "white") +
-  theme_void()
-# what's up with that one precinct with like 4% overvotes?
-
-ggplot(sf_precincts) +
-  geom_sf(aes(fill = under_pct)) +
-  scale_fill_gradient(low = 'white') +
-  theme_void()
 
 # regressions?
 # dig out the stat learning book and do some better model selection
 
-naive_over <- lm((over_count / (over_count + no_over_count)) ~
-#                   + pct_Pop_18_24_CEN_2010
-#                   + pct_Pop_25_44_CEN_2010
-#                   + pct_Pop_45_64_CEN_2010
-#                   + pct_Pop_65plus_CEN_2010
-                   + pct_Tot_GQ_CEN_2010 # people in group quarters
-#                   + pct_Inst_GQ_CEN_2010 # people in institutionalized group quarters - prison, hospital, etc. (probably not voting)
-                   + pct_Non_Inst_GQ_CEN_2010 # people in noninstitutional GQs - military, dorm, etc. (potential voters)
-                   + pct_Hispanic_CEN_2010
-                   + pct_NH_White_alone_CEN_2010
-                   + pct_NH_Blk_alone_CEN_2010
-#                   + pct_NH_AIAN_alone_CEN_2010
-#                   + pct_NH_Asian_alone_CEN_2010
-#                   + pct_NH_NHOPI_alone_CEN_2010
-#                   + pct_NH_SOR_alone_CEN_2010
-,
-                 data = sf_precincts)
-summary(naive_over)
-# more overvoting: pop in GQs, Hispanic, Black
-# less overvoting: non-institutional GQs, White
-# GQs, NIGQs, and Black are the most important
+training <- sample_frac(sf_precincts, 0.5)
+test <- sf_precincts[!(sf_precincts$PREC_2017 %in% training$PREC_2017), ]
 
-naive_under <- lm((under_count / (under_count + no_under_count)) ~
-                   pct_Pop_18_24_CEN_2010
-                   + pct_Pop_25_44_CEN_2010
-                   + pct_Pop_45_64_CEN_2010
-#                   + pct_Pop_65plus_CEN_2010
-                   + pct_Tot_GQ_CEN_2010
-#                   + pct_Inst_GQ_CEN_2010
-                   + pct_Non_Inst_GQ_CEN_2010
-                   + pct_Hispanic_CEN_2010
-                   + pct_NH_White_alone_CEN_2010
-                   + pct_NH_Blk_alone_CEN_2010
-#                   + pct_NH_AIAN_alone_CEN_2010
-                   + pct_NH_Asian_alone_CEN_2010
-                   + pct_NH_NHOPI_alone_CEN_2010
-#                   + pct_NH_SOR_alone_CEN_2010
-                 ,
-                 data = sf_precincts)
-summary(naive_under)
-# more undervoting: Hispanic, White, Black, Asian, Pacific Islander, NIGQs
-# less undervoting: all except the oldest age group
-# the ethnic groups are the most important, followed by age low to high with GQ thrown in the bottom mix
+# linear model for overvoting #####
 
+over_formula <- overvote_rate ~ Pop_18_24_CEN_2010 + Pop_25_44_CEN_2010 + Pop_45_64_CEN_2010 +
+  Pop_65plus_CEN_2010 + Hispanic_CEN_2010 + NH_White_alone_CEN_2010 + NH_Blk_alone_CEN_2010 +
+  NH_AIAN_alone_CEN_2010 + NH_Asian_alone_CEN_2010 + NH_NHOPI_alone_CEN_2010 +
+  NH_SOR_alone_CEN_2010
+
+linear_over_backward <- regsubsets(over_formula, data = training, method = 'backward', nvmax = 11)
+linear_over_forward <- regsubsets(over_formula, data = training, method = 'forward', nvmax = 11)
+# backward selection
+test.mat <- model.matrix(over_formula, data = test)
+errors <- rep(NA, 11)
+for (i in 1:11) {
+  coefi <- coef(linear_over_backward, id = i)
+  pred <- test.mat[ ,names(coefi)]%*%coefi
+  errors[i] <- mean((test$overvote_rate - pred)^2)
+}
+coef(linear_over_backward, which.min(errors))
+# forward selection
+test.mat <- model.matrix(over_formula, data = test)
+errors <- rep(NA, 11)
+for (i in 1:11) {
+  coefi <- coef(linear_over_forward, id = i)
+  pred <- test.mat[ ,names(coefi)]%*%coefi
+  errors[i] <- mean((test$overvote_rate - pred)^2)
+}
+coef(linear_over_forward, which.min(errors))
+# they agree here!
+best_linear_over <- lm(overvote_rate ~ Pop_65plus_CEN_2010 +
+                         Hispanic_CEN_2010 +
+                         NH_Blk_alone_CEN_2010,
+                       data = sf_precincts)
+
+# linear model for undervoting #####
+under_formula <- undervote_rate ~ Pop_18_24_CEN_2010 + Pop_25_44_CEN_2010 + Pop_45_64_CEN_2010 +
+  Pop_65plus_CEN_2010 + Hispanic_CEN_2010 + NH_White_alone_CEN_2010 + NH_Blk_alone_CEN_2010 +
+  NH_AIAN_alone_CEN_2010 + NH_Asian_alone_CEN_2010 + NH_NHOPI_alone_CEN_2010 +
+  NH_SOR_alone_CEN_2010
+
+linear_under_backward <- regsubsets(under_formula, data = training, method = 'backward', nvmax = 11)
+linear_under_forward <- regsubsets(under_formula, data = training, method = 'forward', nvmax = 11)
+# backward selection
+test.mat <- model.matrix(under_formula, data = test)
+errors <- rep(NA, 11)
+for (i in 1:11) {
+  coefi <- coef(linear_under_backward, id = i)
+  pred <- test.mat[ ,names(coefi)]%*%coefi
+  errors[i] <- mean((test$undervote_rate - pred)^2)
+}
+coef(linear_under_backward, which.min(errors))
+# forward selection
+test.mat <- model.matrix(under_formula, data = test)
+errors <- rep(NA, 11)
+for (i in 1:11) {
+  coefi <- coef(linear_under_forward, id = i)
+  pred <- test.mat[ ,names(coefi)]%*%coefi
+  errors[i] <- mean((test$undervote_rate - pred)^2)
+}
+coef(linear_under_forward, which.min(errors))
+# they agree here!
+best_linear_under <- lm(overvote_rate ~ Pop_18_24_CEN_2010 +
+                          Pop_25_44_CEN_2010 +
+                          Pop_45_64_CEN_2010 +
+                          Pop_65plus_CEN_2010 +
+                          Hispanic_CEN_2010 +
+                          NH_White_alone_CEN_2010 +
+                          NH_Blk_alone_CEN_2010 +
+                          NH_AIAN_alone_CEN_2010 +
+                          NH_Asian_alone_CEN_2010 +
+                          NH_NHOPI_alone_CEN_2010 +
+                          NH_SOR_alone_CEN_2010,
+                        data = sf_precincts)
+# not sure at all why the full model had the best MSE - very spooky
+# none of them are even significant
+# do cross validation instead?
 
 # logistic regressions
 
 logit_over <- glm(cbind(over_count, no_over_count) ~
-#                    pct_Pop_18_24_CEN_2010
-                  + pct_Pop_25_44_CEN_2010
-#                  + pct_Pop_45_64_CEN_2010
-                  + pct_Pop_65plus_CEN_2010
-#                  + pct_Tot_GQ_CEN_2010
-#                  + pct_Inst_GQ_CEN_2010
-#                  + pct_Non_Inst_GQ_CEN_2010
-#                  + pct_Hispanic_CEN_2010
-                  + pct_NH_White_alone_CEN_2010
-#                  + pct_NH_Blk_alone_CEN_2010
-#                  + pct_NH_AIAN_alone_CEN_2010
-                  + pct_NH_Asian_alone_CEN_2010
-#                  + pct_NH_NHOPI_alone_CEN_2010
-#                  + pct_NH_SOR_alone_CEN_2010
+#                    Pop_18_24_CEN_2010
+                  + Pop_25_44_CEN_2010
+#                  + Pop_45_64_CEN_2010
+                  + Pop_65plus_CEN_2010
+#                  + Tot_GQ_CEN_2010
+#                  + Inst_GQ_CEN_2010
+#                  + Non_Inst_GQ_CEN_2010
+#                  + Hispanic_CEN_2010
+                  + NH_White_alone_CEN_2010
+#                  + NH_Blk_alone_CEN_2010
+#                  + NH_AIAN_alone_CEN_2010
+                  + NH_Asian_alone_CEN_2010
+#                  + NH_NHOPI_alone_CEN_2010
+#                  + NH_SOR_alone_CEN_2010
                   ,
                   data = sf_precincts, family = binomial)
 # oldest age group, 25-44yo (less significant) increase chances of overvoting
@@ -153,20 +171,20 @@ logit_over <- glm(cbind(over_count, no_over_count) ~
 
 
 logit_under <- glm(cbind(under_count, no_under_count) ~
-                  pct_Pop_18_24_CEN_2010
-                  + pct_Pop_25_44_CEN_2010
-                  + pct_Pop_45_64_CEN_2010
-#                  + pct_Pop_65plus_CEN_2010
-                  + pct_Tot_GQ_CEN_2010
-#                  + pct_Inst_GQ_CEN_2010
-                  + pct_Non_Inst_GQ_CEN_2010
-                  + pct_Hispanic_CEN_2010
-                  + pct_NH_White_alone_CEN_2010
-                  + pct_NH_Blk_alone_CEN_2010
-                  + pct_NH_AIAN_alone_CEN_2010
-#                  + pct_NH_Asian_alone_CEN_2010
-#                  + pct_NH_NHOPI_alone_CEN_2010
-#                  + pct_NH_SOR_alone_CEN_2010
+                  Pop_18_24_CEN_2010
+                  + Pop_25_44_CEN_2010
+                  + Pop_45_64_CEN_2010
+#                  + Pop_65plus_CEN_2010
+                  + Tot_GQ_CEN_2010
+#                  + Inst_GQ_CEN_2010
+                  + Non_Inst_GQ_CEN_2010
+                  + Hispanic_CEN_2010
+                  + NH_White_alone_CEN_2010
+                  + NH_Blk_alone_CEN_2010
+                  + NH_AIAN_alone_CEN_2010
+#                  + NH_Asian_alone_CEN_2010
+#                  + NH_NHOPI_alone_CEN_2010
+#                  + NH_SOR_alone_CEN_2010
                   ,
                   data = sf_precincts, family = binomial)
 # all age groups except for the oldest less likely to undervote

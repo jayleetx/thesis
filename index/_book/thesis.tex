@@ -929,14 +929,14 @@ insight into these demographic trends, we instead aggregate up to the
 precinct level.
 
 At the precinct level, we can now only study the rates of these ballot
-phenomena. For example, in Precinct 1703, we may see 14\% of voters
-undervote. Rather than building a classification model (error / no
-error), we can now instead build regression models with a numerical
-dependent variable - the rate of ballot error. Moving up this level of
-abstraction does remove some granularity from the model (inference and
-prediction at the precinct level is less specific than at the individual
-level), but this is the least we can do and still be able to access
-demographic information.
+phenomena (as opposed to an individual's response). For example, in
+Precinct 1703, we may see 14\% of voters undervote. Rather than building
+a classification model (error / no error), we can now instead build
+regression models with a numerical dependent variable - the rate of
+ballot error. Moving up this level of abstraction does remove some
+granularity from the model (inference and prediction at the precinct
+level is less specific than at the individual level), but this is the
+least we can do and still be able to access demographic information.
 
 \hypertarget{demographic-data}{%
 \subsection{Demographic data}\label{demographic-data}}
@@ -978,61 +978,299 @@ these properties for other possible divisions?
 One field of GIS (geographic information system) research that looks
 into this is called \emph{areal interpolation}. The goal of areal
 interpolation is to take a variable distributed over a set of ``source
-zones'' and estimate its distribution over a set of ``target zones''.
-These two zoning systems must overlap at least partially to get any
-estimate for the target zones (e.g.~information about Oregon doesn't
-directly tell us anything about information in Washington, under any
-zoning system), but are incompatible in some way\footnote{A set of
-  ``compatible'' zoning systems would be something like the US Census'
-  hierarchical systems: multiple blocks are combined to make a block
-  group, multiple block groups are combined into a census tract, etc.
-  Since the areas overlap neatly, you can directly add together certain
-  numbers (like population) from block groups to get a very accurate
-  estimate for the census tract.}.
+zones'' and estimate its distribution over a set of ``target zones''
+(Schroeder, 2007). These two zoning systems must overlap at least
+partially to get any estimate for the target zones (e.g.~information
+about Oregon doesn't directly tell us anything about information in
+Washington, under any zoning system), but are incompatible in some
+way\footnote{A set of ``compatible'' zoning systems would be something
+  like the US Census' hierarchical systems: multiple blocks are combined
+  to make a block group, multiple block groups are combined into a
+  census tract, etc. Since the areas overlap neatly, you can directly
+  add together certain numbers (like population) from block groups to
+  get a very accurate estimate for the census tract.}. When this is not
+possible, however, areal interpolation can help get parameter estimates
+for these incompatible areas.
 
-Types of AI:
+Soem common types of areal interpolation are:
 \begin{itemize}
 \item
-  Areal Weighting (what I'm doing)
+  Areal weighting, using the assumption that populations are distributed
+  uniformly on a region.
 \item
-  Density weighting (doesn't really apply I think)
+  Modified areal weighting, which creates a continuous map from region
+  to region to better reflect changes in population density.
+\item
+  Target density weighting, which uses extra information about the
+  target zones, typically population density, to increase accuracy
+  (Schroeder, 2007).
+\item
+  Dasymetric mapping, which uses alternative data, also called
+  \emph{ancillary data} to produce a continuous estimate of population
+  density (Sleeter and Gould, 2008). Examples of ancillary data include
+  land cover information, parcel classifications, and street locations.
 \end{itemize}
-Talk about intensive versus extensive data and how that differs.
+In this work we will use areal weighting for our interpolation. The
+other methods above, while typically more accurate are infeasible under
+the constraints of the research\footnote{Mostly time limitations; see
+  Conclusion section for further research ideas.}. The assumption of
+uniformity is not necessarily correct, but in an urban area such as San
+Francisco it is more accurate than an area like the entire state of
+California, with a large urban/rural spread.
 
-Probably drop this paragraph. There are a few possible ways of
-accomplishing this. The way we use assumes a uniform spatial
-distribution of all non-constant properties: any sub-region has
-proportion of the full region's property equal to the proportion of the
-area of the full region that the sub-region occupies. For example, if we
-split a region with 100 people into two sub-regions of equal area, we
-assume that there are 50 people in each sub-region. To approach this
-method, we first spatially intersect the two division sets of the city:
-census tracts and election precincts. This creates a new division, where
-every new sub-region is a unique combination of tract and precinct We
-can directly group these sub-regions together in one combination into
-the full set of precincts, and group them in another combination into
-the full set of census tracts. Using the uniform spatial assumption, we
-obtain demographic estimates for each of these sub-regions, then add
-them together in the precinct grouping to obtain demographic estimates
-for our precincts.
+\hypertarget{areal-weighting}{%
+\subsubsection{Areal weighting}\label{areal-weighting}}
 
-This assumption of uniformity, like any assumption, may be unfounded.
-There are methods, some involving satellite imagery and street location,
-to get more accurate information about population distribution. Quite
-honestly, these were just too complicated for the scope of this
-research. It is, however, more likely in an urban environment like San
-Francisco\footnote{as compared to the entire state of California, which
-  has urban pockets within suburban regions within a rural overall
-  condition} that this unifrmity assumption will not drastically change
-our estimates.
+Areal weighting first makes the assumption that populations are
+distributed uniformly over a space. If Region X has 100 people and we
+split X in half spatially, then we assume that 50 people are in each
+half. This also applies to sub-populations: if Region X has 20 non-White
+Hispanic people, then we assume each half has 10 non-white Hispanic
+people. This type of data, counts that can be divided into sub-regions,
+is called \emph{spatially extensive} data. Extensive data is data that
+applies to an entire region, but not any given sub-region.
 
-\hypertarget{shit-to-add}{%
-\subsubsection{Shit to add}\label{shit-to-add}}
+Conversely, data that applies to any given sub-region of a region is
+called \emph{spatially intensive}. Properties like population density
+are spatially intensive under the uniformity assumption, because the
+ratio of population to area does not change upon examining a sub-region.
+Percentages are also spatially intensive - considering the
+sub-population as above, the percentage of non-White Hispanic people in
+Region X (20 out of 100, 20\%) does not change when we look at one of
+the sub-regions (10 out of 50, 20\%).
 
-R package used, and why Validation - general choropleth matching Talk
-about percentages versus counts, once you figure out what's going on
-there
+We will use the following example case to illustrate the areal
+interpolation process. Suppose regions \(A\), \(B\), \(C\), and \(D\)
+are the source regions (each taking up a quadrant of the square), and
+regions \(X\), \(Y\), and \(Z\) are the target regions (each taking up a
+third of the square vertically). Further suppose that the boundaries of
+the source regions and target regions are fully coincident, that is
+\(A \cup B \cup C \cup D = X \cup Y \cup Z\)\footnote{This example
+  ignores the case where the covered regions are not coincident, which
+  is a possibility in general. In this research we enforce coincidence
+  in our data, however.}.
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(purrr)}
+\NormalTok{source <-}\StringTok{ }\KeywordTok{st_read}\NormalTok{(}\KeywordTok{here}\NormalTok{(}\StringTok{'data'}\NormalTok{, }\StringTok{'source_zones'}\NormalTok{)) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{transmute}\NormalTok{(}\DataTypeTok{name =} \KeywordTok{c}\NormalTok{(}\StringTok{'D'}\NormalTok{,}\StringTok{'C'}\NormalTok{,}\StringTok{'A'}\NormalTok{,}\StringTok{'B'}\NormalTok{),}
+            \DataTypeTok{lon =} \KeywordTok{map_dbl}\NormalTok{(geometry, }\OperatorTok{~}\KeywordTok{st_centroid}\NormalTok{(.x)[[}\DecValTok{1}\NormalTok{]]),}
+            \DataTypeTok{lat =} \KeywordTok{map_dbl}\NormalTok{(geometry, }\OperatorTok{~}\KeywordTok{st_centroid}\NormalTok{(.x)[[}\DecValTok{2}\NormalTok{]]))}
+\end{Highlighting}
+\end{Shaded}
+\begin{verbatim}
+Reading layer `source_zones' from data source `/Users/jaylee/Desktop/thesis/data/source_zones' using driver `ESRI Shapefile'
+Simple feature collection with 4 features and 1 field
+geometry type:  POLYGON
+dimension:      XY
+bbox:           xmin: -3 ymin: -3 xmax: 3 ymax: 3
+epsg (SRID):    4267
+proj4string:    +proj=longlat +datum=NAD27 +no_defs
+\end{verbatim}
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{target <-}\StringTok{ }\KeywordTok{st_read}\NormalTok{(}\KeywordTok{here}\NormalTok{(}\StringTok{'data'}\NormalTok{, }\StringTok{'target_zones'}\NormalTok{)) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{transmute}\NormalTok{(}\DataTypeTok{name =} \KeywordTok{c}\NormalTok{(}\StringTok{'Z'}\NormalTok{,}\StringTok{'X'}\NormalTok{,}\StringTok{'Y'}\NormalTok{),}
+            \DataTypeTok{lon =} \KeywordTok{map_dbl}\NormalTok{(geometry, }\OperatorTok{~}\KeywordTok{st_centroid}\NormalTok{(.x)[[}\DecValTok{1}\NormalTok{]]),}
+            \DataTypeTok{lat =} \KeywordTok{map_dbl}\NormalTok{(geometry, }\OperatorTok{~}\KeywordTok{st_centroid}\NormalTok{(.x)[[}\DecValTok{2}\NormalTok{]]))}
+\end{Highlighting}
+\end{Shaded}
+\begin{verbatim}
+Reading layer `target_zones' from data source `/Users/jaylee/Desktop/thesis/data/target_zones' using driver `ESRI Shapefile'
+Simple feature collection with 3 features and 1 field
+geometry type:  POLYGON
+dimension:      XY
+bbox:           xmin: -3 ymin: -3 xmax: 3 ymax: 3
+epsg (SRID):    4267
+proj4string:    +proj=longlat +datum=NAD27 +no_defs
+\end{verbatim}
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{source_plot <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(source) }\OperatorTok{+}\StringTok{ }\KeywordTok{geom_sf}\NormalTok{() }\OperatorTok{+}\StringTok{ }\KeywordTok{geom_text}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ lon, }\DataTypeTok{y =}\NormalTok{ lat, }\DataTypeTok{label =}\NormalTok{ name)) }\OperatorTok{+}\StringTok{ }\KeywordTok{theme_void}\NormalTok{() }\OperatorTok{+}\StringTok{ }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{'Source regions'}\NormalTok{)}
 
+\NormalTok{target_plot <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(target) }\OperatorTok{+}\StringTok{ }\KeywordTok{geom_sf}\NormalTok{() }\OperatorTok{+}\StringTok{ }\KeywordTok{geom_text}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ lon, }\DataTypeTok{y =}\NormalTok{ lat, }\DataTypeTok{label =}\NormalTok{ name)) }\OperatorTok{+}\StringTok{ }\KeywordTok{theme_void}\NormalTok{() }\OperatorTok{+}\StringTok{ }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{'Target regions'}\NormalTok{)}
+
+\NormalTok{source_plot }\OperatorTok{+}\StringTok{ }\NormalTok{target_plot }\OperatorTok{+}\StringTok{ }\KeywordTok{plot_layout}\NormalTok{(}\DataTypeTok{ncol =} \DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-3-1.pdf}
+
+In general, denote a source region by \(S_i\) (over index set \(I\)) and
+a target region by \(T_j\) (over index set \(J\)). For any region \(R\),
+denote the area of \(R\) by \(Area(R)\), the measure of a given
+extensive property of \(R\) by \(x_R\), and the measure of a given
+intensive property of \(R\) by \(y_R\). These measures are known in the
+source regions, but unknown in the target regions (hence, the
+interpolation). Denote an estimate of a quantity with a carat, e.g.
+\(\widehat{y_{R}}\).
+
+Say we want to estimate \(x_{T_j}\), the measure of the extensive
+property in region \(T_j\). For all \(j \in J\), we can estimate this
+property with \[
+\widehat{x_{T_j}} = \sum_{i \in I} \frac{Area(S_i \cap T_j)}{Area(S_i)} \cdot x_{S_i}
+\]
+
+For each source region, calculate the proportion of the region that lies
+inside the target region. These proportions are the weights to be
+multiplied by the source regions' properties. In the example case,
+consider target region \(X\): \[
+\widehat{x_X} = \frac{Area(A \cap X)}{Area(A)} \cdot x_{A} + \frac{Area(B \cap X)}{Area(B)} \cdot x_{B} + 0 + 0 = \frac{2}{3}(x_A + x_B).
+\]
+
+Since \(A\) and \(B\) each have \(2/3\) of their area inside target
+region \(X\), we estimate that 2/3 of the extensive quantity \(x_A\) is
+inside region \(X\) (similarly for \(x_B\)). Adding these together gives
+us an estimate \(\widehat{x_X}\).
+
+For intensive properties, the process is slightly different. For all
+\(j \in J\), we can estimate an intensive property \(y_{T_j}\) with \[
+\widehat{y_{T_j}} = \sum_{i \in I} \frac{Area(S_i \cap T_j)}{Area(T_j)} \cdot x_{S_i}
+\]
+
+Since the intensive property isn't ``divisible'' within a region, we
+instead take a weighted average of the component source regions of the
+target region, where each component is weighted by the amount of the
+target region it takes up. Again considering target region \(X\): \[
+\widehat{y_X} = \frac{Area(A \cap X)}{Area(X)} \cdot y_{A} + \frac{Area(B \cap X)}{Area(X)} \cdot y_{B} + 0 + 0 = \frac{1}{2}(y_A + y_B).
+\]
+
+Since \(A\) and \(B\) each take up half of target region \(X\), each of
+them gets weighted by half before being added to get the estimate of
+\(y_X\).
+
+\hypertarget{interpolation---counts-vs.percentages}{%
+\subsubsection{Interpolation - counts
+vs.~percentages}\label{interpolation---counts-vs.percentages}}
+
+One consideration in the data preparation stage was whether to use
+counts or percentages as input for the regression. The census data
+contains total population in a region, as well as a count and percentage
+for a given variable (say people between the ages of 25 and 44). The
+percentage can equivalently be calculated by dividing the count by the
+population. After performing the areal interpolation on the data, I ran
+this percentage calculation again to double check that it lined up with
+the reported percentages (post-interpolation). My intuition was that
+these steps should be commutative - calculating a percentage and then
+interpolating should have the same result as interpolating and then
+calculating the percentage. This was not the case, however - in the
+variable for population between 25 and 44, the error between these two
+methods ranged from -12 to 26 percentage points.
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{(sf_precincts, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ Pop_}\DecValTok{25}\NormalTok{_}\DecValTok{44}\NormalTok{_CEN_}\DecValTok{2010} \OperatorTok{/}\StringTok{ }\NormalTok{Tot_Population_CEN_}\DecValTok{2010}\NormalTok{,}
+                         \DataTypeTok{y =}\NormalTok{ Pop_}\DecValTok{25}\NormalTok{_}\DecValTok{44}\NormalTok{_CEN_}\DecValTok{2010}\NormalTok{,}
+                         \DataTypeTok{col =} \KeywordTok{abs}\NormalTok{((Pop_}\DecValTok{25}\NormalTok{_}\DecValTok{44}\NormalTok{_CEN_}\DecValTok{2010} \OperatorTok{/}\StringTok{ }\NormalTok{Tot_Population_CEN_}\DecValTok{2010}\NormalTok{) }\OperatorTok{-}\StringTok{ }\NormalTok{Pop_}\DecValTok{25}\NormalTok{_}\DecValTok{44}\NormalTok{_CEN_}\DecValTok{2010}\NormalTok{))) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"Error in the Variable 'Pop_25_44_CEN_2010'"}\NormalTok{,}
+       \DataTypeTok{x =} \StringTok{"Calculated Percentage"}\NormalTok{,}
+       \DataTypeTok{y =} \StringTok{"Reported Percentage"}\NormalTok{,}
+       \DataTypeTok{col =} \StringTok{"Absolute Error"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-4-1.pdf}
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# get a better color scheme for this error}
+\end{Highlighting}
+\end{Shaded}
+As it turns out, these steps are not commutative in this way, and the
+observed error is mostly a function of the weighting between different
+steps in the process. For example, consider a simple case: suppose
+source regions A and B are fully contained in target region X, and split
+X in half. Let the number of people between 25 and 44 in A be 4 (out of
+10 total) and in B be 3 (out of 5 total). Taking the percentages first
+gives us a proportion of 0.4 in A and 0.6 in B. Using the intensive
+interpolation method on these proportions, both are weighted by the
+amount of X that the region takes up (half, in each case) and added, so
+the average weighted by area is 0.5. Conversely, using the extensive
+interpolation method on the count and popuation, we see that X has 7
+people between 25 and 44 (out of 15 total). Taking the percentage, we
+see that the proportion of this variable in X is \textasciitilde{}0.47.
+
+In short, the ``calculating proportion'' and ``areal interpolation''
+steps are NOT commutative, because of the differences in weights when
+using intensive vs.~extensive interpolation methods. Both are
+calculating a weighted mean of sorts, but the former is weighting by
+AREA, while the latter is weighting by POPULATION. In this case we see
+that the latter is more accurate - source regions with more people
+should have greater impact on the estimated measures in target regions,
+because the variables we are dealing with are human-centered rather than
+space-centered. As such, for this study we will interpolate only the
+count data (population, numbers of people for each measured variable)
+and then calculate proportions in the target regions after the
+interpolation. These proportions are better suited to the regression to
+ensure that variables are of the same scale and we can compare
+coefficient estimates.
+
+\hypertarget{boundary-mismatch}{%
+\subsubsection{Boundary mismatch}\label{boundary-mismatch}}
+
+A further issue appears - just like the precinct and census boundaries
+don't line up because they come from different sources, the outside
+boundaries of the precinct and census files don't line up. The census
+boundaries have a lower resolution on the whole than then precinct
+boundaries. This leads to issues when performing the areal
+interpolation, because parts of a census boundary that are outside of a
+precinct will be dropped and cause an underestimate of the true measure
+of the variables. We address this by bounding both files to only
+consider the space that is contained in both\footnote{No census tracts
+  were fully removed in this process, but this causes one precinct,
+  Precinct 9900, to be cut off. However, this precinct is a semi-exclave
+  of the county on Alameda Island, across the San Francisco Bay. Since
+  this land (an undeveloped former naval air base) is uninhabited, its
+  removal should not negatively impact the accuracy of our results
+  (Levi, 2018).}. Since we are dealing with a fundamental unit of people
+instead of space, this ensures that every person is counted, and changes
+some of the spatial weights calculated. The assumption here is that any
+region which is only contained in one of the files (precincts without
+census, or census without precincts) has zero population, because every
+person should be contained in both a precinct and a census region.
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{prec_out <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(precincts_bound) }\OperatorTok{+}\StringTok{ }\KeywordTok{geom_sf}\NormalTok{() }\OperatorTok{+}\StringTok{ }\KeywordTok{theme_void}\NormalTok{() }\OperatorTok{+}\StringTok{ }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{'Precincts'}\NormalTok{)}
+
+\NormalTok{cen_out <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(census_bound) }\OperatorTok{+}\StringTok{ }\KeywordTok{geom_sf}\NormalTok{() }\OperatorTok{+}\StringTok{ }\KeywordTok{theme_void}\NormalTok{() }\OperatorTok{+}\StringTok{ }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{'Census'}\NormalTok{)}
+
+\NormalTok{joint_out <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(overall) }\OperatorTok{+}\StringTok{ }\KeywordTok{geom_sf}\NormalTok{() }\OperatorTok{+}\StringTok{ }\KeywordTok{theme_void}\NormalTok{() }\OperatorTok{+}\StringTok{ }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{'Overall'}\NormalTok{)}
+
+\NormalTok{prec_out }\OperatorTok{+}\StringTok{ }\NormalTok{cen_out }\OperatorTok{-}\StringTok{ }\NormalTok{joint_out }\OperatorTok{+}\StringTok{ }\KeywordTok{plot_layout}\NormalTok{(}\DataTypeTok{ncol =} \DecValTok{1}\NormalTok{, }\DataTypeTok{heights =} \KeywordTok{c}\NormalTok{(}\DecValTok{3}\NormalTok{,}\DecValTok{6}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+\begin{figure}
+\centering
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-5-1.pdf}
+\caption{\label{fig:unnamed-chunk-5}Boundary intersection between
+shapefiles}
+\end{figure}
+This plot displays the result of this intersection between the two
+regions. The impact on the census tracts is quite visible - notably the
+eastern coastline is much more defined, and the gap in Treasure Island
+(the large island off the northeastern shore) appears. The impact on the
+precinct boundaries is less apparent, but still there - the exclave on
+Alameda Island (small sliver to the East) has disappeared, and in the
+southeastern corner it is visible how the angles in the precinct
+boundary have softened to the more rounded final shape.
+
+Below is a comparison of the original shapefiles (including all
+divisions) to the bounded versions.
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{precincts_pre <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(precincts_shape) }\OperatorTok{+}\StringTok{ }\KeywordTok{geom_sf}\NormalTok{() }\OperatorTok{+}\StringTok{ }\KeywordTok{theme_void}\NormalTok{() }\OperatorTok{+}\StringTok{ }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{'Precincts - original'}\NormalTok{)}
+
+\NormalTok{census_pre <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(census_shape) }\OperatorTok{+}\StringTok{ }\KeywordTok{geom_sf}\NormalTok{() }\OperatorTok{+}\StringTok{ }\KeywordTok{theme_void}\NormalTok{() }\OperatorTok{+}\StringTok{ }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{'Census - original'}\NormalTok{)}
+
+\NormalTok{precincts_post <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(precincts) }\OperatorTok{+}\StringTok{ }\KeywordTok{geom_sf}\NormalTok{() }\OperatorTok{+}\StringTok{ }\KeywordTok{theme_void}\NormalTok{() }\OperatorTok{+}\StringTok{ }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{'Precincts - bounded'}\NormalTok{)}
+
+\NormalTok{census_post <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(census) }\OperatorTok{+}\StringTok{ }\KeywordTok{geom_sf}\NormalTok{() }\OperatorTok{+}\StringTok{ }\KeywordTok{theme_void}\NormalTok{() }\OperatorTok{+}\StringTok{ }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{'Census - bounded'}\NormalTok{)}
+
+\NormalTok{precincts_pre }\OperatorTok{+}\StringTok{ }\NormalTok{census_pre }\OperatorTok{-}\StringTok{ }\NormalTok{precincts_post }\OperatorTok{+}\StringTok{ }\NormalTok{census_post }\OperatorTok{+}\StringTok{ }\KeywordTok{plot_layout}\NormalTok{(}\DataTypeTok{ncol =} \DecValTok{1}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+\begin{figure}
+\centering
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-6-1.pdf}
+\caption{\label{fig:unnamed-chunk-6}Original versus bounded shapefiles}
+\end{figure}
 \hypertarget{precinct-consolidation}{%
 \subsubsection{Precinct Consolidation}\label{precinct-consolidation}}
 
@@ -1087,7 +1325,7 @@ weights applied.
 \end{Highlighting}
 \end{Shaded}
 \begin{longtable}[t]{llrrrr}
-\caption[Combined Precincts - Original]{\label{tab:unnamed-chunk-3}Consolidated Precincts - Original Data}\\
+\caption[Combined Precincts - Original]{\label{tab:unnamed-chunk-7}Consolidated Precincts - Original Data}\\
 \toprule
 Election Pct. & Pct. Number & Overvotes & Not over & Undervotes & Not under\\
 \midrule
@@ -1116,7 +1354,7 @@ Pct 7527/7528 & 7528 & 5 & 396 & 98 & 303\\
 \end{Highlighting}
 \end{Shaded}
 \begin{longtable}[t]{llrrrrr}
-\caption[Combined Precincts - Weighted]{\label{tab:unnamed-chunk-4}Consolidated Precincts - Weighted Data}\\
+\caption[Combined Precincts - Weighted]{\label{tab:unnamed-chunk-8}Consolidated Precincts - Weighted Data}\\
 \toprule
 Election Pct. & Pct. Number & Weight & Overvotes & Not over & Undervotes & Not under\\
 \midrule
@@ -1148,16 +1386,170 @@ Methods for regression:
   \item
     This is more useful because our output (rate) is 0-1 limited.
   \item
-    It also overweights precincts with more people - is this good?
+    It also overweights precincts with more people - is this good? (Ask
+    Heather)
   \end{itemize}
 \item
   For whatever goes in, I need to pick a better model selection method.
+\item
+  Also test / train data set
+\item
+  Cross-validation?
 \end{itemize}
 \hypertarget{results}{%
 \chapter{Results}\label{results}}
 
-I have some results and they are here.
+I have some results and they are here. First model is the overvoting
+linear model, second is undervoting linear.
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(best_linear_over)}
+\end{Highlighting}
+\end{Shaded}
+\begin{verbatim}
 
+Call:
+lm(formula = overvote_rate ~ Pop_65plus_CEN_2010 + Hispanic_CEN_2010 + 
+    NH_Blk_alone_CEN_2010, data = sf_precincts)
+
+Residuals:
+      Min        1Q    Median        3Q       Max 
+-0.009689 -0.002604 -0.000647  0.001626  0.035200 
+
+Coefficients:
+                       Estimate Std. Error t value Pr(>|t|)    
+(Intercept)           0.0006458  0.0005006   1.290    0.198    
+Pop_65plus_CEN_2010   0.0130538  0.0026982   4.838 1.67e-06 ***
+Hispanic_CEN_2010     0.0072170  0.0014557   4.958 9.30e-07 ***
+NH_Blk_alone_CEN_2010 0.0147915  0.0018810   7.864 1.75e-14 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.003887 on 599 degrees of freedom
+Multiple R-squared:  0.1526,    Adjusted R-squared:  0.1484 
+F-statistic: 35.96 on 3 and 599 DF,  p-value: < 2.2e-16
+\end{verbatim}
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(best_linear_under)}
+\end{Highlighting}
+\end{Shaded}
+\begin{verbatim}
+
+Call:
+lm(formula = overvote_rate ~ Pop_18_24_CEN_2010 + Pop_25_44_CEN_2010 + 
+    Pop_45_64_CEN_2010 + Pop_65plus_CEN_2010 + Hispanic_CEN_2010 + 
+    NH_White_alone_CEN_2010 + NH_Blk_alone_CEN_2010 + NH_AIAN_alone_CEN_2010 + 
+    NH_Asian_alone_CEN_2010 + NH_NHOPI_alone_CEN_2010 + NH_SOR_alone_CEN_2010, 
+    data = sf_precincts)
+
+Residuals:
+      Min        1Q    Median        3Q       Max 
+-0.009237 -0.002509 -0.000669  0.001572  0.035771 
+
+Coefficients:
+                         Estimate Std. Error t value Pr(>|t|)    
+(Intercept)             -0.008882   0.019817  -0.448 0.654181    
+Pop_18_24_CEN_2010       0.003496   0.004968   0.704 0.481875    
+Pop_25_44_CEN_2010       0.006551   0.004290   1.527 0.127263    
+Pop_45_64_CEN_2010       0.010267   0.006805   1.509 0.131868    
+Pop_65plus_CEN_2010      0.016817   0.005015   3.354 0.000849 ***
+Hispanic_CEN_2010        0.010795   0.020035   0.539 0.590232    
+NH_White_alone_CEN_2010  0.003287   0.020805   0.158 0.874519    
+NH_Blk_alone_CEN_2010    0.017776   0.020915   0.850 0.395703    
+NH_AIAN_alone_CEN_2010   0.081654   0.083265   0.981 0.327169    
+NH_Asian_alone_CEN_2010  0.004826   0.020254   0.238 0.811766    
+NH_NHOPI_alone_CEN_2010  0.024532   0.028022   0.875 0.381682    
+NH_SOR_alone_CEN_2010   -0.120171   0.097157  -1.237 0.216625    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.003879 on 591 degrees of freedom
+Multiple R-squared:  0.1675,    Adjusted R-squared:  0.152 
+F-statistic: 10.81 on 11 and 591 DF,  p-value: < 2.2e-16
+\end{verbatim}
+Writeup of said results is forthcoming because it's way past my bedtime
+right now. Not sure why the undervote model is the full model - nothing
+in it is significant, but apparently that had the best MSE. I'll check
+it more seriously tomorrow.
+
+And these are logistic for over and under - still need to do
+training/test or cross validation, plus better model selection.
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(logit_over)}
+\end{Highlighting}
+\end{Shaded}
+\begin{verbatim}
+
+Call:
+glm(formula = cbind(over_count, no_over_count) ~ +Pop_25_44_CEN_2010 + 
+    Pop_65plus_CEN_2010 + NH_White_alone_CEN_2010 + NH_Asian_alone_CEN_2010, 
+    family = binomial, data = sf_precincts)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-2.6217  -0.7680  -0.1902   0.4990   3.2691  
+
+Coefficients:
+                        Estimate Std. Error z value Pr(>|z|)    
+(Intercept)              -4.8283     0.2326 -20.758  < 2e-16 ***
+Pop_25_44_CEN_2010        0.8662     0.4790   1.808   0.0706 .  
+Pop_65plus_CEN_2010       2.6296     0.5925   4.438 9.07e-06 ***
+NH_White_alone_CEN_2010  -2.1367     0.2184  -9.785  < 2e-16 ***
+NH_Asian_alone_CEN_2010  -1.3383     0.2406  -5.563 2.65e-08 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 869.88  on 602  degrees of freedom
+Residual deviance: 761.76  on 598  degrees of freedom
+AIC: 1970
+
+Number of Fisher Scoring iterations: 5
+\end{verbatim}
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(logit_under)}
+\end{Highlighting}
+\end{Shaded}
+\begin{verbatim}
+
+Call:
+glm(formula = cbind(under_count, no_under_count) ~ Pop_18_24_CEN_2010 + 
+    Pop_25_44_CEN_2010 + Pop_45_64_CEN_2010 + Tot_GQ_CEN_2010 + 
+    Non_Inst_GQ_CEN_2010 + Hispanic_CEN_2010 + NH_White_alone_CEN_2010 + 
+    NH_Blk_alone_CEN_2010 + NH_AIAN_alone_CEN_2010, family = binomial, 
+    data = sf_precincts)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-4.9413  -0.9777  -0.0568   0.8644   5.0426  
+
+Coefficients:
+                         Estimate Std. Error z value Pr(>|z|)    
+(Intercept)              -0.83303    0.06903 -12.069  < 2e-16 ***
+Pop_18_24_CEN_2010       -1.55070    0.14400 -10.768  < 2e-16 ***
+Pop_25_44_CEN_2010       -0.84248    0.07746 -10.876  < 2e-16 ***
+Pop_45_64_CEN_2010       -0.50530    0.14790  -3.416 0.000634 ***
+Tot_GQ_CEN_2010          -0.57419    0.19133  -3.001 0.002691 ** 
+Non_Inst_GQ_CEN_2010      1.43808    0.24273   5.925 3.13e-09 ***
+Hispanic_CEN_2010        -0.15366    0.05156  -2.980 0.002882 ** 
+NH_White_alone_CEN_2010   0.74065    0.03679  20.131  < 2e-16 ***
+NH_Blk_alone_CEN_2010     0.49762    0.07216   6.896 5.34e-12 ***
+NH_AIAN_alone_CEN_2010  -13.33221    2.67039  -4.993 5.96e-07 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 2460.6  on 602  degrees of freedom
+Residual deviance: 1228.5  on 593  degrees of freedom
+AIC: 4944.3
+
+Number of Fisher Scoring iterations: 4
+\end{verbatim}
 \hypertarget{conclusion}{%
 \chapter*{Conclusion}\label{conclusion}}
 \addcontentsline{toc}{chapter}{Conclusion}

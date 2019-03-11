@@ -1,6 +1,17 @@
 # Results {#results}
 
-I have some results and they are here.
+I have some results and they are here. First model is the overvoting linear model, second is undervoting linear.
 
+```{r}
+summary(best_linear_over)
+summary(best_linear_under)
+```
 
+Writeup of said results is forthcoming because it's way past my bedtime right now. Not sure why the undervote model is the full model - nothing in it is significant, but apparently that had the best MSE. I'll check it more seriously tomorrow.
 
+And these are logistic for over and under - still need to do training/test or cross validation, plus better model selection.
+
+```{r}
+summary(logit_over)
+summary(logit_under)
+```

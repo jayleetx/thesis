@@ -1,8 +1,9 @@
 # Methods and Structure {#methods}
 
-```{r include = FALSE}
+```{r include = FALSE, cache = TRUE}
 library(here)
-source(here('sandbox', 'precinct_math.R'))
+library(patchwork)
+source(here('code', 'precinct_math.R'))
 ```
 
 
@@ -21,7 +22,7 @@ In the ballot file, each voter is spread across three rows of data (one for each
 
 Since the voter-level data is fully anonymized, we have no demographic information at the individual level. For any given voter, since the most identifying piece of information we have about them is their precinct, it is impossible to know any one voter's gender or ethnicity. To gain insight into these demographic trends, we instead aggregate up to the precinct level.
 
-At the precinct level, we can now only study the rates of these ballot phenomena. For example, in Precinct 1703, we may see 14% of voters undervote. <!-- Get a real stat to use for this --> Rather than building a classification model (error / no error), we can now instead build regression models with a numerical dependent variable <!-- Better word for this --> - the rate of ballot error. Moving up this level of abstraction does remove some granularity from the model (inference and prediction at the precinct level is less specific than at the individual level), but this is the least we can do and still be able to access demographic information.
+At the precinct level, we can now only study the rates of these ballot phenomena (as opposed to an individual's response). For example, in Precinct 1703, we may see 14% of voters undervote. <!-- Get a real stat to use for this --> Rather than building a classification model (error / no error), we can now instead build regression models with a numerical dependent variable <!-- Better word for this --> - the rate of ballot error. Moving up this level of abstraction does remove some granularity from the model (inference and prediction at the precinct level is less specific than at the individual level), but this is the least we can do and still be able to access demographic information.
 <!-- Talk about the actual processes (and files) used to do this -->
 
 ### Demographic data
@@ -36,32 +37,121 @@ Stated more generally: if we have a division of a geographic region and some set
 
 #### Areal Interpolation
 
-One field of GIS (geographic information system) research that looks into this is called *areal interpolation*. The goal of areal interpolation is to take a variable distributed over a set of "source zones" and estimate its distribution over a set of "target zones". These two zoning systems must overlap at least partially to get any estimate for the target zones (e.g. information about Oregon doesn't directly tell us anything about information in Washington, under any zoning system), but are incompatible in some way^[A set of "compatible" zoning systems would be something like the US Census' hierarchical systems: multiple blocks are combined to make a block group, multiple block groups are combined into a census tract, etc. Since the areas overlap neatly, you can directly add together certain numbers (like population) from block groups to get a very accurate estimate for the census tract.].
+One field of GIS (geographic information system) research that looks into this is called *areal interpolation*. The goal of areal interpolation is to take a variable distributed over a set of "source zones" and estimate its distribution over a set of "target zones" (Schroeder, 2007). These two zoning systems must overlap at least partially to get any estimate for the target zones (e.g. information about Oregon doesn't directly tell us anything about information in Washington, under any zoning system), but are incompatible in some way^[A set of "compatible" zoning systems would be something like the US Census' hierarchical systems: multiple blocks are combined to make a block group, multiple block groups are combined into a census tract, etc. Since the areas overlap neatly, you can directly add together certain numbers (like population) from block groups to get a very accurate estimate for the census tract.]. When this is not possible, however, areal interpolation can help get parameter estimates for these incompatible areas.
 
-Types of AI:
+Soem common types of areal interpolation are:
 
-- Areal Weighting (what I'm doing)
+- Areal weighting, using the assumption that populations are distributed uniformly on a region.
 
-- Density weighting (doesn't really apply I think)
+- Modified areal weighting, which creates a continuous map from region to region to better reflect changes in population density.
 
-Talk about intensive versus extensive data and how that differs.
+- Target density weighting, which uses extra information about the target zones, typically population density, to increase accuracy (Schroeder, 2007).
 
-Probably drop this paragraph.
-There are a few possible ways of accomplishing this. The way we use assumes a uniform spatial distribution of all non-constant properties: any sub-region has proportion of the full region's property equal to the proportion of the area of the full region that the sub-region occupies. For example, if we split a region with 100 people into two sub-regions of equal area, we assume that there are 50 people in each sub-region.
-<!-- add a pic of the validation data because it's easier to comprehend -->
-To approach this method, we first spatially intersect the two division sets of the city: census tracts and election precincts. This creates a new division, where every new sub-region is a unique combination of tract and precinct <!-- This might not be true? What if there's a weird concave shape that gets split up? --> We can directly group these sub-regions together in one combination into the full set of precincts, and group them in another combination into the full set of census tracts. Using the uniform spatial assumption, we obtain demographic estimates for each of these sub-regions, then add them together in the precinct grouping to obtain demographic estimates for our precincts.
+- Dasymetric mapping, which uses alternative data, also called *ancillary data* to produce a continuous estimate of population density (Sleeter and Gould, 2008). Examples of ancillary data include land cover information, parcel classifications, and street locations.
 
-<!-- Add general example with the test data here, it's way easier to understand. -->
+In this work we will use areal weighting for our interpolation. The other methods above, while typically more accurate are infeasible under the constraints of the research^[Mostly time limitations; see Conclusion section for further research ideas.]. The assumption of uniformity is not necessarily correct, but in an urban area such as San Francisco it is more accurate than an area like the entire state of California, with a large urban/rural spread. 
 
-This assumption of uniformity, like any assumption, may be unfounded. There are methods, some involving satellite imagery and street location, to get more accurate information about population distribution. Quite honestly, these were just too complicated for the scope of this research. It is, however, more likely in an urban environment like San Francisco^[as compared to the entire state of California, which has urban pockets within suburban regions within a rural overall condition] that this unifrmity assumption will not drastically change our estimates.
+#### Areal weighting
 
-#### Shit to add
+Areal weighting first makes the assumption that populations are distributed uniformly over a space. If Region X has 100 people and we split X in half spatially, then we assume that 50 people are in each half. This also applies to sub-populations: if Region X has 20 non-White Hispanic people, then we assume each half has 10 non-white Hispanic people. This type of data, counts that can be divided into sub-regions, is called *spatially extensive* data. Extensive data is data that applies to an entire region, but not any given sub-region.
 
-R package used, and why
-Validation - general choropleth matching
-Talk about percentages versus counts, once you figure out what's going on there
-It's about the weighting - the weight on an extensive variable is intersection / source, the weight on an intensive variable is intersection / target. Honestly you can just copy a bunch of what you sent to Andrew as a toy example.
-Minimal bounding box and the solution chosen - assume that every person lives in both a precinct and a census division, so any physical space that is only in one of these must have no people in it (well, it's really a function of the shapefile data being weird/coarse). Thus we clip both data sets to only include areas that the other also contains. This changes the shape of some of the edge data sets, but it gets rid of the issue of demographic info being "wasted" because it applies to a census tract but not a precinct, or precincts being underweighted demographically because they have space outside of a tract.
+Conversely, data that applies to any given sub-region of a region is called *spatially intensive*. Properties like population density are spatially intensive under the uniformity assumption, because the ratio of population to area does not change upon examining a sub-region. Percentages are also spatially intensive - considering the sub-population as above, the percentage of non-White Hispanic people in Region X (20 out of 100, 20%) does not change when we look at one of the sub-regions (10 out of 50, 20%).
+
+We will use the following example case to illustrate the areal interpolation process. Suppose regions $A$, $B$, $C$, and $D$ are the source regions (each taking up a quadrant of the square), and regions $X$, $Y$, and $Z$ are the target regions (each taking up a third of the square vertically). Further suppose that the boundaries of the source regions and target regions are fully coincident, that is $A \cup B \cup C \cup D = X \cup Y \cup Z$^[This example ignores the case where the covered regions are not coincident, which is a possibility in general. In this research we enforce coincidence in our data, however.].
+
+```{r}
+library(purrr)
+source <- st_read(here('data', 'source_zones')) %>%
+  transmute(name = c('D','C','A','B'),
+            lon = map_dbl(geometry, ~st_centroid(.x)[[1]]),
+            lat = map_dbl(geometry, ~st_centroid(.x)[[2]]))
+target <- st_read(here('data', 'target_zones')) %>%
+  transmute(name = c('Z','X','Y'),
+            lon = map_dbl(geometry, ~st_centroid(.x)[[1]]),
+            lat = map_dbl(geometry, ~st_centroid(.x)[[2]]))
+
+source_plot <- ggplot(source) + geom_sf() + geom_text(aes(x = lon, y = lat, label = name)) + theme_void() + ggtitle('Source regions')
+
+target_plot <- ggplot(target) + geom_sf() + geom_text(aes(x = lon, y = lat, label = name)) + theme_void() + ggtitle('Target regions')
+
+source_plot + target_plot + plot_layout(ncol = 2)
+```
+
+In general, denote a source region by $S_i$ (over index set $I$) and a target region by $T_j$ (over index set $J$). For any region $R$, denote the area of $R$ by $Area(R)$, the measure of a given extensive property of $R$ by $x_R$, and the measure of a given intensive property of $R$ by $y_R$. These measures are known in the source regions, but unknown in the target regions (hence, the interpolation). Denote an estimate of a quantity with a carat, e.g. $\widehat{y_{R}}$.
+
+Say we want to estimate $x_{T_j}$, the measure of the extensive property in region $T_j$. For all $j \in J$, we can estimate this property with
+\[
+\widehat{x_{T_j}} = \sum_{i \in I} \frac{Area(S_i \cap T_j)}{Area(S_i)} \cdot x_{S_i}
+\]
+
+For each source region, calculate the proportion of the region that lies inside the target region. These proportions are the weights to be multiplied by the source regions' properties. In the example case, consider target region $X$:
+\[
+\widehat{x_X} = \frac{Area(A \cap X)}{Area(A)} \cdot x_{A} + \frac{Area(B \cap X)}{Area(B)} \cdot x_{B} + 0 + 0 = \frac{2}{3}(x_A + x_B).
+\]
+
+Since $A$ and $B$ each have $2/3$ of their area inside target region $X$, we estimate that 2/3 of the extensive quantity $x_A$ is inside region $X$ (similarly for $x_B$). Adding these together gives us an estimate $\widehat{x_X}$.
+
+For intensive properties, the process is slightly different. For all $j \in J$, we can estimate an intensive property $y_{T_j}$ with
+\[
+\widehat{y_{T_j}} = \sum_{i \in I} \frac{Area(S_i \cap T_j)}{Area(T_j)} \cdot x_{S_i}
+\]
+
+Since the intensive property isn't "divisible" within a region, we instead take a weighted average of the component source regions of the target region, where each component is weighted by the amount of the target region it takes up. Again considering target region $X$:
+\[
+\widehat{y_X} = \frac{Area(A \cap X)}{Area(X)} \cdot y_{A} + \frac{Area(B \cap X)}{Area(X)} \cdot y_{B} + 0 + 0 = \frac{1}{2}(y_A + y_B).
+\]
+
+Since $A$ and $B$ each take up half of target region $X$, each of them gets weighted by half before being added to get the estimate of $y_X$.
+
+#### Interpolation - counts vs. percentages
+
+One consideration in the data preparation stage was whether to use counts or percentages as input for the regression. The census data contains total population in a region, as well as a count and percentage for a given variable (say people between the ages of 25 and 44). The percentage can equivalently be calculated by dividing the count by the population. After performing the areal interpolation on the data, I ran this percentage calculation again to double check that it lined up with the reported percentages (post-interpolation). My intuition was that these steps should be commutative - calculating a percentage and then interpolating should have the same result as interpolating and then calculating the percentage. This was not the case, however - in the variable for population between 25 and 44, the error between these two methods ranged from -12 to 26 percentage points.
+
+```{r}
+ggplot(sf_precincts, aes(x = Pop_25_44_CEN_2010 / Tot_Population_CEN_2010,
+                         y = Pop_25_44_CEN_2010,
+                         col = abs((Pop_25_44_CEN_2010 / Tot_Population_CEN_2010) - Pop_25_44_CEN_2010))) +
+  geom_point() +
+  labs(title = "Error in the Variable 'Pop_25_44_CEN_2010'",
+       x = "Calculated Percentage",
+       y = "Reported Percentage",
+       col = "Absolute Error")
+# get a better color scheme for this error
+```
+
+As it turns out, these steps are not commutative in this way, and the observed error is mostly a function of the weighting between different steps in the process. For example, consider a simple case: suppose source regions A and B are fully contained in target region X, and split X in half. Let the number of people between 25 and 44 in A be 4 (out of 10 total) and in B be 3 (out of 5 total). Taking the percentages first gives us a proportion of 0.4 in A and 0.6 in B. Using the intensive interpolation method on these proportions, both are weighted by the amount of X that the region takes up (half, in each case) and added, so the average weighted by area is 0.5. Conversely, using the extensive interpolation method on the count and popuation, we see that X has 7 people between 25 and 44 (out of 15 total). Taking the percentage, we see that the proportion of this variable in X is ~0.47.
+
+In short, the "calculating proportion" and "areal interpolation" steps are NOT commutative, because of the differences in weights when using intensive vs. extensive interpolation methods. Both are calculating a weighted mean of sorts, but the former is weighting by AREA, while the latter is weighting by POPULATION. In this case we see that the latter is more accurate - source regions with more people should have greater impact on the estimated measures in target regions, because the variables we are dealing with are human-centered rather than space-centered. As such, for this study we will interpolate only the count data (population, numbers of people for each measured variable) and then calculate proportions in the target regions after the interpolation. These proportions are better suited to the regression to ensure that variables are of the same scale and we can compare coefficient estimates.
+
+#### Boundary mismatch
+
+A further issue appears - just like the precinct and census boundaries don't line up because they come from different sources, the outside boundaries of the precinct and census files don't line up. The census boundaries have a lower resolution on the whole than then precinct boundaries. This leads to issues when performing the areal interpolation, because parts of a census boundary that are outside of a precinct will be dropped and cause an underestimate of the true measure of the variables. We address this by bounding both files to only consider the space that is contained in both^[No census tracts were fully removed in this process, but this causes one precinct, Precinct 9900, to be cut off. However, this precinct is a semi-exclave of the county on Alameda Island, across the San Francisco Bay. Since this land (an undeveloped former naval air base) is uninhabited, its removal should not negatively impact the accuracy of our results (Levi, 2018).]. Since we are dealing with a fundamental unit of people instead of space, this ensures that every person is counted, and changes some of the spatial weights calculated. The assumption here is that any region which is only contained in one of the files (precincts without census, or census without precincts) has zero population, because every person should be contained in both a precinct and a census region.
+
+```{r fig.cap = 'Boundary intersection between shapefiles'}
+prec_out <- ggplot(precincts_bound) + geom_sf() + theme_void() + labs(title = 'Precincts')
+
+cen_out <- ggplot(census_bound) + geom_sf() + theme_void() + labs(title = 'Census')
+
+joint_out <- ggplot(overall) + geom_sf() + theme_void() + labs(title = 'Overall')
+
+prec_out + cen_out - joint_out + plot_layout(ncol = 1, heights = c(3,6))
+```
+
+This plot displays the result of this intersection between the two regions. The impact on the census tracts is quite visible - notably the eastern coastline is much more defined, and the gap in Treasure Island (the large island off the northeastern shore) appears. The impact on the precinct boundaries is less apparent, but still there - the exclave on Alameda Island (small sliver to the East) has disappeared, and in the southeastern corner it is visible how the angles in the precinct boundary have softened to the more rounded final shape.
+
+Below is a comparison of the original shapefiles (including all divisions) to the bounded versions.
+
+```{r fig.cap = 'Original versus bounded shapefiles'}
+precincts_pre <- ggplot(precincts_shape) + geom_sf() + theme_void() + labs(title = 'Precincts - original')
+
+census_pre <- ggplot(census_shape) + geom_sf() + theme_void() + labs(title = 'Census - original')
+
+precincts_post <- ggplot(precincts) + geom_sf() + theme_void() + labs(title = 'Precincts - bounded')
+
+census_post <- ggplot(census) + geom_sf() + theme_void() + labs(title = 'Census - bounded')
+
+precincts_pre + census_pre - precincts_post + census_post + plot_layout(ncol = 1)
+```
 
 #### Precinct Consolidation
 
@@ -110,6 +200,9 @@ Methods for regression:
 
 - Logistic with the "binomial-style" input data
   + This is more useful because our output (rate) is 0-1 limited.
-  + It also overweights precincts with more people - is this good?
+  + It also overweights precincts with more people - is this good? (Ask Heather)
 
 - For whatever goes in, I need to pick a better model selection method.
+- Also test / train data set
+- Cross-validation?
+

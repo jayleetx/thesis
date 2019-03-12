@@ -24,17 +24,43 @@ census_bound <- st_union(census_shape)
 overall <- st_intersection(precincts_bound, census_bound) # great!
 
 precincts <- st_intersection(precincts_shape, overall)
-census <- st_intersection(census_shape, overall)
+census_regions <- st_intersection(census_shape, overall)
 
-
+# okay we're gonna use the ACS because it has education info
 census_data <- readr::read_csv(here('data', 'planning_database.csv')) %>%
-  select(1:9, 14:16, 29:78, 128:135, 190:195, 202:251) %>% # need more specs on which columns to use
-  filter(State == "06", County == "075") %>%
-  select(GIDBG, TRACT = Tract, BLKGRP = Block_group, AREA = LAND_AREA,
-         ends_with('CEN_2010'), -starts_with('pct'))
+  select(GIDBG, State, State_name, County, County_name,
+         TRACT = Tract, BLKGRP = Block_group,
+         population = Tot_Population_ACS_12_16,
+         women = Females_ACS_12_16,
+         pop_18_24 = Pop_18_24_ACS_12_16,
+         pop_25_44 = Pop_25_44_ACS_12_16,
+         pop_45_64 = Pop_45_64_ACS_12_16,
+         pop_65_up = Pop_65plus_ACS_12_16,
+         hispanic = Hispanic_ACS_12_16,
+         white = NH_White_alone_ACS_12_16,
+         black = NH_Blk_alone_ACS_12_16,
+         native = NH_AIAN_alone_ACS_12_16,
+         asian = NH_Asian_alone_ACS_12_16,
+         pac_islander = NH_NHOPI_alone_ACS_12_16,
+         other_race = NH_SOR_alone_ACS_12_16,
+         education_denom = Pop_25yrs_Over_ACS_12_16,
+         no_hs = Not_HS_Grad_ACS_12_16,
+         college = College_ACS_12_16,
+         poverty_denom = Pov_Univ_ACS_12_16,
+         poverty = Prs_Blw_Pov_Lev_ACS_12_16,
+         no_english = ENG_VW_ACS_12_16,
+         language_denom = Tot_Occp_Units_ACS_12_16) %>%
+  filter(State == "06", County == "075")
 
-census <- left_join(census, census_data, by = c('TRACT', 'BLKGRP')) %>%
-  select(-TRACT, -BLKGRP, -GIDBG, -AREA)
+census <- left_join(census_regions, census_data, by = c('TRACT', 'BLKGRP')) %>%
+  select(-TRACT, -BLKGRP, -GIDBG, -State, -State_name, -County, -County_name)
+
+census_props <- census %>%
+  mutate_at(vars(women:other_race), function(x) x / .$population) %>%
+  mutate_at(vars(no_hs:college), function(x) x / .$education_denom) %>%
+  mutate(poverty = poverty / poverty_denom,
+         no_english = no_english / language_denom) %>%
+  select(-population, -education_denom, -poverty_denom, -language_denom)
 
 join <- st_interpolate_aw(census, to = precincts, extensive = TRUE) %>%
   as.data.frame() %>%
@@ -43,9 +69,9 @@ join <- st_interpolate_aw(census, to = precincts, extensive = TRUE) %>%
 demo_data <- precincts %>%
   mutate(Group.1 = 1:nrow(.)) %>%
   left_join(join, by = 'Group.1') %>%
-  mutate_at(vars(ends_with('CEN_2010'), -Tot_Population_CEN_2010), function(x) x / .$Tot_Population_CEN_2010)
-# validation for this join? idk
+  mutate_at(vars(women:other_race), function(x) x / .$population) %>%
+  mutate_at(vars(no_hs:college), function(x) x / .$education_denom) %>%
+  mutate(poverty = poverty / poverty_denom,
+         no_english = no_english / language_denom) %>%
+  select(-c(education_denom, poverty_denom, language_denom, Group.1, Shape_Area))
 
-# validation - the distribution of heavily Asian regions lines up between the two methods
-#ggplot(census) + geom_sf(aes(fill = pct_NH_Asian_alone_CEN_2010))
-#ggplot(demo_data) + geom_sf(aes(fill = pct_NH_Asian_alone_CEN_2010))

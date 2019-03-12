@@ -51,7 +51,7 @@ sf_unadjusted <- sf_precincts
 # we're gonna assume the pop split is the same as in 2010 and weight that way
 double_cases <- filter(sf_precincts, str_detect(precinct, '/')) %>%
   group_by(precinct) %>%
-  mutate(weight = Tot_Population_CEN_2010 / sum(Tot_Population_CEN_2010))
+  mutate(weight = population / sum(population))
 count_cols <- c('over_count', 'no_over_count', 'under_count', 'no_under_count')
 sf_precincts[str_detect(sf_precincts$precinct, '/') %in% TRUE, count_cols] <- round(sf_precincts[str_detect(sf_precincts$precinct, '/') %in% TRUE, count_cols] * double_cases$weight)
 # this gives much nicer results
@@ -61,132 +61,114 @@ sf_precincts <- mutate(sf_precincts,
                        overvote_rate = over_count / (over_count + no_over_count),
                        undervote_rate = under_count / (under_count + no_under_count),
                        turnout = under_count + no_under_count,
-                       turnout_rate = turnout / Tot_Population_CEN_2010) %>%
+                       turnout_rate = turnout / population) %>%
   na.omit()
 
 
 # regressions?
 # dig out the stat learning book and do some better model selection
 
-training <- sample_frac(sf_precincts, 0.5)
-test <- sf_precincts[!(sf_precincts$PREC_2017 %in% training$PREC_2017), ]
+train_index <- sample(c(TRUE, FALSE), size = nrow(sf_precincts), replace = TRUE)
+training <- filter(sf_precincts, train_index)
+test <- filter(sf_precincts, !train_index)
 
 # linear model for overvoting #####
+# bootstrap these instead? to get different splits
+over_formula <- overvote_rate ~ pop_18_24 + pop_25_44 + pop_45_64 + pop_65_up +
+  hispanic + white + black + native + asian + pac_islander + other_race + no_hs +
+  college + poverty + no_english
+nvars <- 15
 
-over_formula <- overvote_rate ~ Pop_18_24_CEN_2010 + Pop_25_44_CEN_2010 + Pop_45_64_CEN_2010 +
-  Pop_65plus_CEN_2010 + Hispanic_CEN_2010 + NH_White_alone_CEN_2010 + NH_Blk_alone_CEN_2010 +
-  NH_AIAN_alone_CEN_2010 + NH_Asian_alone_CEN_2010 + NH_NHOPI_alone_CEN_2010 +
-  NH_SOR_alone_CEN_2010
-
-linear_over_backward <- regsubsets(over_formula, data = training, method = 'backward', nvmax = 11)
-linear_over_forward <- regsubsets(over_formula, data = training, method = 'forward', nvmax = 11)
+linear_over_backward <- regsubsets(over_formula, data = training, method = 'backward', nvmax = nvars)
+linear_over_forward <- regsubsets(over_formula, data = training, method = 'forward', nvmax = nvars)
 # backward selection
 test.mat <- model.matrix(over_formula, data = test)
-errors <- rep(NA, 11)
-for (i in 1:11) {
+back_errors <- rep(NA, nvars)
+for (i in 1:nvars) {
   coefi <- coef(linear_over_backward, id = i)
   pred <- test.mat[ ,names(coefi)]%*%coefi
-  errors[i] <- mean((test$overvote_rate - pred)^2)
+  back_errors[i] <- mean((test$overvote_rate - pred)^2)
 }
-coef(linear_over_backward, which.min(errors))
+coef(linear_over_backward, which.min(back_errors))
 # forward selection
 test.mat <- model.matrix(over_formula, data = test)
-errors <- rep(NA, 11)
-for (i in 1:11) {
+for_errors <- rep(NA, nvars)
+for (i in 1:nvars) {
   coefi <- coef(linear_over_forward, id = i)
   pred <- test.mat[ ,names(coefi)]%*%coefi
-  errors[i] <- mean((test$overvote_rate - pred)^2)
+  for_errors[i] <- mean((test$overvote_rate - pred)^2)
 }
-coef(linear_over_forward, which.min(errors))
+coef(linear_over_forward, which.min(for_errors))
 # they agree here!
-best_linear_over <- lm(overvote_rate ~ Pop_65plus_CEN_2010 +
-                         Hispanic_CEN_2010 +
-                         NH_Blk_alone_CEN_2010,
-                       data = sf_precincts)
+best_linear_over <- lm(overvote_rate ~ hispanic + black + no_english, data = sf_precincts)
 
 # linear model for undervoting #####
-under_formula <- undervote_rate ~ Pop_18_24_CEN_2010 + Pop_25_44_CEN_2010 + Pop_45_64_CEN_2010 +
-  Pop_65plus_CEN_2010 + Hispanic_CEN_2010 + NH_White_alone_CEN_2010 + NH_Blk_alone_CEN_2010 +
-  NH_AIAN_alone_CEN_2010 + NH_Asian_alone_CEN_2010 + NH_NHOPI_alone_CEN_2010 +
-  NH_SOR_alone_CEN_2010
+under_formula <- undervote_rate ~ pop_18_24 + pop_25_44 + pop_45_64 + pop_65_up +
+  hispanic + white + black + native + asian + pac_islander + other_race + no_hs +
+  college + poverty + no_english
 
-linear_under_backward <- regsubsets(under_formula, data = training, method = 'backward', nvmax = 11)
-linear_under_forward <- regsubsets(under_formula, data = training, method = 'forward', nvmax = 11)
+linear_under_backward <- regsubsets(under_formula, data = training, method = 'backward', nvmax = nvars)
+linear_under_forward <- regsubsets(under_formula, data = training, method = 'forward', nvmax = nvars)
 # backward selection
 test.mat <- model.matrix(under_formula, data = test)
-errors <- rep(NA, 11)
-for (i in 1:11) {
+back_errors <- rep(NA, nvars)
+for (i in 1:nvars) {
   coefi <- coef(linear_under_backward, id = i)
   pred <- test.mat[ ,names(coefi)]%*%coefi
-  errors[i] <- mean((test$undervote_rate - pred)^2)
+  back_errors[i] <- mean((test$undervote_rate - pred)^2)
 }
-coef(linear_under_backward, which.min(errors))
+coef(linear_under_backward, which.min(back_errors))
 # forward selection
 test.mat <- model.matrix(under_formula, data = test)
-errors <- rep(NA, 11)
-for (i in 1:11) {
+for_errors <- rep(NA, nvars)
+for (i in 1:nvars) {
   coefi <- coef(linear_under_forward, id = i)
   pred <- test.mat[ ,names(coefi)]%*%coefi
-  errors[i] <- mean((test$undervote_rate - pred)^2)
+  for_errors[i] <- mean((test$undervote_rate - pred)^2)
 }
-coef(linear_under_forward, which.min(errors))
-# they agree here!
-best_linear_under <- lm(overvote_rate ~ Pop_18_24_CEN_2010 +
-                          Pop_25_44_CEN_2010 +
-                          Pop_45_64_CEN_2010 +
-                          Pop_65plus_CEN_2010 +
-                          Hispanic_CEN_2010 +
-                          NH_White_alone_CEN_2010 +
-                          NH_Blk_alone_CEN_2010 +
-                          NH_AIAN_alone_CEN_2010 +
-                          NH_Asian_alone_CEN_2010 +
-                          NH_NHOPI_alone_CEN_2010 +
-                          NH_SOR_alone_CEN_2010,
-                        data = sf_precincts)
-# not sure at all why the full model had the best MSE - very spooky
-# none of them are even significant
-# do cross validation instead?
+coef(linear_under_forward, which.min(for_errors))
+# they do not agree here!
+best_linear_under <- lm(overvote_rate ~ pop_18_24 + pop_25_44 + pop_45_64 +
+                          white + black + no_hs + college, data = sf_precincts)
+
 
 # logistic regressions
 
 logit_over <- glm(cbind(over_count, no_over_count) ~
-#                    Pop_18_24_CEN_2010
-                  + Pop_25_44_CEN_2010
-#                  + Pop_45_64_CEN_2010
-                  + Pop_65plus_CEN_2010
-#                  + Tot_GQ_CEN_2010
-#                  + Inst_GQ_CEN_2010
-#                  + Non_Inst_GQ_CEN_2010
-#                  + Hispanic_CEN_2010
-                  + NH_White_alone_CEN_2010
-#                  + NH_Blk_alone_CEN_2010
-#                  + NH_AIAN_alone_CEN_2010
-                  + NH_Asian_alone_CEN_2010
-#                  + NH_NHOPI_alone_CEN_2010
-#                  + NH_SOR_alone_CEN_2010
+#                  + pop_18_24
+#                  + pop_25_44
+#                  + pop_45_64
+#                  + pop_65_up
+                  + hispanic
+#                  + white
+                  + black
+#                  + native
+#                  + asian
+#                  + pac_islander
+#                  + other_race
+#                  + no_hs
+#                  + college
+#                  + poverty
+                  + no_english
                   ,
                   data = sf_precincts, family = binomial)
-# oldest age group, 25-44yo (less significant) increase chances of overvoting
-# Whites, Asians decrease chances of overvoting
 
 
 logit_under <- glm(cbind(under_count, no_under_count) ~
-                  Pop_18_24_CEN_2010
-                  + Pop_25_44_CEN_2010
-                  + Pop_45_64_CEN_2010
-#                  + Pop_65plus_CEN_2010
-                  + Tot_GQ_CEN_2010
-#                  + Inst_GQ_CEN_2010
-                  + Non_Inst_GQ_CEN_2010
-                  + Hispanic_CEN_2010
-                  + NH_White_alone_CEN_2010
-                  + NH_Blk_alone_CEN_2010
-                  + NH_AIAN_alone_CEN_2010
-#                  + NH_Asian_alone_CEN_2010
-#                  + NH_NHOPI_alone_CEN_2010
-#                  + NH_SOR_alone_CEN_2010
-                  ,
-                  data = sf_precincts, family = binomial)
-# all age groups except for the oldest less likely to undervote
-# people in GQs less likely to undervote, institutional GQs more likely to undervote
-# Black and White more likely to undervote, Native and Hispanic less likely to undervote
+                  + pop_18_24
+                  + pop_25_44
+                  + pop_45_64
+#                  + pop_65_up
+                  + hispanic
+                  + white
+                  + black
+#                  + native
+                  + asian
+#                  + pac_islander
+#                  + other_race
+                  + no_hs
+                  + college
+#                  + poverty
+#                   + no_english
+                   ,
+                   data = sf_precincts, family = binomial)

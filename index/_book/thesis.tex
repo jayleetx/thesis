@@ -906,14 +906,14 @@ ballot incompletely, given their demographic qualities.
 
 The data used comes from two main sources. From the San Francisco
 Elections Office , we have a cast ballot record of the election in
-question . This is presented by the city as two text files: - The ballot
-image, a 45-character fixed-width file with fields corresponding to
-election, candidate, unique voter number (anonymized and disconnected
-from any voter registration ID), ranking, precinct, and other
-information. Each of these is encoded numerically, so each line of the
-file appears as a 45-digit number. - The lookup table, an 83-character
-fixed-width file that defines the encodings used to create the numerical
-values in the ballot image.
+question (source?). This is presented by the city as two text files: -
+The ballot image, a 45-character fixed-width file with fields
+corresponding to election, candidate, unique voter number (anonymized
+and disconnected from any voter registration ID), ranking, precinct, and
+other information. Each of these is encoded numerically, so each line of
+the file appears as a 45-digit number. - The lookup table, an
+83-character fixed-width file that defines the encodings used to create
+the numerical values in the ballot image.
 
 In the ballot file, each voter is spread across three rows of data (one
 for each ranking). We use the \texttt{clean\_ballot()} function from our
@@ -941,14 +941,16 @@ least we can do and still be able to access demographic information.
 \hypertarget{demographic-data}{%
 \subsection{Demographic data}\label{demographic-data}}
 
-Now that we have precinct-level rates, we need to obtain precinct-level
+Edit this paragraph because it's not right - ACS, no MOE, etc. Now that
+we have precinct-level rates, we need to obtain precinct-level
 demographic information in order to build a model. Our source of
-demographic data is the 2010 U.S. Census (citation). While this data is
-slightly out of date (about 8 years), there is more certainty about the
-accuracy of the measurements collected. While a more temporally accurate
-data set like the yearly American Community Survey (ACS) could have been
-used, the error margins of this data set proved too large / complicated
-to be useful for this study.
+demographic data is the 2010 U.S. Census as part of the 2018 Census
+Planning Database (source? Also map source). While this data is slightly
+out of date (about 8 years), there is more certainty about the accuracy
+of the measurements collected. While a more temporally accurate data set
+like the yearly American Community Survey (ACS) could have been used,
+the error margins of this data set proved too large / complicated to be
+useful for this study.
 
 One consideration with this is that the voting population is not always
 representative of the general population. It might be more informative
@@ -1049,15 +1051,6 @@ the source regions and target regions are fully coincident, that is
   ignores the case where the covered regions are not coincident, which
   is a possibility in general. In this research we enforce coincidence
   in our data, however.}.
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{library}\NormalTok{(purrr)}
-\NormalTok{source <-}\StringTok{ }\KeywordTok{st_read}\NormalTok{(}\KeywordTok{here}\NormalTok{(}\StringTok{'data'}\NormalTok{, }\StringTok{'source_zones'}\NormalTok{)) }\OperatorTok{%>%}
-\StringTok{  }\KeywordTok{transmute}\NormalTok{(}\DataTypeTok{name =} \KeywordTok{c}\NormalTok{(}\StringTok{'D'}\NormalTok{,}\StringTok{'C'}\NormalTok{,}\StringTok{'A'}\NormalTok{,}\StringTok{'B'}\NormalTok{),}
-            \DataTypeTok{lon =} \KeywordTok{map_dbl}\NormalTok{(geometry, }\OperatorTok{~}\KeywordTok{st_centroid}\NormalTok{(.x)[[}\DecValTok{1}\NormalTok{]]),}
-            \DataTypeTok{lat =} \KeywordTok{map_dbl}\NormalTok{(geometry, }\OperatorTok{~}\KeywordTok{st_centroid}\NormalTok{(.x)[[}\DecValTok{2}\NormalTok{]]))}
-\end{Highlighting}
-\end{Shaded}
 \begin{verbatim}
 Reading layer `source_zones' from data source `/Users/jaylee/Desktop/thesis/data/source_zones' using driver `ESRI Shapefile'
 Simple feature collection with 4 features and 1 field
@@ -1067,14 +1060,6 @@ bbox:           xmin: -3 ymin: -3 xmax: 3 ymax: 3
 epsg (SRID):    4267
 proj4string:    +proj=longlat +datum=NAD27 +no_defs
 \end{verbatim}
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{target <-}\StringTok{ }\KeywordTok{st_read}\NormalTok{(}\KeywordTok{here}\NormalTok{(}\StringTok{'data'}\NormalTok{, }\StringTok{'target_zones'}\NormalTok{)) }\OperatorTok{%>%}
-\StringTok{  }\KeywordTok{transmute}\NormalTok{(}\DataTypeTok{name =} \KeywordTok{c}\NormalTok{(}\StringTok{'Z'}\NormalTok{,}\StringTok{'X'}\NormalTok{,}\StringTok{'Y'}\NormalTok{),}
-            \DataTypeTok{lon =} \KeywordTok{map_dbl}\NormalTok{(geometry, }\OperatorTok{~}\KeywordTok{st_centroid}\NormalTok{(.x)[[}\DecValTok{1}\NormalTok{]]),}
-            \DataTypeTok{lat =} \KeywordTok{map_dbl}\NormalTok{(geometry, }\OperatorTok{~}\KeywordTok{st_centroid}\NormalTok{(.x)[[}\DecValTok{2}\NormalTok{]]))}
-\end{Highlighting}
-\end{Shaded}
 \begin{verbatim}
 Reading layer `target_zones' from data source `/Users/jaylee/Desktop/thesis/data/target_zones' using driver `ESRI Shapefile'
 Simple feature collection with 3 features and 1 field
@@ -1084,15 +1069,6 @@ bbox:           xmin: -3 ymin: -3 xmax: 3 ymax: 3
 epsg (SRID):    4267
 proj4string:    +proj=longlat +datum=NAD27 +no_defs
 \end{verbatim}
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{source_plot <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(source) }\OperatorTok{+}\StringTok{ }\KeywordTok{geom_sf}\NormalTok{() }\OperatorTok{+}\StringTok{ }\KeywordTok{geom_text}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ lon, }\DataTypeTok{y =}\NormalTok{ lat, }\DataTypeTok{label =}\NormalTok{ name)) }\OperatorTok{+}\StringTok{ }\KeywordTok{theme_void}\NormalTok{() }\OperatorTok{+}\StringTok{ }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{'Source regions'}\NormalTok{)}
-
-\NormalTok{target_plot <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(target) }\OperatorTok{+}\StringTok{ }\KeywordTok{geom_sf}\NormalTok{() }\OperatorTok{+}\StringTok{ }\KeywordTok{geom_text}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ lon, }\DataTypeTok{y =}\NormalTok{ lat, }\DataTypeTok{label =}\NormalTok{ name)) }\OperatorTok{+}\StringTok{ }\KeywordTok{theme_void}\NormalTok{() }\OperatorTok{+}\StringTok{ }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{'Target regions'}\NormalTok{)}
-
-\NormalTok{source_plot }\OperatorTok{+}\StringTok{ }\NormalTok{target_plot }\OperatorTok{+}\StringTok{ }\KeywordTok{plot_layout}\NormalTok{(}\DataTypeTok{ncol =} \DecValTok{2}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
 \includegraphics{thesis_files/figure-latex/unnamed-chunk-3-1.pdf}
 
 In general, denote a source region by \(S_i\) (over index set \(I\)) and
@@ -1138,6 +1114,15 @@ Since \(A\) and \(B\) each take up half of target region \(X\), each of
 them gets weighted by half before being added to get the estimate of
 \(y_X\).
 
+To validate the application of this method to the data at hand, we can
+visually compare the spatial distribution of a variable before the
+interpolation to its distribution after the interpolation.
+\begin{figure}
+\centering
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-4-1.pdf}
+\caption{\label{fig:unnamed-chunk-4}Proportion of non-Hispanic Asian
+residents}
+\end{figure}
 \hypertarget{interpolation---counts-vs.percentages}{%
 \subsubsection{Interpolation - counts
 vs.~percentages}\label{interpolation---counts-vs.percentages}}
@@ -1155,24 +1140,15 @@ interpolating should have the same result as interpolating and then
 calculating the percentage. This was not the case, however - in the
 variable for population between 25 and 44, the error between these two
 methods ranged from -12 to 26 percentage points.
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{ggplot}\NormalTok{(sf_precincts, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ Pop_}\DecValTok{25}\NormalTok{_}\DecValTok{44}\NormalTok{_CEN_}\DecValTok{2010} \OperatorTok{/}\StringTok{ }\NormalTok{Tot_Population_CEN_}\DecValTok{2010}\NormalTok{,}
-                         \DataTypeTok{y =}\NormalTok{ Pop_}\DecValTok{25}\NormalTok{_}\DecValTok{44}\NormalTok{_CEN_}\DecValTok{2010}\NormalTok{,}
-                         \DataTypeTok{col =} \KeywordTok{abs}\NormalTok{((Pop_}\DecValTok{25}\NormalTok{_}\DecValTok{44}\NormalTok{_CEN_}\DecValTok{2010} \OperatorTok{/}\StringTok{ }\NormalTok{Tot_Population_CEN_}\DecValTok{2010}\NormalTok{) }\OperatorTok{-}\StringTok{ }\NormalTok{Pop_}\DecValTok{25}\NormalTok{_}\DecValTok{44}\NormalTok{_CEN_}\DecValTok{2010}\NormalTok{))) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}
-\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"Error in the Variable 'Pop_25_44_CEN_2010'"}\NormalTok{,}
-       \DataTypeTok{x =} \StringTok{"Calculated Percentage"}\NormalTok{,}
-       \DataTypeTok{y =} \StringTok{"Reported Percentage"}\NormalTok{,}
-       \DataTypeTok{col =} \StringTok{"Absolute Error"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-4-1.pdf}
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{# get a better color scheme for this error}
-\end{Highlighting}
-\end{Shaded}
+\begin{verbatim}
+Warning: Removed 4 rows containing missing values (geom_point).
+\end{verbatim}
+\begin{figure}
+\centering
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-5-1.pdf}
+\caption{\label{fig:unnamed-chunk-5}Example error in intensive
+interpolation}
+\end{figure}
 As it turns out, these steps are not commutative in this way, and the
 observed error is mostly a function of the weighting between different
 steps in the process. For example, consider a simple case: suppose
@@ -1217,29 +1193,18 @@ consider the space that is contained in both\footnote{No census tracts
   were fully removed in this process, but this causes one precinct,
   Precinct 9900, to be cut off. However, this precinct is a semi-exclave
   of the county on Alameda Island, across the San Francisco Bay. Since
-  this land (an undeveloped former naval air base) is uninhabited, its
-  removal should not negatively impact the accuracy of our results
-  (Levi, 2018).}. Since we are dealing with a fundamental unit of people
-instead of space, this ensures that every person is counted, and changes
-some of the spatial weights calculated. The assumption here is that any
-region which is only contained in one of the files (precincts without
-census, or census without precincts) has zero population, because every
-person should be contained in both a precinct and a census region.
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{prec_out <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(precincts_bound) }\OperatorTok{+}\StringTok{ }\KeywordTok{geom_sf}\NormalTok{() }\OperatorTok{+}\StringTok{ }\KeywordTok{theme_void}\NormalTok{() }\OperatorTok{+}\StringTok{ }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{'Precincts'}\NormalTok{)}
-
-\NormalTok{cen_out <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(census_bound) }\OperatorTok{+}\StringTok{ }\KeywordTok{geom_sf}\NormalTok{() }\OperatorTok{+}\StringTok{ }\KeywordTok{theme_void}\NormalTok{() }\OperatorTok{+}\StringTok{ }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{'Census'}\NormalTok{)}
-
-\NormalTok{joint_out <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(overall) }\OperatorTok{+}\StringTok{ }\KeywordTok{geom_sf}\NormalTok{() }\OperatorTok{+}\StringTok{ }\KeywordTok{theme_void}\NormalTok{() }\OperatorTok{+}\StringTok{ }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{'Overall'}\NormalTok{)}
-
-\NormalTok{prec_out }\OperatorTok{+}\StringTok{ }\NormalTok{cen_out }\OperatorTok{-}\StringTok{ }\NormalTok{joint_out }\OperatorTok{+}\StringTok{ }\KeywordTok{plot_layout}\NormalTok{(}\DataTypeTok{ncol =} \DecValTok{1}\NormalTok{, }\DataTypeTok{heights =} \KeywordTok{c}\NormalTok{(}\DecValTok{3}\NormalTok{,}\DecValTok{6}\NormalTok{))}
-\end{Highlighting}
-\end{Shaded}
+  this land, an undeveloped former naval air base, is uninhabited (Levi,
+  2018) its removal does not impact our results.}. Since we are dealing
+with a fundamental unit of people instead of space, this ensures that
+every person is counted, and changes some of the spatial weights
+calculated. The assumption here is that any region which is only
+contained in one of the files (precincts without census, or census
+without precincts) has zero population, because every person should be
+contained in both a precinct and a census region.
 \begin{figure}
 \centering
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-5-1.pdf}
-\caption{\label{fig:unnamed-chunk-5}Boundary intersection between
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-6-1.pdf}
+\caption{\label{fig:unnamed-chunk-6}Boundary intersection between
 shapefiles}
 \end{figure}
 This plot displays the result of this intersection between the two
@@ -1251,25 +1216,15 @@ Alameda Island (small sliver to the East) has disappeared, and in the
 southeastern corner it is visible how the angles in the precinct
 boundary have softened to the more rounded final shape.
 
-Below is a comparison of the original shapefiles (including all
+Below is a comparison of the original shapefiles\footnote{The original
+  census regions contained the Farallon Islands, which have been removed
+  from this plot because they are uninhabited, 30 miles into the Pacific
+  Ocean, and messed up the scale of the graph.} (including all
 divisions) to the bounded versions.
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{precincts_pre <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(precincts_shape) }\OperatorTok{+}\StringTok{ }\KeywordTok{geom_sf}\NormalTok{() }\OperatorTok{+}\StringTok{ }\KeywordTok{theme_void}\NormalTok{() }\OperatorTok{+}\StringTok{ }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{'Precincts - original'}\NormalTok{)}
-
-\NormalTok{census_pre <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(census_shape) }\OperatorTok{+}\StringTok{ }\KeywordTok{geom_sf}\NormalTok{() }\OperatorTok{+}\StringTok{ }\KeywordTok{theme_void}\NormalTok{() }\OperatorTok{+}\StringTok{ }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{'Census - original'}\NormalTok{)}
-
-\NormalTok{precincts_post <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(precincts) }\OperatorTok{+}\StringTok{ }\KeywordTok{geom_sf}\NormalTok{() }\OperatorTok{+}\StringTok{ }\KeywordTok{theme_void}\NormalTok{() }\OperatorTok{+}\StringTok{ }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{'Precincts - bounded'}\NormalTok{)}
-
-\NormalTok{census_post <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(census) }\OperatorTok{+}\StringTok{ }\KeywordTok{geom_sf}\NormalTok{() }\OperatorTok{+}\StringTok{ }\KeywordTok{theme_void}\NormalTok{() }\OperatorTok{+}\StringTok{ }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{'Census - bounded'}\NormalTok{)}
-
-\NormalTok{precincts_pre }\OperatorTok{+}\StringTok{ }\NormalTok{census_pre }\OperatorTok{-}\StringTok{ }\NormalTok{precincts_post }\OperatorTok{+}\StringTok{ }\NormalTok{census_post }\OperatorTok{+}\StringTok{ }\KeywordTok{plot_layout}\NormalTok{(}\DataTypeTok{ncol =} \DecValTok{1}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
 \begin{figure}
 \centering
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-6-1.pdf}
-\caption{\label{fig:unnamed-chunk-6}Original versus bounded shapefiles}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-7-1.pdf}
+\caption{\label{fig:unnamed-chunk-7}Original versus bounded shapefiles}
 \end{figure}
 \hypertarget{precinct-consolidation}{%
 \subsubsection{Precinct Consolidation}\label{precinct-consolidation}}
@@ -1308,24 +1263,8 @@ Examples of this in the data are below. The first table is the initial
 data, with full consolidated counts doubled in the precincts (and thus
 doubled across rows), and the second table is the data with proper
 weights applied.
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{original <-}\StringTok{ }\NormalTok{sf_unadjusted }\OperatorTok{%>%}
-\StringTok{  }\KeywordTok{as.data.frame}\NormalTok{() }\OperatorTok{%>%}
-\StringTok{  }\KeywordTok{select}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{6}\NormalTok{,}\DecValTok{2}\OperatorTok{:}\DecValTok{5}\NormalTok{) }\OperatorTok{%>%}
-\StringTok{  }\KeywordTok{filter}\NormalTok{(}\KeywordTok{str_detect}\NormalTok{(precinct, }\StringTok{'/'}\NormalTok{)) }\OperatorTok{%>%}
-\StringTok{  }\KeywordTok{slice}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\DecValTok{6}\NormalTok{)}
-
-\NormalTok{knitr}\OperatorTok{::}\KeywordTok{kable}\NormalTok{(original, }
-      \DataTypeTok{col.names =} \KeywordTok{c}\NormalTok{(}\StringTok{"Election Pct."}\NormalTok{, }\StringTok{"Pct. Number"}\NormalTok{, }\StringTok{"Overvotes"}\NormalTok{, }\StringTok{"Not over"}\NormalTok{, }\StringTok{"Undervotes"}\NormalTok{, }\StringTok{"Not under"}\NormalTok{),}
-      \DataTypeTok{caption =} \StringTok{"Consolidated Precincts - Original Data"}\NormalTok{,}
-      \DataTypeTok{caption.short =} \StringTok{"Combined Precincts - Original"}\NormalTok{,}
-      \DataTypeTok{longtable =} \OtherTok{TRUE}\NormalTok{,}
-      \DataTypeTok{booktabs =} \OtherTok{TRUE}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
 \begin{longtable}[t]{llrrrr}
-\caption[Combined Precincts - Original]{\label{tab:unnamed-chunk-7}Consolidated Precincts - Original Data}\\
+\caption[Combined Precincts - Original]{\label{tab:unnamed-chunk-8}Consolidated Precincts - Original Data}\\
 \toprule
 Election Pct. & Pct. Number & Overvotes & Not over & Undervotes & Not under\\
 \midrule
@@ -1337,35 +1276,55 @@ Pct 7527/7528 & 7527 & 5 & 396 & 98 & 303\\
 Pct 7527/7528 & 7528 & 5 & 396 & 98 & 303\\
 \bottomrule
 \end{longtable}
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{adjusted <-}\StringTok{ }\NormalTok{double_cases }\OperatorTok{%>%}
-\StringTok{  }\KeywordTok{as.data.frame}\NormalTok{() }\OperatorTok{%>%}
-\StringTok{  }\KeywordTok{select}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{6}\NormalTok{, weight, }\DecValTok{2}\OperatorTok{:}\DecValTok{5}\NormalTok{) }\OperatorTok{%>%}
-\StringTok{  }\KeywordTok{mutate_at}\NormalTok{(}\KeywordTok{vars}\NormalTok{(}\KeywordTok{ends_with}\NormalTok{(}\StringTok{'count'}\NormalTok{)), }\ControlFlowTok{function}\NormalTok{(x) x }\OperatorTok{*}\StringTok{ }\NormalTok{.}\OperatorTok{$}\NormalTok{weight) }\OperatorTok{%>%}
-\StringTok{  }\KeywordTok{slice}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\DecValTok{6}\NormalTok{)}
-
-\NormalTok{knitr}\OperatorTok{::}\KeywordTok{kable}\NormalTok{(adjusted, }
-      \DataTypeTok{col.names =} \KeywordTok{c}\NormalTok{(}\StringTok{"Election Pct."}\NormalTok{, }\StringTok{"Pct. Number"}\NormalTok{, }\StringTok{"Weight"}\NormalTok{, }\StringTok{"Overvotes"}\NormalTok{, }\StringTok{"Not over"}\NormalTok{, }\StringTok{"Undervotes"}\NormalTok{, }\StringTok{"Not under"}\NormalTok{),}
-      \DataTypeTok{caption =} \StringTok{"Consolidated Precincts - Weighted Data"}\NormalTok{,}
-      \DataTypeTok{caption.short =} \StringTok{"Combined Precincts - Weighted"}\NormalTok{,}
-      \DataTypeTok{longtable =} \OtherTok{TRUE}\NormalTok{,}
-      \DataTypeTok{booktabs =} \OtherTok{TRUE}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
 \begin{longtable}[t]{llrrrrr}
-\caption[Combined Precincts - Weighted]{\label{tab:unnamed-chunk-8}Consolidated Precincts - Weighted Data}\\
+\caption[Combined Precincts - Weighted]{\label{tab:unnamed-chunk-9}Consolidated Precincts - Weighted Data}\\
 \toprule
 Election Pct. & Pct. Number & Weight & Overvotes & Not over & Undervotes & Not under\\
 \midrule
-Pct 1104/1105 & 1104 & 0.4646860 & 0.4646860 & 213.290865 & 46.933284 & 166.822267\\
-Pct 1104/1105 & 1105 & 0.5353140 & 0.5353140 & 245.709135 & 54.066716 & 192.177733\\
-Pct 7509/7511 & 7511 & 0.7169455 & 0.7169455 & 352.020218 & 94.636800 & 258.100364\\
-Pct 7509/7511 & 7509 & 0.2830545 & 0.2830545 & 138.979782 & 37.363200 & 101.899636\\
-Pct 7527/7528 & 7527 & 0.0167966 & 0.0839828 & 6.651434 & 1.646062 & 5.089355\\
-Pct 7527/7528 & 7528 & 0.9832034 & 4.9160172 & 389.348566 & 96.353938 & 297.910645\\
+Pct 1104/1105 & 1104 & 0.4060452 & 0.4060452 & 186.374741 & 41.010564 & 145.770223\\
+Pct 1104/1105 & 1105 & 0.5939548 & 0.5939548 & 272.625259 & 59.989436 & 213.229777\\
+Pct 7509/7511 & 7511 & 0.7438036 & 0.7438036 & 365.207545 & 98.182069 & 267.769279\\
+Pct 7509/7511 & 7509 & 0.2561964 & 0.2561964 & 125.792455 & 33.817931 & 92.230721\\
+Pct 7527/7528 & 7527 & 0.0129859 & 0.0649297 & 5.142434 & 1.272622 & 3.934741\\
+Pct 7527/7528 & 7528 & 0.9870141 & 4.9350703 & 390.857566 & 96.727378 & 299.065259\\
 \bottomrule
 \end{longtable}
+\hypertarget{calculating-overundervote-info}{%
+\section{Calculating over/undervote
+info}\label{calculating-overundervote-info}}
+
+RCV package (with Matthew) Data from the city elections board Data is
+missing some ballots that had to be hand-counted because it spits out
+straight from the machine, so this won't necessarily match the official
+reports.
+
+Data comes in in weird double file form, then gets cleaned up and looks
+like this.
+\begin{longtable}[t]{lllll}
+\caption{\label{tab:unnamed-chunk-10}Processed Ballot Image}\\
+\toprule
+Contest & Voter ID & 1 & 2 & 3\\
+\midrule
+Mayor & 000012886 & JANE KIM & ELLEN LEE ZHOU & MARK LENO\\
+Mayor & 000012887 & JANE KIM & ANGELA ALIOTO & RICHIE GREENBERG\\
+Mayor & 000012888 & JANE KIM & LONDON BREED & ANGELA ALIOTO\\
+Mayor & 000012889 & JANE KIM & LONDON BREED & ANGELA ALIOTO\\
+Mayor & 000012890 & LONDON BREED & JANE KIM & MARK LENO\\
+\addlinespace
+Mayor & 000012891 & MARK LENO & LONDON BREED & ANGELA ALIOTO\\
+Mayor & 000012892 & MARK LENO & LONDON BREED & JANE KIM\\
+Mayor & 000012893 & MARK LENO & ANGELA ALIOTO & MICHELLE BRAVO\\
+Mayor & 000012894 & LONDON BREED & ANGELA ALIOTO & MARK LENO\\
+Mayor & 000012895 & ELLEN LEE ZHOU & MICHELLE BRAVO & JANE KIM\\
+\bottomrule
+\end{longtable}
+To summarize the data
+\begin{verbatim}
+[1] 0.004074546
+\end{verbatim}
+\begin{verbatim}
+[1] 0.2524841
+\end{verbatim}
 \hypertarget{regressions}{%
 \section{Regressions}\label{regressions}}
 
@@ -1395,78 +1354,65 @@ Methods for regression:
   Also test / train data set
 \item
   Cross-validation?
+\item
+  ex post facto model validation! The residual plots and all that. This
+  could also go in the results section.
 \end{itemize}
 \hypertarget{results}{%
 \chapter{Results}\label{results}}
 
+Variables considered for this are LIST/TABLE/CALCULATION
+
 I have some results and they are here. First model is the overvoting
 linear model, second is undervoting linear.
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{summary}\NormalTok{(best_linear_over)}
-\end{Highlighting}
-\end{Shaded}
 \begin{verbatim}
 
 Call:
-lm(formula = overvote_rate ~ Pop_65plus_CEN_2010 + Hispanic_CEN_2010 + 
-    NH_Blk_alone_CEN_2010, data = sf_precincts)
+lm(formula = overvote_rate ~ hispanic + black + no_english, data = sf_precincts)
 
 Residuals:
       Min        1Q    Median        3Q       Max 
--0.009689 -0.002604 -0.000647  0.001626  0.035200 
+-0.008424 -0.002606 -0.000584  0.001633  0.037469 
 
 Coefficients:
-                       Estimate Std. Error t value Pr(>|t|)    
-(Intercept)           0.0006458  0.0005006   1.290    0.198    
-Pop_65plus_CEN_2010   0.0130538  0.0026982   4.838 1.67e-06 ***
-Hispanic_CEN_2010     0.0072170  0.0014557   4.958 9.30e-07 ***
-NH_Blk_alone_CEN_2010 0.0147915  0.0018810   7.864 1.75e-14 ***
+             Estimate Std. Error t value Pr(>|t|)    
+(Intercept) 0.0018971  0.0002937   6.459 2.18e-10 ***
+hispanic    0.0037156  0.0013724   2.707  0.00698 ** 
+black       0.0153094  0.0018998   8.059 4.20e-15 ***
+no_english  0.0092404  0.0015438   5.985 3.72e-09 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Residual standard error: 0.003887 on 599 degrees of freedom
-Multiple R-squared:  0.1526,    Adjusted R-squared:  0.1484 
-F-statistic: 35.96 on 3 and 599 DF,  p-value: < 2.2e-16
+Residual standard error: 0.003841 on 599 degrees of freedom
+Multiple R-squared:  0.1728,    Adjusted R-squared:  0.1687 
+F-statistic: 41.72 on 3 and 599 DF,  p-value: < 2.2e-16
 \end{verbatim}
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{summary}\NormalTok{(best_linear_under)}
-\end{Highlighting}
-\end{Shaded}
 \begin{verbatim}
 
 Call:
-lm(formula = overvote_rate ~ Pop_18_24_CEN_2010 + Pop_25_44_CEN_2010 + 
-    Pop_45_64_CEN_2010 + Pop_65plus_CEN_2010 + Hispanic_CEN_2010 + 
-    NH_White_alone_CEN_2010 + NH_Blk_alone_CEN_2010 + NH_AIAN_alone_CEN_2010 + 
-    NH_Asian_alone_CEN_2010 + NH_NHOPI_alone_CEN_2010 + NH_SOR_alone_CEN_2010, 
-    data = sf_precincts)
+lm(formula = overvote_rate ~ pop_18_24 + pop_25_44 + pop_45_64 + 
+    white + black + no_hs + college, data = sf_precincts)
 
 Residuals:
       Min        1Q    Median        3Q       Max 
--0.009237 -0.002509 -0.000669  0.001572  0.035771 
+-0.009142 -0.002600 -0.000599  0.001656  0.038353 
 
 Coefficients:
-                         Estimate Std. Error t value Pr(>|t|)    
-(Intercept)             -0.008882   0.019817  -0.448 0.654181    
-Pop_18_24_CEN_2010       0.003496   0.004968   0.704 0.481875    
-Pop_25_44_CEN_2010       0.006551   0.004290   1.527 0.127263    
-Pop_45_64_CEN_2010       0.010267   0.006805   1.509 0.131868    
-Pop_65plus_CEN_2010      0.016817   0.005015   3.354 0.000849 ***
-Hispanic_CEN_2010        0.010795   0.020035   0.539 0.590232    
-NH_White_alone_CEN_2010  0.003287   0.020805   0.158 0.874519    
-NH_Blk_alone_CEN_2010    0.017776   0.020915   0.850 0.395703    
-NH_AIAN_alone_CEN_2010   0.081654   0.083265   0.981 0.327169    
-NH_Asian_alone_CEN_2010  0.004826   0.020254   0.238 0.811766    
-NH_NHOPI_alone_CEN_2010  0.024532   0.028022   0.875 0.381682    
-NH_SOR_alone_CEN_2010   -0.120171   0.097157  -1.237 0.216625    
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  0.0043119  0.0022074   1.953   0.0512 .  
+pop_18_24   -0.0018829  0.0029419  -0.640   0.5224    
+pop_25_44    0.0009263  0.0020995   0.441   0.6592    
+pop_45_64   -0.0002122  0.0036628  -0.058   0.9538    
+white        0.0033238  0.0017292   1.922   0.0551 .  
+black        0.0130410  0.0021664   6.020 3.06e-09 ***
+no_hs        0.0067164  0.0032870   2.043   0.0415 *  
+college     -0.0055218  0.0023552  -2.345   0.0194 *  
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Residual standard error: 0.003879 on 591 degrees of freedom
-Multiple R-squared:  0.1675,    Adjusted R-squared:  0.152 
-F-statistic: 10.81 on 11 and 591 DF,  p-value: < 2.2e-16
+Residual standard error: 0.003872 on 595 degrees of freedom
+Multiple R-squared:  0.1652,    Adjusted R-squared:  0.1554 
+F-statistic: 16.82 on 7 and 595 DF,  p-value: < 2.2e-16
 \end{verbatim}
 Writeup of said results is forthcoming because it's way past my bedtime
 right now. Not sure why the undervote model is the full model - nothing
@@ -1475,80 +1421,66 @@ it more seriously tomorrow.
 
 And these are logistic for over and under - still need to do
 training/test or cross validation, plus better model selection.
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{summary}\NormalTok{(logit_over)}
-\end{Highlighting}
-\end{Shaded}
 \begin{verbatim}
 
 Call:
-glm(formula = cbind(over_count, no_over_count) ~ +Pop_25_44_CEN_2010 + 
-    Pop_65plus_CEN_2010 + NH_White_alone_CEN_2010 + NH_Asian_alone_CEN_2010, 
-    family = binomial, data = sf_precincts)
+glm(formula = cbind(over_count, no_over_count) ~ +hispanic + 
+    black + no_english, family = binomial, data = sf_precincts)
 
 Deviance Residuals: 
     Min       1Q   Median       3Q      Max  
--2.6217  -0.7680  -0.1902   0.4990   3.2691  
+-2.4763  -0.8224  -0.2002   0.4779   3.4130  
 
 Coefficients:
-                        Estimate Std. Error z value Pr(>|z|)    
-(Intercept)              -4.8283     0.2326 -20.758  < 2e-16 ***
-Pop_25_44_CEN_2010        0.8662     0.4790   1.808   0.0706 .  
-Pop_65plus_CEN_2010       2.6296     0.5925   4.438 9.07e-06 ***
-NH_White_alone_CEN_2010  -2.1367     0.2184  -9.785  < 2e-16 ***
-NH_Asian_alone_CEN_2010  -1.3383     0.2406  -5.563 2.65e-08 ***
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept) -5.99377    0.06082 -98.549  < 2e-16 ***
+hispanic     0.94028    0.24326   3.865 0.000111 ***
+black        2.49121    0.30587   8.145 3.81e-16 ***
+no_english   1.86161    0.26677   6.978 2.99e-12 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 (Dispersion parameter for binomial family taken to be 1)
 
-    Null deviance: 869.88  on 602  degrees of freedom
-Residual deviance: 761.76  on 598  degrees of freedom
-AIC: 1970
+    Null deviance: 869.52  on 602  degrees of freedom
+Residual deviance: 746.04  on 599  degrees of freedom
+AIC: 1952.2
 
 Number of Fisher Scoring iterations: 5
 \end{verbatim}
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{summary}\NormalTok{(logit_under)}
-\end{Highlighting}
-\end{Shaded}
 \begin{verbatim}
 
 Call:
-glm(formula = cbind(under_count, no_under_count) ~ Pop_18_24_CEN_2010 + 
-    Pop_25_44_CEN_2010 + Pop_45_64_CEN_2010 + Tot_GQ_CEN_2010 + 
-    Non_Inst_GQ_CEN_2010 + Hispanic_CEN_2010 + NH_White_alone_CEN_2010 + 
-    NH_Blk_alone_CEN_2010 + NH_AIAN_alone_CEN_2010, family = binomial, 
-    data = sf_precincts)
+glm(formula = cbind(under_count, no_under_count) ~ +pop_18_24 + 
+    pop_25_44 + pop_45_64 + hispanic + white + black + asian + 
+    no_hs + college, family = binomial, data = sf_precincts)
 
 Deviance Residuals: 
     Min       1Q   Median       3Q      Max  
--4.9413  -0.9777  -0.0568   0.8644   5.0426  
+-6.0425  -0.9543  -0.0741   0.8984   5.1072  
 
 Coefficients:
-                         Estimate Std. Error z value Pr(>|z|)    
-(Intercept)              -0.83303    0.06903 -12.069  < 2e-16 ***
-Pop_18_24_CEN_2010       -1.55070    0.14400 -10.768  < 2e-16 ***
-Pop_25_44_CEN_2010       -0.84248    0.07746 -10.876  < 2e-16 ***
-Pop_45_64_CEN_2010       -0.50530    0.14790  -3.416 0.000634 ***
-Tot_GQ_CEN_2010          -0.57419    0.19133  -3.001 0.002691 ** 
-Non_Inst_GQ_CEN_2010      1.43808    0.24273   5.925 3.13e-09 ***
-Hispanic_CEN_2010        -0.15366    0.05156  -2.980 0.002882 ** 
-NH_White_alone_CEN_2010   0.74065    0.03679  20.131  < 2e-16 ***
-NH_Blk_alone_CEN_2010     0.49762    0.07216   6.896 5.34e-12 ***
-NH_AIAN_alone_CEN_2010  -13.33221    2.67039  -4.993 5.96e-07 ***
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept) -1.79707    0.17597 -10.212  < 2e-16 ***
+pop_18_24   -0.82711    0.10140  -8.157 3.43e-16 ***
+pop_25_44   -1.06927    0.06324 -16.908  < 2e-16 ***
+pop_45_64   -0.61586    0.10886  -5.657 1.54e-08 ***
+hispanic     0.58464    0.17750   3.294 0.000988 ***
+white        0.97672    0.17320   5.639 1.71e-08 ***
+black        1.18790    0.19900   5.969 2.38e-09 ***
+asian        0.62484    0.17213   3.630 0.000283 ***
+no_hs        0.64791    0.10176   6.367 1.93e-10 ***
+college      0.85892    0.07075  12.140  < 2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 (Dispersion parameter for binomial family taken to be 1)
 
     Null deviance: 2460.6  on 602  degrees of freedom
-Residual deviance: 1228.5  on 593  degrees of freedom
-AIC: 4944.3
+Residual deviance: 1291.2  on 593  degrees of freedom
+AIC: 5006.1
 
-Number of Fisher Scoring iterations: 4
+Number of Fisher Scoring iterations: 3
 \end{verbatim}
 \hypertarget{conclusion}{%
 \chapter*{Conclusion}\label{conclusion}}
@@ -1585,6 +1517,10 @@ chunk tag) to help with readibility and/or setup.
 \ControlFlowTok{if}\NormalTok{(}\OperatorTok{!}\KeywordTok{require}\NormalTok{(thesisdown))}
 \NormalTok{  devtools}\OperatorTok{::}\KeywordTok{install_github}\NormalTok{(}\StringTok{"ismayc/thesisdown"}\NormalTok{)}
 \KeywordTok{library}\NormalTok{(thesisdown)}
+\NormalTok{knitr}\OperatorTok{::}\NormalTok{opts_chunk}\OperatorTok{$}\KeywordTok{set}\NormalTok{(}\DataTypeTok{echo =} \OtherTok{FALSE}\NormalTok{, }\DataTypeTok{eval =} \OtherTok{TRUE}\NormalTok{)}
+\CommentTok{# generally I don't want code to show up in the doc}
+\CommentTok{# I'll just link to the (eventually public) thesis repository to find source code}
+\CommentTok{# or put them as appendices? who knows}
 \end{Highlighting}
 \end{Shaded}
 \textbf{In Chapter \ref{ref-labels}:}

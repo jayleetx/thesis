@@ -66,6 +66,10 @@ if(!require(devtools))
 if(!require(thesisdown))
   devtools::install_github("ismayc/thesisdown")
 library(thesisdown)
+knitr::opts_chunk$set(echo = FALSE, eval = TRUE)
+# generally I don't want code to show up in the doc
+# I'll just link to the (eventually public) thesis repository to find source code
+# or put them as appendices? who knows
 ```
 
 <!-- You'll need to include the order that you'd like Rmd files to appear in the _bookdown.yml file for

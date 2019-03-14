@@ -72,6 +72,7 @@ This first variable is at the election level (different for every election), the
 | Candidates rankable | 2 (Generally, up to 3^[This is changing in 2019 to be up to 10.]) | 27 (Generally, all) |
 | Seats elected       | 1                      | 9                   |
 
+Table: (\#tab:compare_elex) Comparison of RCV rules by jurisdiction
 
 ## History of RCV in the US (SF in particular)
 

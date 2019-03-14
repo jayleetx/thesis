@@ -75,3 +75,16 @@ demo_data <- precincts %>%
          no_english = no_english / language_denom) %>%
   select(-c(education_denom, poverty_denom, language_denom, Group.1, Shape_Area))
 
+# test intensive case to show off that plot
+
+join_int <- st_interpolate_aw(census_props, to = precincts, extensive = FALSE) %>%
+  as.data.frame() %>%
+  select(-geometry)
+
+demo_data_int <- precincts %>%
+  mutate(Group.1 = 1:nrow(.)) %>%
+  left_join(join_int, by = 'Group.1') %>%
+  select(-Group.1, -Shape_Area) %>%
+  as.data.frame() %>%
+  select(-geometry)
+colnames(demo_data_int) <- paste0(colnames(demo_data_int), "_wrong")

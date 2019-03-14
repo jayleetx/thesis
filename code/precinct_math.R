@@ -64,6 +64,8 @@ sf_precincts <- mutate(sf_precincts,
                        turnout_rate = turnout / population) %>%
   na.omit()
 
+sf_wrong <- left_join(sf_precincts, demo_data_int, by = c('PREC_2017' = 'PREC_2017_wrong'))
+
 
 # regressions?
 # dig out the stat learning book and do some better model selection
@@ -74,10 +76,10 @@ test <- filter(sf_precincts, !train_index)
 
 # linear model for overvoting #####
 # bootstrap these instead? to get different splits
-over_formula <- overvote_rate ~ pop_18_24 + pop_25_44 + pop_45_64 + pop_65_up +
-  hispanic + white + black + native + asian + pac_islander + other_race + no_hs +
-  college + poverty + no_english
-nvars <- 15
+over_formula <- overvote_rate ~ women + pop_18_24 + pop_25_44 + pop_45_64 +
+  pop_65_up + hispanic + white + black + native + asian + pac_islander +
+  other_race + no_hs + college + poverty + no_english
+nvars <- 16
 
 linear_over_backward <- regsubsets(over_formula, data = training, method = 'backward', nvmax = nvars)
 linear_over_forward <- regsubsets(over_formula, data = training, method = 'forward', nvmax = nvars)
@@ -103,9 +105,9 @@ coef(linear_over_forward, which.min(for_errors))
 best_linear_over <- lm(overvote_rate ~ hispanic + black + no_english, data = sf_precincts)
 
 # linear model for undervoting #####
-under_formula <- undervote_rate ~ pop_18_24 + pop_25_44 + pop_45_64 + pop_65_up +
-  hispanic + white + black + native + asian + pac_islander + other_race + no_hs +
-  college + poverty + no_english
+under_formula <- undervote_rate ~ women + pop_18_24 + pop_25_44 + pop_45_64 +
+  pop_65_up + hispanic + white + black + native + asian + pac_islander +
+  other_race + no_hs + college + poverty + no_english
 
 linear_under_backward <- regsubsets(under_formula, data = training, method = 'backward', nvmax = nvars)
 linear_under_forward <- regsubsets(under_formula, data = training, method = 'forward', nvmax = nvars)
@@ -127,7 +129,7 @@ for (i in 1:nvars) {
   for_errors[i] <- mean((test$undervote_rate - pred)^2)
 }
 coef(linear_under_forward, which.min(for_errors))
-# they do not agree here!
+# they do not agree here! backwards has a lower test MSE
 best_linear_under <- lm(overvote_rate ~ pop_18_24 + pop_25_44 + pop_45_64 +
                           white + black + no_hs + college, data = sf_precincts)
 

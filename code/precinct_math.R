@@ -74,6 +74,19 @@ train_index <- sample(c(TRUE, FALSE), size = nrow(sf_precincts), replace = TRUE)
 training <- filter(sf_precincts, train_index)
 test <- filter(sf_precincts, !train_index)
 
+# linear model for turnout #####
+
+turnout_formula <- turnout_rate ~ women + pop_18_24 + pop_25_44 + pop_45_64 +
+  pop_65_up + hispanic + white + black + native + asian + pac_islander +
+  other_race + no_hs + college + poverty + no_english
+nvars <- 16
+
+linear_turnout <- regsubsets(turnout_formula, data = training, method = 'exhaustive', nvmax = nvars)
+# best subset selection
+coef(linear_turnout, which.min(summary(linear_turnout_backward)$bic))
+
+best_linear_turnout <- lm(turnout_rate ~ pop_45_64 + white + black + poverty, data = sf_precincts)
+
 # linear model for overvoting #####
 # bootstrap these instead? to get different splits
 over_formula <- overvote_rate ~ women + pop_18_24 + pop_25_44 + pop_45_64 +

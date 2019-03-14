@@ -1,10 +1,24 @@
 # Results {#results}
 
-There re the variables I'm using LIST/TABLE/CALCULATION
+These are the variables I'm using LIST/TABLE/CALCULATION
 
 ## Modeling turnout
 
+```{r}
+summary(best_linear_turnout)
+ggplot(best_linear_turnout, aes(x = .fitted, y = .resid)) +
+  geom_point() +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  xlab("Fitted values") +
+  ylab("Residuals")
 
+ggplot(best_linear_turnout, aes(x = .resid)) +
+  geom_histogram() +
+  xlab("Residuals")
+# linear model is not half bad at turnout
+# slightly right skewed residuals, a few super high outliers
+# investigate these
+```
 
 ## Modeling overvoting and undervoting
 

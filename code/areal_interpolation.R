@@ -31,7 +31,7 @@ census_data <- readr::read_csv(here('data', 'planning_database.csv')) %>%
   select(GIDBG, State, State_name, County, County_name,
          TRACT = Tract, BLKGRP = Block_group,
          population = Tot_Population_ACS_12_16,
-         women = Females_ACS_12_16,
+         female = Females_ACS_12_16,
          pop_18_24 = Pop_18_24_ACS_12_16,
          pop_25_44 = Pop_25_44_ACS_12_16,
          pop_45_64 = Pop_45_64_ACS_12_16,
@@ -56,7 +56,7 @@ census <- left_join(census_regions, census_data, by = c('TRACT', 'BLKGRP')) %>%
   select(-TRACT, -BLKGRP, -GIDBG, -State, -State_name, -County, -County_name)
 
 census_props <- census %>%
-  mutate_at(vars(women:other_race), function(x) x / .$population) %>%
+  mutate_at(vars(female:other_race), function(x) x / .$population) %>%
   mutate_at(vars(no_hs:college), function(x) x / .$education_denom) %>%
   mutate(poverty = poverty / poverty_denom,
          no_english = no_english / language_denom) %>%
@@ -69,7 +69,7 @@ join <- st_interpolate_aw(census, to = precincts, extensive = TRUE) %>%
 demo_data <- precincts %>%
   mutate(Group.1 = 1:nrow(.)) %>%
   left_join(join, by = 'Group.1') %>%
-  mutate_at(vars(women:other_race), function(x) x / .$population) %>%
+  mutate_at(vars(female:other_race), function(x) x / .$population) %>%
   mutate_at(vars(no_hs:college), function(x) x / .$education_denom) %>%
   mutate(poverty = poverty / poverty_denom,
          no_english = no_english / language_denom) %>%

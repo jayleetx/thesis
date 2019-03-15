@@ -61,35 +61,50 @@ sf_precincts <- mutate(sf_precincts,
                        overvote_rate = over_count / (over_count + no_over_count),
                        undervote_rate = under_count / (under_count + no_under_count),
                        turnout = under_count + no_under_count,
+                       no_turnout = population - turnout,
                        turnout_rate = turnout / population) %>%
   na.omit()
 
 sf_wrong <- left_join(sf_precincts, demo_data_int, by = c('PREC_2017' = 'PREC_2017_wrong'))
 
+# linear turnout #####
 
-# regressions?
-# dig out the stat learning book and do some better model selection
-
-train_index <- sample(c(TRUE, FALSE), size = nrow(sf_precincts), replace = TRUE)
-training <- filter(sf_precincts, train_index)
-test <- filter(sf_precincts, !train_index)
-
-# linear model for turnout #####
-
-turnout_formula <- turnout_rate ~ women + pop_18_24 + pop_25_44 + pop_45_64 +
+set.seed(314159265)
+turnout_formula <- turnout_rate ~ female + pop_18_24 + pop_25_44 + pop_45_64 +
   pop_65_up + hispanic + white + black + native + asian + pac_islander +
   other_race + no_hs + college + poverty + no_english
 nvars <- 16
 
-linear_turnout <- regsubsets(turnout_formula, data = training, method = 'exhaustive', nvmax = nvars)
-# best subset selection
-coef(linear_turnout, which.min(summary(linear_turnout_backward)$bic))
+iters <- 100
+turnout_models <- vector("list", length = iters)
+turnout_bic <- vector(iters)
 
-best_linear_turnout <- lm(turnout_rate ~ pop_45_64 + white + black + poverty, data = sf_precincts)
+for (i in seq_len(iters)) {
+  train_index <- sample(c(TRUE, FALSE), size = nrow(sf_precincts), replace = TRUE)
+  training <- filter(sf_precincts, train_index)
+  test <- filter(sf_precincts, !train_index)
+  
+  linear_turnout <- regsubsets(turnout_formula, data = training, method = 'exhaustive', nvmax = nvars)
+  # best subset selection
+  turnout_models[[i]] <- coef(linear_turnout, which.min(summary(linear_turnout)$bic))
+  turnout_bic[i] <- min(summary(linear_turnout)$bic)
+}
+
+turnout_models[order(turnout_bic)]
+
+# so this isn't a very mathematical heuristic 
+# but the best few models consistently have
+# pop_18_24, pop_45_64, college
+# then white, no_hs, female
+# then black, poverty, pop_65_up
+
+best_linear_turnout <- lm(turnout_rate ~ pop_18_24 + pop_45_64 + college, data = sf_precincts)
+
+
 
 # linear model for overvoting #####
 # bootstrap these instead? to get different splits
-over_formula <- overvote_rate ~ women + pop_18_24 + pop_25_44 + pop_45_64 +
+over_formula <- overvote_rate ~ female + pop_18_24 + pop_25_44 + pop_45_64 +
   pop_65_up + hispanic + white + black + native + asian + pac_islander +
   other_race + no_hs + college + poverty + no_english
 nvars <- 16
@@ -118,7 +133,7 @@ coef(linear_over_forward, which.min(for_errors))
 best_linear_over <- lm(overvote_rate ~ hispanic + black + no_english, data = sf_precincts)
 
 # linear model for undervoting #####
-under_formula <- undervote_rate ~ women + pop_18_24 + pop_25_44 + pop_45_64 +
+under_formula <- undervote_rate ~ female + pop_18_24 + pop_25_44 + pop_45_64 +
   pop_65_up + hispanic + white + black + native + asian + pac_islander +
   other_race + no_hs + college + poverty + no_english
 

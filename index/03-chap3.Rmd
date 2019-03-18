@@ -1,35 +1,129 @@
 # Results {#results}
 
-These are the variables I'm using LIST/TABLE/CALCULATION
+For the following models, I use variables taken from the US Census 2018 Planning Database, estimated for the election precincts through the areal interpolation method. All data is self-reported through the Census process.
 
-## Modeling turnout
+| Variable | Description^[All descriptions taken from the Planning Database.] |
+|---------------------|------------------------|
+| female  | The percentage of the population that is female^[The Census specifically asks about binary sex; there are currently no questions about gender identity.] |
+| pop_18_24 | The percentage of the population that is between 18 and 24 years old |
+| pop_25_44 | The percentage of the population that is between 25 and 44 years old |
+| pop_45_64 | The percentage of the population that is between 45 and 64 years old |
+| pop_65_up | The percentage of the population that is 65 years old or over |
+| hispanic | The percentage of the population that identify as "Mexican", "Puerto Rican", "Cuban", or "another Hispanic, Latino, or Spanish origin" |
+| white | The percentage of the population that indicate no Hispanic origin and their only race as "White" or report entries such as Irish, German, Italian, Lebanese, Arab, Moroccan, or Caucasian |
+| black | The percentage of the population that indicate no Hispanic origin and their only race as "Black, African Am., or Negro" or report entries such as African American, Kenyan, Nigerian, or Haitian |
+| native | The percentage of the population that indicate no Hispanic origin and their only race as "American Indian or Alaska Native" or report entries such as Navajo, Blackfeet, Inupiat, Yup'ik, or Central/South American Indian groups |
+| asian |The percentage of the population that indicate no Hispanic origin and their only race as "Asian Indian", "Chinese", "Filipino", "Korean", "Japanese", "Vietnamese", or "Other Asian" |
+| pac_islander | The percentage of the population that indicate no Hispanic origin and their only race as "Native Hawaiian", "Guamanian or Chamorro", "Samoan", or "Other Pacific Islander" |
+| other_race | The percentage of the population that indicate no Hispanic origin and their race as other than "White", "Hispanic", "Black or African American", "American Indian or Alaska Native", "Asian", and "Native Hawaiian or Other Pacific Islander" |
+| no_hs | The percentage of the population aged 25 years and over that are not high school graduates and have not received a diploma or the equivalent |
+| college | The percentage of the ACS population aged 25 years and over that have a college degree or higher |
+| poverty | The percentage of the eligible population^[The "eligible population" is measured by the Census as "Number of people excluding institutionalized people, people in military group quarters, people in college dormitories, and unrelated individuals under 15 years old"] that are classified as below the poverty level given their total family or household income within the last year, family size, and family composition |
+| no_english | The percentage of all occupied housing units^[This variable is at the level of housing units (not persons), and the Census measures "occupied housing units" as "Number of housing units classified as usual place of residence of the individual or group living in it"] where no one ages 14 years and over speaks English only or speaks English "very well" |
 
-```{r}
-summary(best_linear_turnout)
-ggplot(best_linear_turnout, aes(x = .fitted, y = .resid)) +
+
+Table: Census variables used in models
+
+## Modeling turnout^[From the dataset, we removed one outlier with a turnout rate of 124%, Precinct 7024. We believe this is a particlarly egregious error in the interpolation process of calculating population.]
+
+```{r, fig.cap='Precinct turnout'}
+ggplot(sf_precincts) + geom_sf(aes(fill = turnout_rate), lwd = 0) +
+  theme_void() + ggtitle("Observed turnout rate by precinct")
+```
+
+With an adjusted $R^2$ value of `r summary(best_linear_turnout)$adj.r.squared`, the best linear model we found for predicting turnout^[The gaps in the map above and following maps are Golden Gate Park (to the northwest), Crocker-Amazon Playground and John McLaren Park (to the south), and our removed precinct 7024 (to the southeast).] included variables for both age and education. Having more young people (18-24) was negatively correlated with turnout, while having more middle-aged and college-educated people was positively correlated with turnout. This is consistent with general literature on voter turnout - young people vote less, and the better educated vote more.
+
+```{r, fig.cap="Linear turnout model validation"}
+library(broom)
+kable(tidy(best_linear_turnout) %>% mutate(term = str_remove_all(term, '\\(|\\)')),
+      caption = "Linear model for RCV voter turnout",
+      caption.short = "Linear turnout model",
+      longtable = TRUE,
+      booktabs = TRUE)
+
+a <- ggplot(best_linear_turnout, aes(x = .fitted, y = .resid)) +
   geom_point() +
   geom_hline(yintercept = 0, linetype = "dashed") +
   xlab("Fitted values") +
   ylab("Residuals")
 
-ggplot(best_linear_turnout, aes(x = .resid)) +
+b <- ggplot(best_linear_turnout, aes(x = .resid)) +
   geom_histogram() +
   xlab("Residuals")
 # linear model is not half bad at turnout
 # slightly right skewed residuals, a few super high outliers
 # investigate these
+
+a + b + plot_layout(ncol = 2)
 ```
 
-## Modeling overvoting and undervoting
+Logistic -
 
-I have some results and they are here. First model is the overvoting linear model, second is undervoting linear.
+## Modeling overvoting
 
-```{r}
-summary(best_linear_over)
-summary(best_linear_under)
+```{r, fig.cap='Precinct overvoting'}
+ggplot(sf_precincts) + geom_sf(aes(fill = overvote_rate), lwd = 0) +
+  theme_void() + ggtitle("Observed overvote rate by precinct")
 ```
 
-Writeup of said results is forthcoming because it's way past my bedtime right now. Not sure why the undervote model is the full model - nothing in it is significant, but apparently that had the best MSE. I'll check it more seriously tomorrow.
+With an adjusted $R^2$ value of `r summary(best_linear_over)$adj.r.squared`, the best linear model we found for predicting overvoting included variables for both race and education. A district being more African-American was positively correlated with overvoting, while having more college-educated people was negatively correlated with overvoting.
+
+```{r, fig.cap="Linear overvote model validation"}
+kable(tidy(best_linear_over) %>% mutate(term = str_remove_all(term, '\\(|\\)')),
+      caption = "Linear model for overvoting in RCV",
+      caption.short = "Linear overvote model",
+      longtable = TRUE,
+      booktabs = TRUE)
+
+c <- ggplot(best_linear_over, aes(x = .fitted, y = .resid)) +
+  geom_point() +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  xlab("Fitted values") +
+  ylab("Residuals")
+
+d <- ggplot(best_linear_over, aes(x = .resid)) +
+  geom_histogram() +
+  xlab("Residuals")
+# linear model is not half bad at turnout
+# slightly right skewed residuals, a few super high outliers
+# investigate these
+
+c + d + plot_layout(ncol = 2)
+```
+
+Logistic
+
+## Modeling undervoting
+
+```{r, fig.cap='Precinct undervoting'}
+ggplot(sf_precincts) + geom_sf(aes(fill = undervote_rate), lwd = 0) +
+  theme_void() + ggtitle("Observed undervote rate by precinct")
+```
+
+With an adjusted $R^2$ value of `r summary(best_linear_under)$adj.r.squared`, the best linear model we found for predicting overvoting included variables for both race and education. Having more African-Americans and residents over 25 without a high school degree was negatively correlated with turnout.
+
+```{r, fig.cap="Linear undervote model validation"}
+kable(tidy(best_linear_under) %>% mutate(term = str_remove_all(term, '\\(|\\)')),
+      caption = "Linear model for undervoting in RCV",
+      caption.short = "Linear undervote model",
+      longtable = TRUE,
+      booktabs = TRUE)
+
+e <- ggplot(best_linear_under, aes(x = .fitted, y = .resid)) +
+  geom_point() +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  xlab("Fitted values") +
+  ylab("Residuals")
+
+f <- ggplot(best_linear_under, aes(x = .resid)) +
+  geom_histogram() +
+  xlab("Residuals")
+# linear model is not half bad at turnout
+# slightly right skewed residuals, a few super high outliers
+# investigate these
+
+e + f + plot_layout(ncol = 2)
+```
 
 And these are logistic for over and under - still need to do training/test or cross validation, plus better model selection.
 
@@ -38,3 +132,5 @@ summary(logit_over)
 summary(logit_under)
 ```
 
+Try the glmulti package on the mLab computers, maybe their rJava will work better...?
+https://rstudio-pubs-static.s3.amazonaws.com/2897_9220b21cfc0c43a396ff9abf122bb351.html

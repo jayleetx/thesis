@@ -111,7 +111,7 @@
   \newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
 
 % To pass between YAML and LaTeX the dollar signs are added by CII
-\title{From Election to Interpolation: Ballot Completion in Ranked Choice
+\title{From Interpolation to Imputation: Ballot Completion in Ranked Choice
 Voting}
 \author{Jay Lee}
 % The month and year that you submit your FINAL draft TO THE LIBRARY (May or December)
@@ -444,6 +444,11 @@ San Francisco Board of Supervisors race (District 3)} versus a
 \href{https://www.cambridgema.gov/election2017/Council\%20Order\%20Round.htm}{2017
 Cambridge City Council race}.
 \begin{longtable}[]{@{}lll@{}}
+\caption{Comparison of RCV rules by jurisdiction}\tabularnewline
+\toprule
+Factor & San Francisco 2016 & Cambridge 2017\tabularnewline
+\midrule
+\endfirsthead
 \toprule
 Factor & San Francisco 2016 & Cambridge 2017\tabularnewline
 \midrule
@@ -1149,6 +1154,18 @@ Warning: Removed 4 rows containing missing values (geom_point).
 \caption{\label{fig:unnamed-chunk-5}Example error in intensive
 interpolation}
 \end{figure}
+\begin{verbatim}
+`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+\end{verbatim}
+\begin{verbatim}
+Warning: Removed 4 rows containing non-finite values (stat_bin).
+\end{verbatim}
+\begin{figure}
+\centering
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-5-2.pdf}
+\caption{\label{fig:unnamed-chunk-5}Example error in intensive
+interpolation}
+\end{figure}
 As it turns out, these steps are not commutative in this way, and the
 observed error is mostly a function of the weighting between different
 steps in the process. For example, consider a simple case: suppose
@@ -1262,18 +1279,19 @@ Precinct Y should have the remaining 35.
 Examples of this in the data are below. The first table is the initial
 data, with full consolidated counts doubled in the precincts (and thus
 doubled across rows), and the second table is the data with proper
-weights applied.
+weights applied. Note that this is 6 out of the 12 total precincts that
+get combined into 6 double precincts.
 \begin{longtable}[t]{llrrrr}
 \caption[Combined Precincts - Original]{\label{tab:unnamed-chunk-8}Consolidated Precincts - Original Data}\\
 \toprule
 Election Pct. & Pct. Number & Overvotes & Not over & Undervotes & Not under\\
 \midrule
-Pct 1104/1105 & 1104 & 1 & 459 & 101 & 359\\
-Pct 1104/1105 & 1105 & 1 & 459 & 101 & 359\\
-Pct 7509/7511 & 7511 & 1 & 491 & 132 & 360\\
-Pct 7509/7511 & 7509 & 1 & 491 & 132 & 360\\
-Pct 7527/7528 & 7527 & 5 & 396 & 98 & 303\\
-Pct 7527/7528 & 7528 & 5 & 396 & 98 & 303\\
+Pct 1104/1105 & 1104 & 1 & 455 & 97 & 359\\
+Pct 1104/1105 & 1105 & 1 & 455 & 97 & 359\\
+Pct 7509/7511 & 7511 & 0 & 491 & 132 & 359\\
+Pct 7509/7511 & 7509 & 0 & 491 & 132 & 359\\
+Pct 7527/7528 & 7527 & 2 & 392 & 94 & 300\\
+Pct 7527/7528 & 7528 & 2 & 392 & 94 & 300\\
 \bottomrule
 \end{longtable}
 \begin{longtable}[t]{llrrrrr}
@@ -1281,12 +1299,12 @@ Pct 7527/7528 & 7528 & 5 & 396 & 98 & 303\\
 \toprule
 Election Pct. & Pct. Number & Weight & Overvotes & Not over & Undervotes & Not under\\
 \midrule
-Pct 1104/1105 & 1104 & 0.4060452 & 0.4060452 & 186.374741 & 41.010564 & 145.770223\\
-Pct 1104/1105 & 1105 & 0.5939548 & 0.5939548 & 272.625259 & 59.989436 & 213.229777\\
-Pct 7509/7511 & 7511 & 0.7438036 & 0.7438036 & 365.207545 & 98.182069 & 267.769279\\
-Pct 7509/7511 & 7509 & 0.2561964 & 0.2561964 & 125.792455 & 33.817931 & 92.230721\\
-Pct 7527/7528 & 7527 & 0.0129859 & 0.0649297 & 5.142434 & 1.272622 & 3.934741\\
-Pct 7527/7528 & 7528 & 0.9870141 & 4.9350703 & 390.857566 & 96.727378 & 299.065259\\
+Pct 1104/1105 & 1104 & 0.4060452 & 0.4060452 & 184.75056 & 39.386383 & 145.770223\\
+Pct 1104/1105 & 1105 & 0.5939548 & 0.5939548 & 270.24944 & 57.613617 & 213.229777\\
+Pct 7509/7511 & 7511 & 0.7438036 & 0.0000000 & 365.20754 & 98.182069 & 267.025476\\
+Pct 7509/7511 & 7509 & 0.2561964 & 0.0000000 & 125.79246 & 33.817931 & 91.974524\\
+Pct 7527/7528 & 7527 & 0.0129859 & 0.0259719 & 5.09049 & 1.220679 & 3.895783\\
+Pct 7527/7528 & 7528 & 0.9870141 & 1.9740281 & 386.90951 & 92.779321 & 296.104217\\
 \bottomrule
 \end{longtable}
 \hypertarget{calculating-overundervote-info}{%
@@ -1320,10 +1338,10 @@ Mayor & 000012895 & ELLEN LEE ZHOU & MICHELLE BRAVO & JANE KIM\\
 \end{longtable}
 To summarize the data
 \begin{verbatim}
-[1] 0.004074546
+[1] 0.003050939
 \end{verbatim}
 \begin{verbatim}
-[1] 0.2524841
+[1] 0.2452883
 \end{verbatim}
 \hypertarget{regressions}{%
 \section{Regressions}\label{regressions}}
@@ -1357,68 +1375,270 @@ Methods for regression:
 \item
   ex post facto model validation! The residual plots and all that. This
   could also go in the results section.
+\item
+  Weights based on population? Based on number of voters? weights for
+  future research maybe
+\item
+  surveyglm/svyglm package to do this weighting
+\item
+  Graphic of precinct turnout
+\item
+  Regression for voter turnout AT ALL and these demographics
+\item
+  Histogram just for how much undervoting or overvoting there is
+\item
+  Zero-inflated? Because there's so many zeroes and we're technically
+  dealing with a census on the voting end (future research, ``I'm aware
+  of this'')
 \end{itemize}
 \hypertarget{results}{%
 \chapter{Results}\label{results}}
 
-Variables considered for this are LIST/TABLE/CALCULATION
-
-I have some results and they are here. First model is the overvoting
-linear model, second is undervoting linear.
+For the following models, I use variables taken from the US Census 2018
+Planning Database, estimated for the election precincts through the
+areal interpolation method. All data is self-reported through the Census
+process.
+\begin{longtable}[]{@{}ll@{}}
+\caption{(\#tab:model\_vars) Census variables used in
+models}\tabularnewline
+\toprule
+\begin{minipage}[b]{0.44\columnwidth}\raggedright
+Variable\strut
+\end{minipage} & \begin{minipage}[b]{0.50\columnwidth}\raggedright
+Description\footnotemark{}\strut
+\end{minipage}
+\footnotetext{All descriptions taken from the Planning Database.}\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+\begin{minipage}[b]{0.44\columnwidth}\raggedright
+Variable\strut
+\end{minipage} & \begin{minipage}[b]{0.50\columnwidth}\raggedright
+Description{}\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.44\columnwidth}\raggedright
+female\strut
+\end{minipage} & \begin{minipage}[t]{0.50\columnwidth}\raggedright
+The percentage of the population that is female\footnotemark{}\strut
+\end{minipage}
+\footnotetext{The Census specifically asks about binary sex; there are
+  currently no questions about gender identity.}\tabularnewline
+\begin{minipage}[t]{0.44\columnwidth}\raggedright
+pop\_18\_24\strut
+\end{minipage} & \begin{minipage}[t]{0.50\columnwidth}\raggedright
+The percentage of the population that is between 18 and 24 years
+old\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.44\columnwidth}\raggedright
+pop\_25\_44\strut
+\end{minipage} & \begin{minipage}[t]{0.50\columnwidth}\raggedright
+The percentage of the population that is between 25 and 44 years
+old\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.44\columnwidth}\raggedright
+pop\_45\_64\strut
+\end{minipage} & \begin{minipage}[t]{0.50\columnwidth}\raggedright
+The percentage of the population that is between 45 and 64 years
+old\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.44\columnwidth}\raggedright
+pop\_65\_up\strut
+\end{minipage} & \begin{minipage}[t]{0.50\columnwidth}\raggedright
+The percentage of the population that is 65 years old or over\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.44\columnwidth}\raggedright
+hispanic\strut
+\end{minipage} & \begin{minipage}[t]{0.50\columnwidth}\raggedright
+The percentage of the population that identify as ``Mexican'', ``Puerto
+Rican'', ``Cuban'', or ``another Hispanic, Latino, or Spanish
+origin''\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.44\columnwidth}\raggedright
+white\strut
+\end{minipage} & \begin{minipage}[t]{0.50\columnwidth}\raggedright
+The percentage of the population that indicate no Hispanic origin and
+their only race as ``White'' or report entries such as Irish, German,
+Italian, Lebanese, Arab, Moroccan, or Caucasian\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.44\columnwidth}\raggedright
+black\strut
+\end{minipage} & \begin{minipage}[t]{0.50\columnwidth}\raggedright
+The percentage of the population that indicate no Hispanic origin and
+their only race as ``Black, African Am., or Negro'' or report entries
+such as African American, Kenyan, Nigerian, or Haitian\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.44\columnwidth}\raggedright
+native\strut
+\end{minipage} & \begin{minipage}[t]{0.50\columnwidth}\raggedright
+The percentage of the population that indicate no Hispanic origin and
+their only race as ``American Indian or Alaska Native'' or report
+entries such as Navajo, Blackfeet, Inupiat, Yup'ik, or Central/South
+American Indian groups\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.44\columnwidth}\raggedright
+asian\strut
+\end{minipage} & \begin{minipage}[t]{0.50\columnwidth}\raggedright
+The percentage of the population that indicate no Hispanic origin and
+their only race as ``Asian Indian'', ``Chinese'', ``Filipino'',
+``Korean'', ``Japanese'', ``Vietnamese'', or ``Other Asian''\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.44\columnwidth}\raggedright
+pac\_islander\strut
+\end{minipage} & \begin{minipage}[t]{0.50\columnwidth}\raggedright
+The percentage of the population that indicate no Hispanic origin and
+their only race as ``Native Hawaiian'', ``Guamanian or Chamorro'',
+``Samoan'', or ``Other Pacific Islander''\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.44\columnwidth}\raggedright
+other\_race\strut
+\end{minipage} & \begin{minipage}[t]{0.50\columnwidth}\raggedright
+The percentage of the population that indicate no Hispanic origin and
+their race as other than ``White'', ``Hispanic'', ``Black or African
+American'', ``American Indian or Alaska Native'', ``Asian'', and
+``Native Hawaiian or Other Pacific Islander''\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.44\columnwidth}\raggedright
+no\_hs\strut
+\end{minipage} & \begin{minipage}[t]{0.50\columnwidth}\raggedright
+The percentage of the population aged 25 years and over that are not
+high school graduates and have not received a diploma or the
+equivalent\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.44\columnwidth}\raggedright
+college\strut
+\end{minipage} & \begin{minipage}[t]{0.50\columnwidth}\raggedright
+The percentage of the ACS population aged 25 years and over that have a
+college degree or higher\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.44\columnwidth}\raggedright
+poverty\strut
+\end{minipage} & \begin{minipage}[t]{0.50\columnwidth}\raggedright
+The percentage of the eligible population\footnotemark{} that are
+classified as below the poverty level given their total family or
+household income within the last year, family size, and family
+composition\strut
+\end{minipage}
+\footnotetext{The ``eligible population'' is measured by the Census as
+  ``Number of people excluding institutionalized people, people in
+  military group quarters, people in college dormitories, and unrelated
+  individuals under 15 years old''}\tabularnewline
+\begin{minipage}[t]{0.44\columnwidth}\raggedright
+no\_english\strut
+\end{minipage} & \begin{minipage}[t]{0.50\columnwidth}\raggedright
+The percentage of all occupied housing units\footnotemark{} where no one
+ages 14 years and over speaks English only or speaks English ``very
+well''\strut
+\end{minipage}
+\footnotetext{This variable is at the level of housing units (not
+  persons), and the Census measures ``occupied housing units'' as
+  ``Number of housing units classified as usual place of residence of
+  the individual or group living in it''}\tabularnewline
+\bottomrule
+\end{longtable}
+\hypertarget{modeling-turnout}{%
+\section[Modeling turnout]{\texorpdfstring{Modeling turnout\footnote{From
+  the dataset, we removed one outlier with a turnout rate of 124\%,
+  Precinct 7024. We believe this is a particlarly egregious error in the
+  interpolation process of calculating population.}}{Modeling turnout}}\label{modeling-turnout}}
+\begin{figure}
+\centering
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-12-1.pdf}
+\caption{\label{fig:unnamed-chunk-12}Precinct turnout}
+\end{figure}
+With an adjusted \(R^2\) value of 0.3724189, the best linear model we
+found for predicting turnout\footnote{The gaps in the map above and
+  following maps are Golden Gate Park (to the northwest), Crocker-Amazon
+  Playground and John McLaren Park (to the south), and our removed
+  precinct 7024 (to the southeast).} included variables for both age and
+education. Having more young people (18-24) was negatively correlated
+with turnout, while having more middle-aged and college-educated people
+was positively correlated with turnout. This is consistent with general
+literature on voter turnout - young people vote less, and the better
+educated vote more.
+\begin{longtable}[t]{lrrrr}
+\caption[Linear turnout model]{\label{tab:unnamed-chunk-13}Linear model for RCV voter turnout}\\
+\toprule
+term & estimate & std.error & statistic & p.value\\
+\midrule
+Intercept & 0.0811993 & 0.0295596 & 2.746965 & 0.0061962\\
+pop\_18\_24 & -0.4131907 & 0.0687493 & -6.010105 & 0.0000000\\
+pop\_45\_64 & 0.2913061 & 0.0741948 & 3.926232 & 0.0000963\\
+college & 0.3529534 & 0.0230954 & 15.282383 & 0.0000000\\
+\bottomrule
+\end{longtable}
 \begin{verbatim}
-
-Call:
-lm(formula = overvote_rate ~ hispanic + black + no_english, data = sf_precincts)
-
-Residuals:
-      Min        1Q    Median        3Q       Max 
--0.008424 -0.002606 -0.000584  0.001633  0.037469 
-
-Coefficients:
-             Estimate Std. Error t value Pr(>|t|)    
-(Intercept) 0.0018971  0.0002937   6.459 2.18e-10 ***
-hispanic    0.0037156  0.0013724   2.707  0.00698 ** 
-black       0.0153094  0.0018998   8.059 4.20e-15 ***
-no_english  0.0092404  0.0015438   5.985 3.72e-09 ***
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-Residual standard error: 0.003841 on 599 degrees of freedom
-Multiple R-squared:  0.1728,    Adjusted R-squared:  0.1687 
-F-statistic: 41.72 on 3 and 599 DF,  p-value: < 2.2e-16
+`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 \end{verbatim}
+\begin{figure}
+\centering
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-13-1.pdf}
+\caption{\label{fig:unnamed-chunk-13}Linear turnout model validation}
+\end{figure}
+Logistic -
+
+\hypertarget{modeling-overvoting}{%
+\section{Modeling overvoting}\label{modeling-overvoting}}
+\begin{figure}
+\centering
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-14-1.pdf}
+\caption{\label{fig:unnamed-chunk-14}Precinct overvoting}
+\end{figure}
+With an adjusted \(R^2\) value of 0.1102897, the best linear model we
+found for predicting overvoting included variables for both race and
+education. A district being more African-American was positively
+correlated with overvoting, while having more college-educated people
+was negatively correlated with overvoting.
+\begin{longtable}[t]{lrrrr}
+\caption[Linear overvote model]{\label{tab:unnamed-chunk-15}Linear model for overvoting in RCV}\\
+\toprule
+term & estimate & std.error & statistic & p.value\\
+\midrule
+Intercept & 0.0042211 & 0.0004209 & 10.027963 & 0.00e+00\\
+black & 0.0092200 & 0.0016453 & 5.603925 & 0.00e+00\\
+college & -0.0027021 & 0.0006421 & -4.207959 & 2.97e-05\\
+\bottomrule
+\end{longtable}
 \begin{verbatim}
-
-Call:
-lm(formula = overvote_rate ~ pop_18_24 + pop_25_44 + pop_45_64 + 
-    white + black + no_hs + college, data = sf_precincts)
-
-Residuals:
-      Min        1Q    Median        3Q       Max 
--0.009142 -0.002600 -0.000599  0.001656  0.038353 
-
-Coefficients:
-              Estimate Std. Error t value Pr(>|t|)    
-(Intercept)  0.0043119  0.0022074   1.953   0.0512 .  
-pop_18_24   -0.0018829  0.0029419  -0.640   0.5224    
-pop_25_44    0.0009263  0.0020995   0.441   0.6592    
-pop_45_64   -0.0002122  0.0036628  -0.058   0.9538    
-white        0.0033238  0.0017292   1.922   0.0551 .  
-black        0.0130410  0.0021664   6.020 3.06e-09 ***
-no_hs        0.0067164  0.0032870   2.043   0.0415 *  
-college     -0.0055218  0.0023552  -2.345   0.0194 *  
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-Residual standard error: 0.003872 on 595 degrees of freedom
-Multiple R-squared:  0.1652,    Adjusted R-squared:  0.1554 
-F-statistic: 16.82 on 7 and 595 DF,  p-value: < 2.2e-16
+`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 \end{verbatim}
-Writeup of said results is forthcoming because it's way past my bedtime
-right now. Not sure why the undervote model is the full model - nothing
-in it is significant, but apparently that had the best MSE. I'll check
-it more seriously tomorrow.
+\begin{figure}
+\centering
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-15-1.pdf}
+\caption{\label{fig:unnamed-chunk-15}Linear overvote model validation}
+\end{figure}
+Logistic
 
+\hypertarget{modeling-undervoting}{%
+\section{Modeling undervoting}\label{modeling-undervoting}}
+\begin{figure}
+\centering
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-16-1.pdf}
+\caption{\label{fig:unnamed-chunk-16}Precinct undervoting}
+\end{figure}
+With an adjusted \(R^2\) value of 0.1491059, the best linear model we
+found for predicting overvoting included variables for both race and
+education. Having more African-Americans and residents over 25 without a
+high school degree was negatively correlated with turnout.
+\begin{longtable}[t]{lrrrr}
+\caption[Linear undervote model]{\label{tab:unnamed-chunk-17}Linear model for undervoting in RCV}\\
+\toprule
+term & estimate & std.error & statistic & p.value\\
+\midrule
+Intercept & 0.2630420 & 0.0025828 & 101.8453876 & 0.0000000\\
+black & -0.0137406 & 0.0212761 & -0.6458238 & 0.5186408\\
+no\_hs & -0.1685223 & 0.0168803 & -9.9833543 & 0.0000000\\
+\bottomrule
+\end{longtable}
+\begin{verbatim}
+`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+\end{verbatim}
+\begin{figure}
+\centering
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-17-1.pdf}
+\caption{\label{fig:unnamed-chunk-17}Linear undervote model validation}
+\end{figure}
 And these are logistic for over and under - still need to do
 training/test or cross validation, plus better model selection.
 \begin{verbatim}
@@ -1429,22 +1649,22 @@ glm(formula = cbind(over_count, no_over_count) ~ +hispanic +
 
 Deviance Residuals: 
     Min       1Q   Median       3Q      Max  
--2.4763  -0.8224  -0.2002   0.4779   3.4130  
+-2.2423  -1.3196  -0.2044   0.5949   2.4973  
 
 Coefficients:
             Estimate Std. Error z value Pr(>|z|)    
-(Intercept) -5.99377    0.06082 -98.549  < 2e-16 ***
-hispanic     0.94028    0.24326   3.865 0.000111 ***
-black        2.49121    0.30587   8.145 3.81e-16 ***
-no_english   1.86161    0.26677   6.978 2.99e-12 ***
+(Intercept) -6.16177    0.06977 -88.318  < 2e-16 ***
+hispanic     0.59112    0.29565   1.999   0.0456 *  
+black        2.48213    0.36157   6.865 6.66e-12 ***
+no_english   1.33077    0.32618   4.080 4.51e-05 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 (Dispersion parameter for binomial family taken to be 1)
 
-    Null deviance: 869.52  on 602  degrees of freedom
-Residual deviance: 746.04  on 599  degrees of freedom
-AIC: 1952.2
+    Null deviance: 750.86  on 601  degrees of freedom
+Residual deviance: 688.05  on 598  degrees of freedom
+AIC: 1706.8
 
 Number of Fisher Scoring iterations: 5
 \end{verbatim}
@@ -1457,31 +1677,35 @@ glm(formula = cbind(under_count, no_under_count) ~ +pop_18_24 +
 
 Deviance Residuals: 
     Min       1Q   Median       3Q      Max  
--6.0425  -0.9543  -0.0741   0.8984   5.1072  
+-6.0978  -0.9966  -0.0659   0.8725   4.8771  
 
 Coefficients:
             Estimate Std. Error z value Pr(>|z|)    
-(Intercept) -1.79707    0.17597 -10.212  < 2e-16 ***
-pop_18_24   -0.82711    0.10140  -8.157 3.43e-16 ***
-pop_25_44   -1.06927    0.06324 -16.908  < 2e-16 ***
-pop_45_64   -0.61586    0.10886  -5.657 1.54e-08 ***
-hispanic     0.58464    0.17750   3.294 0.000988 ***
-white        0.97672    0.17320   5.639 1.71e-08 ***
-black        1.18790    0.19900   5.969 2.38e-09 ***
-asian        0.62484    0.17213   3.630 0.000283 ***
-no_hs        0.64791    0.10176   6.367 1.93e-10 ***
-college      0.85892    0.07075  12.140  < 2e-16 ***
+(Intercept) -1.88317    0.17903 -10.519  < 2e-16 ***
+pop_18_24   -0.85810    0.10327  -8.309  < 2e-16 ***
+pop_25_44   -1.07076    0.06415 -16.692  < 2e-16 ***
+pop_45_64   -0.59295    0.11042  -5.370 7.89e-08 ***
+hispanic     0.62824    0.18049   3.481 0.000500 ***
+white        1.02151    0.17617   5.798 6.69e-09 ***
+black        1.28621    0.20331   6.326 2.51e-10 ***
+asian        0.64239    0.17508   3.669 0.000243 ***
+no_hs        0.65671    0.10350   6.345 2.22e-10 ***
+college      0.87021    0.07189  12.105  < 2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 (Dispersion parameter for binomial family taken to be 1)
 
-    Null deviance: 2460.6  on 602  degrees of freedom
-Residual deviance: 1291.2  on 593  degrees of freedom
-AIC: 5006.1
+    Null deviance: 2486.5  on 601  degrees of freedom
+Residual deviance: 1297.4  on 592  degrees of freedom
+AIC: 4989.1
 
 Number of Fisher Scoring iterations: 3
 \end{verbatim}
+Try the glmulti package on the mLab computers, maybe their rJava will
+work better\ldots{}?
+\url{https://rstudio-pubs-static.s3.amazonaws.com/2897_9220b21cfc0c43a396ff9abf122bb351.html}
+
 \hypertarget{conclusion}{%
 \chapter*{Conclusion}\label{conclusion}}
 \addcontentsline{toc}{chapter}{Conclusion}

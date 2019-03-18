@@ -60,7 +60,7 @@ Conversely, data that applies to any given sub-region of a region is called *spa
 
 We will use the following example case to illustrate the areal interpolation process. Suppose regions $A$, $B$, $C$, and $D$ are the source regions (each taking up a quadrant of the square), and regions $X$, $Y$, and $Z$ are the target regions (each taking up a third of the square vertically). Further suppose that the boundaries of the source regions and target regions are fully coincident, that is $A \cup B \cup C \cup D = X \cup Y \cup Z$^[This example ignores the case where the covered regions are not coincident, which is a possibility in general. In this research we enforce coincidence in our data, however.].
 
-```{r}
+```{r message=FALSE}
 library(purrr)
 source <- st_read(here('data', 'source_zones')) %>%
   transmute(name = c('D','C','A','B'),
@@ -118,18 +118,20 @@ asian_pre + asian_post + plot_layout(ncol = 2)
 One consideration in the data preparation stage was whether to use counts or percentages as input for the regression. The census data contains total population in a region, as well as a count and percentage for a given variable (say people between the ages of 25 and 44). The percentage can equivalently be calculated by dividing the count by the population. After performing the areal interpolation on the data, I ran this percentage calculation again to double check that it lined up with the reported percentages (post-interpolation). My intuition was that these steps should be commutative - calculating a percentage and then interpolating should have the same result as interpolating and then calculating the percentage. This was not the case, however - in the variable for population between 25 and 44, the error between these two methods ranged from -12 to 26 percentage points.
 
 ```{r, fig.cap = 'Example error in intensive interpolation'}
-ggplot(sf_wrong, aes(x = women,
-                     y = women_wrong,
-                     col = abs(women - women_wrong))) +
-  geom_point() +
-  labs(title = "Error in proportion of women",
+ggplot(sf_wrong, aes(x = female,
+                     y = female_wrong,
+                     col = abs(female - female_wrong),
+                     size = population)) +
+  geom_point(shape = 1) +
+  labs(title = "Error in percentage female",
        x = "Calculated Percentage",
        y = "Reported Percentage",
        col = "Absolute Error") +
   scale_colour_gradient(high = "#132B43", low = "#56B1F7") +
-  theme_void()
-# get a better color scheme for this error
-# scale the error by the population of a region to show what's up
+  theme_bw()
+# maybe pick a new variable that really exemplifies the issue
+
+ggplot(sf_wrong, aes(x = female - female_wrong)) + geom_histogram()
 ```
 
 As it turns out, these steps are not commutative in this way, and the observed error is mostly a function of the weighting between different steps in the process. For example, consider a simple case: suppose source regions A and B are fully contained in target region X, and split X in half. Let the number of people between 25 and 44 in A be 4 (out of 10 total) and in B be 3 (out of 5 total). Taking the percentages first gives us a proportion of 0.4 in A and 0.6 in B. Using the intensive interpolation method on these proportions, both are weighted by the amount of X that the region takes up (half, in each case) and added, so the average weighted by area is 0.5. Conversely, using the extensive interpolation method on the count and popuation, we see that X has 7 people between 25 and 44 (out of 15 total). Taking the percentage, we see that the proportion of this variable in X is ~0.47.
@@ -173,7 +175,7 @@ One peculiarity in San Francisco is the combination of certain precincts during 
 
 The areal interpolation process produces demographic estimates for areas in the map, however, which are non-consolidated. This causes a mismatch: we have demographic data for individual precincts, but election data for the consolidated precincts. To address this issue, we have split the election data (a count of overvotes and undervotes) in the consolidated precincts into their two component precincts. This split is weighted by the population of each precinct in 2010^[The most simple weight would be 50-50 for each split, but this is inaccurate for many of these precincts: see the gap in the weights for Pct 7527/7528. The flaw in this method was discovered after calculating turnout of over 1000% for Precinct 7527...]. For example, suppose Precinct X/Y had 100 undervotes, the population of Precinct X in 2010 was 325, and the population of Precinct Y in 2010 was 175. Then the "population split" between X and Y is 65%-35%, and we adjust the undervotes accordingly: Precinct X should have 65 of the 100 undervotes, and Precinct Y should have the remaining 35.
 
-Examples of this in the data are below. The first table is the initial data, with full consolidated counts doubled in the precincts (and thus doubled across rows), and the second table is the data with proper weights applied. Note that this is 6 out of the 12 total precincts that get combines into 6 double precincts.
+Examples of this in the data are below. The first table is the initial data, with full consolidated counts doubled in the precincts (and thus doubled across rows), and the second table is the data with proper weights applied. Note that this is 6 out of the 12 total precincts that get combined into 6 double precincts.
 
 ```{r}
 original <- sf_unadjusted %>%

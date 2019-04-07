@@ -1,11 +1,12 @@
-# Methods and Structure {#methods}
-
 ```{r include = FALSE}
 library(here)
+library(purrr)
+library(sf)
+library(ggplot2)
 library(patchwork)
-source(here('code', 'precinct_math.R'))
 ```
 
+# Methods and Structure {#methods}
 
 Inevitably, the data format that would be ideal to conduct this research doesn't exist publicly (as it shouldn't - voter anonymity and such). The ideal model might be a logistic or other classification model that predicts whether a given voter has a ballot error or fills out the ballot incompletely, given their demographic qualities.
 
@@ -60,13 +61,12 @@ Conversely, data that applies to any given sub-region of a region is called *spa
 
 We will use the following example case to illustrate the areal interpolation process. Suppose regions $A$, $B$, $C$, and $D$ are the source regions (each taking up a quadrant of the square), and regions $X$, $Y$, and $Z$ are the target regions (each taking up a third of the square vertically). Further suppose that the boundaries of the source regions and target regions are fully coincident, that is $A \cup B \cup C \cup D = X \cup Y \cup Z$^[This example ignores the case where the covered regions are not coincident, which is a possibility in general. In this research we enforce coincidence in our data, however.].
 
-```{r message=FALSE}
-library(purrr)
-source <- st_read(here('data', 'source_zones')) %>%
+```{r include=FALSE, fig.cap='Example regions for interpolation'}
+source <- st_read(here('raw_data', 'source_zones')) %>%
   transmute(name = c('D','C','A','B'),
             lon = map_dbl(geometry, ~st_centroid(.x)[[1]]),
             lat = map_dbl(geometry, ~st_centroid(.x)[[2]]))
-target <- st_read(here('data', 'target_zones')) %>%
+target <- st_read(here('raw_data', 'target_zones')) %>%
   transmute(name = c('Z','X','Y'),
             lon = map_dbl(geometry, ~st_centroid(.x)[[1]]),
             lat = map_dbl(geometry, ~st_centroid(.x)[[2]]))
@@ -87,7 +87,7 @@ Say we want to estimate $x_{T_j}$, the measure of the extensive property in regi
 
 For each source region, calculate the proportion of the region that lies inside the target region. These proportions are the weights to be multiplied by the source regions' properties. In the example case, consider target region $X$:
 \[
-\widehat{x_X} = \frac{Area(A \cap X)}{Area(A)} \cdot x_{A} + \frac{Area(B \cap X)}{Area(B)} \cdot x_{B} + 0 + 0 = \frac{2}{3}(x_A + x_B).
+\widehat{x_X} = \frac{Area(A \cap X)}{Area(A)} \cdot x_{A} + \frac{Area(B \cap X)}{Area(B)} \cdot x_{B} + 0 + 0 = \frac{2}{3}(x_A + x_B)
 \]
 
 Since $A$ and $B$ each have $2/3$ of their area inside target region $X$, we estimate that 2/3 of the extensive quantity $x_A$ is inside region $X$ (similarly for $x_B$). Adding these together gives us an estimate $\widehat{x_X}$.
@@ -99,39 +99,23 @@ For intensive properties, the process is slightly different. For all $j \in J$, 
 
 Since the intensive property isn't "divisible" within a region, we instead take a weighted average of the component source regions of the target region, where each component is weighted by the amount of the target region it takes up. Again considering target region $X$:
 \[
-\widehat{y_X} = \frac{Area(A \cap X)}{Area(X)} \cdot y_{A} + \frac{Area(B \cap X)}{Area(X)} \cdot y_{B} + 0 + 0 = \frac{1}{2}(y_A + y_B).
+\widehat{y_X} = \frac{Area(A \cap X)}{Area(X)} \cdot y_{A} + \frac{Area(B \cap X)}{Area(X)} \cdot y_{B} + 0 + 0 = \frac{1}{2}(y_A + y_B)
 \]
 
 Since $A$ and $B$ each take up half of target region $X$, each of them gets weighted by half before being added to get the estimate of $y_X$.
 
 To validate the application of this method to the data at hand, we can visually compare the spatial distribution of a variable before the interpolation to its distribution after the interpolation.
 
-```{r fig.cap = "Proportion of non-Hispanic Asian residents"}
-asian_pre <- ggplot(census_props) + geom_sf(aes(fill = asian), lwd = 0) + theme_void() + ggtitle('Pre-interpolation')
-asian_post <- ggplot(demo_data) + geom_sf(aes(fill = asian), lwd = 0) + theme_void() + ggtitle('Post-interpolation')
-
-asian_pre + asian_post + plot_layout(ncol = 2)
+```{r echo = FALSE, fig.width=6.5, fig.cap = 'Proportion of non-Hispanic Asian residents'}
+knitr::include_graphics(here('img', 'interpolation_check.png'))
 ```
 
 #### Interpolation - counts vs. percentages
 
 One consideration in the data preparation stage was whether to use counts or percentages as input for the regression. The census data contains total population in a region, as well as a count and percentage for a given variable (say people between the ages of 25 and 44). The percentage can equivalently be calculated by dividing the count by the population. After performing the areal interpolation on the data, I ran this percentage calculation again to double check that it lined up with the reported percentages (post-interpolation). My intuition was that these steps should be commutative - calculating a percentage and then interpolating should have the same result as interpolating and then calculating the percentage. This was not the case, however - in the variable for population between 25 and 44, the error between these two methods ranged from -12 to 26 percentage points.
 
-```{r, fig.cap = 'Example error in intensive interpolation'}
-ggplot(sf_wrong, aes(x = female,
-                     y = female_wrong,
-                     col = abs(female - female_wrong),
-                     size = population)) +
-  geom_point(shape = 1) +
-  labs(title = "Error in percentage female",
-       x = "Calculated Percentage",
-       y = "Reported Percentage",
-       col = "Absolute Error") +
-  scale_colour_gradient(high = "#132B43", low = "#56B1F7") +
-  theme_bw()
-# maybe pick a new variable that really exemplifies the issue
-
-ggplot(sf_wrong, aes(x = female - female_wrong)) + geom_histogram()
+```{r, fig.cap = 'Sample error in intensive interpolation', warning=FALSE}
+knitr::include_graphics(here('img', 'intensive_error.png'))
 ```
 
 As it turns out, these steps are not commutative in this way, and the observed error is mostly a function of the weighting between different steps in the process. For example, consider a simple case: suppose source regions A and B are fully contained in target region X, and split X in half. Let the number of people between 25 and 44 in A be 4 (out of 10 total) and in B be 3 (out of 5 total). Taking the percentages first gives us a proportion of 0.4 in A and 0.6 in B. Using the intensive interpolation method on these proportions, both are weighted by the amount of X that the region takes up (half, in each case) and added, so the average weighted by area is 0.5. Conversely, using the extensive interpolation method on the count and popuation, we see that X has 7 people between 25 and 44 (out of 15 total). Taking the percentage, we see that the proportion of this variable in X is ~0.47.
@@ -142,31 +126,16 @@ In short, the "calculating proportion" and "areal interpolation" steps are NOT c
 
 A further issue appears - just like the precinct and census boundaries don't line up because they come from different sources, the outside boundaries of the precinct and census files don't line up. The census boundaries have a lower resolution on the whole than then precinct boundaries. This leads to issues when performing the areal interpolation, because parts of a census boundary that are outside of a precinct will be dropped and cause an underestimate of the true measure of the variables. We address this by bounding both files to only consider the space that is contained in both^[No census tracts were fully removed in this process, but this causes one precinct, Precinct 9900, to be cut off. However, this precinct is a semi-exclave of the county on Alameda Island, across the San Francisco Bay. Since this land, an undeveloped former naval air base, is uninhabited (Levi, 2018) its removal does not impact our results.]. Since we are dealing with a fundamental unit of people instead of space, this ensures that every person is counted, and changes some of the spatial weights calculated. The assumption here is that any region which is only contained in one of the files (precincts without census, or census without precincts) has zero population, because every person should be contained in both a precinct and a census region.
 
-```{r fig.cap = 'Boundary intersection between shapefiles'}
-# add a minimal bounding box to these to make the grid lines match up
-prec_out <- ggplot(precincts_bound) + geom_sf() + theme_void() + labs(title = 'Precincts')
-
-cen_out <- ggplot(census_bound) + geom_sf() + theme_void() + labs(title = 'Census')
-
-joint_out <- ggplot(overall) + geom_sf() + theme_void() + labs(title = 'Overall')
-
-prec_out + cen_out - joint_out + plot_layout(ncol = 1, heights = c(3,6))
+```{r echo = FALSE, fig.width=6.5, fig.cap = 'Boundary intersection between shapefiles'}
+knitr::include_graphics(here('img', 'boundary_intersection.png'))
 ```
 
-This plot displays the result of this intersection between the two regions. The impact on the census tracts is quite visible - notably the eastern coastline is much more defined, and the gap in Treasure Island (the large island off the northeastern shore) appears. The impact on the precinct boundaries is less apparent, but still there - the exclave on Alameda Island (small sliver to the East) has disappeared, and in the southeastern corner it is visible how the angles in the precinct boundary have softened to the more rounded final shape.
+This plot^[The plots were clipped to display the same area. There are some extra islands out of range on the precinct and census maps that are not shown.] displays the result of this intersection between the two regions. The impact on the census tracts is quite visible - notably the eastern coastline is much more defined, and the gap in Treasure Island (the large island off the northeastern shore) appears. The impact on the precinct boundaries is less apparent, but still there - foe example, in the southeastern corner it is visible how the angles in the precinct boundary have softened to the more rounded final shape.
 
 Below is a comparison of the original shapefiles^[The original census regions contained the Farallon Islands, which have been removed from this plot because they are uninhabited, 30 miles into the Pacific Ocean, and messed up the scale of the graph.] (including all divisions) to the bounded versions.
 
 ```{r fig.cap = 'Original versus bounded shapefiles'}
-precincts_pre <- ggplot(precincts_shape) + geom_sf() + theme_void() + labs(title = 'Precincts - original')
-
-census_pre <- ggplot(census_shape) + geom_sf() + theme_void() + labs(title = 'Census - original')
-
-precincts_post <- ggplot(precincts) + geom_sf() + theme_void() + labs(title = 'Precincts - bounded')
-
-census_post <- ggplot(census) + geom_sf() + theme_void() + labs(title = 'Census - bounded')
-
-(precincts_pre + census_pre) - (precincts_post + census_post) + plot_layout(ncol = 1)
+knitr::include_graphics(here('img', 'clipped_internals.png'))
 ```
 
 #### Precinct Consolidation
@@ -177,11 +146,11 @@ The areal interpolation process produces demographic estimates for areas in the 
 
 Examples of this in the data are below. The first table is the initial data, with full consolidated counts doubled in the precincts (and thus doubled across rows), and the second table is the data with proper weights applied. Note that this is 6 out of the 12 total precincts that get combined into 6 double precincts.
 
-```{r}
-original <- sf_unadjusted %>%
-  as.data.frame() %>%
-  select(1,6,2:5) %>%
-  filter(str_detect(precinct, '/')) %>%
+```{r echo = FALSE}
+load(here('data', 'double_precincts.RData'))
+original <- doubles_for_table %>%
+  filter(type == 'unweighted') %>%
+  select(-weight, -type) %>%
   slice(1:6)
 
 knitr::kable(original, 
@@ -192,11 +161,10 @@ knitr::kable(original,
       booktabs = TRUE)
 ```
 
-```{r}
-adjusted <- double_cases %>%
-  as.data.frame() %>%
-  select(1,6, weight, 2:5) %>%
-  mutate_at(vars(ends_with('count')), function(x) x * .$weight) %>%
+```{r echo = FALSE}
+adjusted <- doubles_for_table %>%
+  filter(type == 'weighted') %>%
+  select(precinct, PREC_2017, weight, everything(), -type) %>%
   slice(1:6)
 
 knitr::kable(adjusted, 
@@ -209,25 +177,33 @@ knitr::kable(adjusted,
 
 ## Calculating over/undervote info
 
+Move this further up to the section where you talk about that? Or move that down because it lines up with the actual process
+
 RCV package (with Matthew)
 Data from the city elections board
 Data is missing some ballots that had to be hand-counted because it spits out straight from the machine, so this won't necessarily match the official reports.
 
 Data comes in in weird double file form, then gets cleaned up and looks like this.
 
-```{r}
-knitr::kable(head(sf_wide %>% arrange(desc(contest)), 10), 
+```{r echo = FALSE}
+load(here('data', 'sf_ballot.RData'))
+image <- sf %>%
+  rcv::readable() %>%
+  arrange(desc(contest)) %>%
+  head(10)
+
+knitr::kable(image, 
       col.names = c("Contest", "Voter ID", "1", "2", "3"),
       caption = "Processed Ballot Image",
       longtable = TRUE,
       booktabs = TRUE)
 ```
 
-To summarize the data
+In this view, an overvote in a ranking appears as `NA` in that ranking
 
 ```{r}
-mean(sf_no_vote$over) # 0.4% of mayoral voters overvoted, which is (as expected) small
-mean(sf_no_vote$under) # 25% of mayoral voters undervoted, which is pretty large (compare this to other SF elections...?)
+#mean(sf_no_vote$over) # 0.4% of mayoral voters overvoted, which is (as expected) small
+#mean(sf_no_vote$under) # 25% of mayoral voters undervoted, which is pretty large (compare this to other SF elections...?)
 ```
 
 

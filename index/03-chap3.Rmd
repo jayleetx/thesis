@@ -1,3 +1,25 @@
+```{r include = FALSE}
+library(sf)
+library(ggplot2)
+library(broom)
+library(here)
+library(knitr)
+
+sf_precincts <- st_read(dsn = here("data", "sf_precincts"), stringsAsFactors = FALSE)
+colnames(sf_precincts) <- c('precinct', 'over_count', 'no_over_count', 'under_count',
+                            'no_under_count', 'PREC_2017', 'population', 'female',
+                            'pop_18_24', 'pop_25_44', 'pop_45_64', 'pop_65_plus',
+                            'hispanic', 'white', 'black', 'native', 'asian', 'pac_islander',
+                            'other_race', 'no_hs', 'college', 'poverty', 'no_english',
+                            'weight', 'overvote_rate', 'undervote_rate', 'turnout',
+                            'no_turnout', 'turnout_rate', 'geometry')
+# this just undoes the var name shortening in the shapefile format
+
+best_linear_turnout <- lm(turnout_rate ~ pop_18_24 + pop_45_64 + college, data = sf_precincts)
+best_linear_over <- lm(overvote_rate ~ black + college, data = sf_precincts)
+best_linear_under <- lm(undervote_rate ~ black + no_english, data = sf_precincts)
+```
+
 # Results {#results}
 
 For the following models, I use variables taken from the US Census 2018 Planning Database, estimated for the election precincts through the areal interpolation method. All data is self-reported through the Census process.
@@ -21,21 +43,23 @@ For the following models, I use variables taken from the US Census 2018 Planning
 | poverty | The percentage of the eligible population^[The "eligible population" is measured by the Census as "Number of people excluding institutionalized people, people in military group quarters, people in college dormitories, and unrelated individuals under 15 years old"] that are classified as below the poverty level given their total family or household income within the last year, family size, and family composition |
 | no_english | The percentage of all occupied housing units^[This variable is at the level of housing units (not persons), and the Census measures "occupied housing units" as "Number of housing units classified as usual place of residence of the individual or group living in it"] where no one ages 14 years and over speaks English only or speaks English "very well" |
 
-
 Table: Census variables used in models
 
-## Modeling turnout^[From the dataset, we removed one outlier with a turnout rate of 124%, Precinct 7024. We believe this is a particlarly egregious error in the interpolation process of calculating population.]
+## Modeling turnout
 
-```{r, fig.cap='Precinct turnout'}
-ggplot(sf_precincts) + geom_sf(aes(fill = turnout_rate), lwd = 0) +
-  theme_void() + ggtitle("Observed turnout rate by precinct")
+```{r, fig.cap='Observed turnout rate by precinct'}
+turnout_map <- ggplot(sf_precincts) + geom_sf(aes(fill = turnout_rate), lwd = 0) +
+  theme_void()
+turnout_hist <- ggplot(sf_precincts, aes(x = turnout_rate)) + geom_histogram() +
+  theme_void()
+
+turnout_map + turnout_hist + plot_layout(ncol = 2)
 ```
 
-With an adjusted $R^2$ value of `r summary(best_linear_turnout)$adj.r.squared`, the best linear model we found for predicting turnout^[The gaps in the map above and following maps are Golden Gate Park (to the northwest), Crocker-Amazon Playground and John McLaren Park (to the south), and our removed precinct 7024 (to the southeast).] included variables for both age and education. Having more young people (18-24) was negatively correlated with turnout, while having more middle-aged and college-educated people was positively correlated with turnout. This is consistent with general literature on voter turnout - young people vote less, and the better educated vote more.
+With an adjusted $R^2$ value of `r summary(best_linear_turnout)$adj.r.squared`, the best linear model we found for predicting turnout^[From the dataset, we removed one outlier with a turnout rate of 124%, Precinct 7024. We believe this is a particlarly egregious inaccuracy in the interpolation process of calculating population. The gaps in the map above and following maps are Golden Gate Park (to the northwest), Crocker-Amazon Playground and John McLaren Park (to the south), and our removed precinct 7024 (to the southeast).] included variables for both age and education. A district having more young people (18-24) was negatively correlated with turnout, while having more middle-aged and college-educated people was positively correlated with turnout. This is consistent with general literature on voter turnout - young people vote less, and the better educated vote more.
 
 ```{r, fig.cap="Linear turnout model validation"}
-library(broom)
-kable(tidy(best_linear_turnout) %>% mutate(term = str_remove_all(term, '\\(|\\)')),
+kable(tidy(best_linear_turnout) %>% mutate(term = stringr::str_remove_all(term, '\\(|\\)')),
       caption = "Linear model for RCV voter turnout",
       caption.short = "Linear turnout model",
       longtable = TRUE,
@@ -61,15 +85,19 @@ Logistic -
 
 ## Modeling overvoting
 
-```{r, fig.cap='Precinct overvoting'}
-ggplot(sf_precincts) + geom_sf(aes(fill = overvote_rate), lwd = 0) +
-  theme_void() + ggtitle("Observed overvote rate by precinct")
+```{r, fig.cap='Observed overvote rate by precinct'}
+overvote_map <- ggplot(sf_precincts) + geom_sf(aes(fill = overvote_rate), lwd = 0) +
+  theme_void()
+overvote_hist <- ggplot(sf_precincts, aes(x = overvote_rate)) + geom_histogram() +
+  theme_void()
+
+overvote_map + overvote_hist + plot_layout(ncol = 2)
 ```
 
 With an adjusted $R^2$ value of `r summary(best_linear_over)$adj.r.squared`, the best linear model we found for predicting overvoting included variables for both race and education. A district being more African-American was positively correlated with overvoting, while having more college-educated people was negatively correlated with overvoting.
 
 ```{r, fig.cap="Linear overvote model validation"}
-kable(tidy(best_linear_over) %>% mutate(term = str_remove_all(term, '\\(|\\)')),
+kable(tidy(best_linear_over) %>% mutate(term = stringr::str_remove_all(term, '\\(|\\)')),
       caption = "Linear model for overvoting in RCV",
       caption.short = "Linear overvote model",
       longtable = TRUE,
@@ -95,15 +123,19 @@ Logistic
 
 ## Modeling undervoting
 
-```{r, fig.cap='Precinct undervoting'}
-ggplot(sf_precincts) + geom_sf(aes(fill = undervote_rate), lwd = 0) +
-  theme_void() + ggtitle("Observed undervote rate by precinct")
+```{r, fig.cap='Observed undervote rate by precinct'}
+undervote_map <- ggplot(sf_precincts) + geom_sf(aes(fill = undervote_rate), lwd = 0) +
+  theme_void()
+undervote_hist <- ggplot(sf_precincts, aes(x = undervote_rate)) + geom_histogram() +
+  theme_void()
+
+undervote_map + undervote_hist + plot_layout(ncol = 2)
 ```
 
-With an adjusted $R^2$ value of `r summary(best_linear_under)$adj.r.squared`, the best linear model we found for predicting overvoting included variables for both race and education. Having more African-Americans and residents over 25 without a high school degree was negatively correlated with turnout.
+With an adjusted $R^2$ value of `r summary(best_linear_under)$adj.r.squared`, the best linear model we found for predicting undervoting^[Here, the percentage of people who listed only 1 or 2 unique candidates out of the percentage of people who listed any number of candidates. This combines both "undervoting" as skipping ranking slots and "duplicated voting" as ranking the same candidate in multiple slots.] included variables for both race and education. Having more African-Americans and residents over 25 without a high school degree was negatively correlated with undervoting.
 
 ```{r, fig.cap="Linear undervote model validation"}
-kable(tidy(best_linear_under) %>% mutate(term = str_remove_all(term, '\\(|\\)')),
+kable(tidy(best_linear_under) %>% mutate(term = stringr::str_remove_all(term, '\\(|\\)')),
       caption = "Linear model for undervoting in RCV",
       caption.short = "Linear undervote model",
       longtable = TRUE,
@@ -125,9 +157,27 @@ f <- ggplot(best_linear_under, aes(x = .resid)) +
 e + f + plot_layout(ncol = 2)
 ```
 
+Honestly I'm really unsure what's going on here. Heavily black precincts are more likely to undervote (lines up with general voting literature), but precincts with less education (less HS grads / less college grads) are less likely to undervote (doesn't line up), and precincts that speak English less well are also less likely to undervote. Just some unexpected and not always significant results.
+
 And these are logistic for over and under - still need to do training/test or cross validation, plus better model selection.
 
 ```{r}
+logit_over <- glm(cbind(over_count, no_over_count) ~ hispanic + black + no_english,
+                  data = sf_precincts, family = binomial)
+
+logit_under <- glm(cbind(under_count, no_under_count) ~
+                  + pop_18_24
+                  + pop_25_44
+                  + pop_45_64
+                  + hispanic
+                  + white
+                  + black
+                  + asian
+                  + no_hs
+                  + college
+                   ,
+                   data = sf_precincts, family = binomial)
+
 summary(logit_over)
 summary(logit_under)
 ```

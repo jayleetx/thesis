@@ -8,7 +8,7 @@ advisor: 'Heather Kitada Smalley'
 # Delete line 6 if you only have one advisor
 department: 'Mathematics - Statistics'
 degree: 'Bachelor of Arts'
-title: 'From Interpolation to Imputation: Ballot Completion in Ranked Choice Voting'
+title: 'From Interpolation to Imputation: Ballot Completion in a Ranked Choice Election'
 knit: "bookdown::render_book"
 site: bookdown::bookdown_site
 always_allow_html: yes
@@ -26,7 +26,7 @@ abstract: |
 # like below, use a command like that for the abstract above.  Note that a tab is 
 # needed on the line after the |.
 acknowledgements: |
-  I want to thank a few people.
+  Heather, Andrew, kbott, Gronke, Manson, jcox and the collegium, the Anna Men, Alex, Mia, Jade, Matthew
 dedication: |
   You can have a dedication here if you wish. 
 preface: |

@@ -111,8 +111,8 @@
   \newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
 
 % To pass between YAML and LaTeX the dollar signs are added by CII
-\title{From Interpolation to Imputation: Ballot Completion in Ranked Choice
-Voting}
+\title{From Interpolation to Imputation: Ballot Completion in a Ranked Choice
+Election}
 \author{Jay Lee}
 % The month and year that you submit your FINAL draft TO THE LIBRARY (May or December)
 \date{May 2019}
@@ -159,7 +159,8 @@ Voting}
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 
 \Acknowledgements{
-I want to thank a few people.
+Heather, Andrew, kbott, Gronke, Manson, jcox and the collegium, the Anna
+Men, Alex, Mia, Jade, Matthew
 }
 
 \Dedication{
@@ -213,7 +214,8 @@ Second paragraph of abstract starts here.
 \frontmatter % this stuff will be roman-numbered
 \pagestyle{empty} % this removes page numbers from the frontmatter
   \begin{acknowledgements}
-    I want to thank a few people.
+    Heather, Andrew, kbott, Gronke, Manson, jcox and the collegium, the Anna
+    Men, Alex, Mia, Jade, Matthew
   \end{acknowledgements}
   \begin{preface}
     This is an example of a thesis setup to use the reed thesis document
@@ -513,7 +515,7 @@ increase the number of elections in a period, so this is one possible
 reason why they generally have low turnout. Further research indicates
 that holding elections concurrently with a presidential election
 ``increase{[}s{]} the likelihood that citizens will vote'' (Boyd, 1986).
-This is seen in off-year Congressinoal elections, where turnout drops
+This is seen in off-year Congressional elections, where turnout drops
 from presidential years. Typically general elections are held
 concurrently with presidential elections (second Tuesday in November,
 super high media coverage, lots of voter outreach, yadda yadda), so
@@ -540,7 +542,7 @@ Since RCV eliminates the need for primary and runoff elections while
 still ensuring majority rule (which is the main reason for these
 elections), it should avoid the problems of lower turnout and higher
 costs associated with secondary elections\footnote{Or at least some of
-  it - costs overall are indeterminate (Rhode comference paper)}. Summed
+  it - costs overall are indeterminate (Rhode conference paper)}. Summed
 up, RCV decreases costs and ``boosts turnout via elimination of
 low-turnout elections'' (Morales, 2018).
 
@@ -661,7 +663,9 @@ standing when it came time to proceed to the final round of counting was
 significant proportion of Kim's voters transferred to Leno after her
 elimination, in the final round Breed surpassed Leno by about 2,000
 votes.
-
+\begin{figure}
+\includegraphics[width=1\linewidth]{/Users/jaylee/Desktop/thesis/img/sankey_official_sfmayor18} \caption{Cross-endorsement in SF mayoral race}\label{fig:unnamed-chunk-2}
+\end{figure}
 Though it's outside the scope of this research to tell if this
 cross-endorsement was effective\footnote{Other confounding factors
   counld exist: maybe Kim and Leno had similar enough positions that
@@ -1056,25 +1060,6 @@ the source regions and target regions are fully coincident, that is
   ignores the case where the covered regions are not coincident, which
   is a possibility in general. In this research we enforce coincidence
   in our data, however.}.
-\begin{verbatim}
-Reading layer `source_zones' from data source `/Users/jaylee/Desktop/thesis/data/source_zones' using driver `ESRI Shapefile'
-Simple feature collection with 4 features and 1 field
-geometry type:  POLYGON
-dimension:      XY
-bbox:           xmin: -3 ymin: -3 xmax: 3 ymax: 3
-epsg (SRID):    4267
-proj4string:    +proj=longlat +datum=NAD27 +no_defs
-\end{verbatim}
-\begin{verbatim}
-Reading layer `target_zones' from data source `/Users/jaylee/Desktop/thesis/data/target_zones' using driver `ESRI Shapefile'
-Simple feature collection with 3 features and 1 field
-geometry type:  POLYGON
-dimension:      XY
-bbox:           xmin: -3 ymin: -3 xmax: 3 ymax: 3
-epsg (SRID):    4267
-proj4string:    +proj=longlat +datum=NAD27 +no_defs
-\end{verbatim}
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-3-1.pdf}
 
 In general, denote a source region by \(S_i\) (over index set \(I\)) and
 a target region by \(T_j\) (over index set \(J\)). For any region \(R\),
@@ -1095,7 +1080,7 @@ For each source region, calculate the proportion of the region that lies
 inside the target region. These proportions are the weights to be
 multiplied by the source regions' properties. In the example case,
 consider target region \(X\): \[
-\widehat{x_X} = \frac{Area(A \cap X)}{Area(A)} \cdot x_{A} + \frac{Area(B \cap X)}{Area(B)} \cdot x_{B} + 0 + 0 = \frac{2}{3}(x_A + x_B).
+\widehat{x_X} = \frac{Area(A \cap X)}{Area(A)} \cdot x_{A} + \frac{Area(B \cap X)}{Area(B)} \cdot x_{B} + 0 + 0 = \frac{2}{3}(x_A + x_B)
 \]
 
 Since \(A\) and \(B\) each have \(2/3\) of their area inside target
@@ -1112,7 +1097,7 @@ Since the intensive property isn't ``divisible'' within a region, we
 instead take a weighted average of the component source regions of the
 target region, where each component is weighted by the amount of the
 target region it takes up. Again considering target region \(X\): \[
-\widehat{y_X} = \frac{Area(A \cap X)}{Area(X)} \cdot y_{A} + \frac{Area(B \cap X)}{Area(X)} \cdot y_{B} + 0 + 0 = \frac{1}{2}(y_A + y_B).
+\widehat{y_X} = \frac{Area(A \cap X)}{Area(X)} \cdot y_{A} + \frac{Area(B \cap X)}{Area(X)} \cdot y_{B} + 0 + 0 = \frac{1}{2}(y_A + y_B)
 \]
 
 Since \(A\) and \(B\) each take up half of target region \(X\), each of
@@ -1123,10 +1108,7 @@ To validate the application of this method to the data at hand, we can
 visually compare the spatial distribution of a variable before the
 interpolation to its distribution after the interpolation.
 \begin{figure}
-\centering
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-4-1.pdf}
-\caption{\label{fig:unnamed-chunk-4}Proportion of non-Hispanic Asian
-residents}
+\includegraphics[width=28.64in]{/Users/jaylee/Desktop/thesis/img/interpolation_check} \caption{Proportion of non-Hispanic Asian residents}\label{fig:unnamed-chunk-5}
 \end{figure}
 \hypertarget{interpolation---counts-vs.percentages}{%
 \subsubsection{Interpolation - counts
@@ -1145,26 +1127,8 @@ interpolating should have the same result as interpolating and then
 calculating the percentage. This was not the case, however - in the
 variable for population between 25 and 44, the error between these two
 methods ranged from -12 to 26 percentage points.
-\begin{verbatim}
-Warning: Removed 4 rows containing missing values (geom_point).
-\end{verbatim}
 \begin{figure}
-\centering
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-5-1.pdf}
-\caption{\label{fig:unnamed-chunk-5}Example error in intensive
-interpolation}
-\end{figure}
-\begin{verbatim}
-`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
-\end{verbatim}
-\begin{verbatim}
-Warning: Removed 4 rows containing non-finite values (stat_bin).
-\end{verbatim}
-\begin{figure}
-\centering
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-5-2.pdf}
-\caption{\label{fig:unnamed-chunk-5}Example error in intensive
-interpolation}
+\includegraphics[width=28.64in]{/Users/jaylee/Desktop/thesis/img/intensive_error} \caption{Sample error in intensive interpolation}\label{fig:unnamed-chunk-6}
 \end{figure}
 As it turns out, these steps are not commutative in this way, and the
 observed error is mostly a function of the weighting between different
@@ -1219,19 +1183,18 @@ contained in one of the files (precincts without census, or census
 without precincts) has zero population, because every person should be
 contained in both a precinct and a census region.
 \begin{figure}
-\centering
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-6-1.pdf}
-\caption{\label{fig:unnamed-chunk-6}Boundary intersection between
-shapefiles}
+\includegraphics[width=29.17in]{/Users/jaylee/Desktop/thesis/img/boundary_intersection} \caption{Boundary intersection between shapefiles}\label{fig:unnamed-chunk-7}
 \end{figure}
-This plot displays the result of this intersection between the two
-regions. The impact on the census tracts is quite visible - notably the
-eastern coastline is much more defined, and the gap in Treasure Island
-(the large island off the northeastern shore) appears. The impact on the
-precinct boundaries is less apparent, but still there - the exclave on
-Alameda Island (small sliver to the East) has disappeared, and in the
-southeastern corner it is visible how the angles in the precinct
-boundary have softened to the more rounded final shape.
+This plot\footnote{The plots were clipped to display the same area.
+  There are some extra islands out of range on the precinct and census
+  maps that are not shown.} displays the result of this intersection
+between the two regions. The impact on the census tracts is quite
+visible - notably the eastern coastline is much more defined, and the
+gap in Treasure Island (the large island off the northeastern shore)
+appears. The impact on the precinct boundaries is less apparent, but
+still there - foe example, in the southeastern corner it is visible how
+the angles in the precinct boundary have softened to the more rounded
+final shape.
 
 Below is a comparison of the original shapefiles\footnote{The original
   census regions contained the Farallon Islands, which have been removed
@@ -1239,9 +1202,7 @@ Below is a comparison of the original shapefiles\footnote{The original
   Ocean, and messed up the scale of the graph.} (including all
 divisions) to the bounded versions.
 \begin{figure}
-\centering
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-7-1.pdf}
-\caption{\label{fig:unnamed-chunk-7}Original versus bounded shapefiles}
+\includegraphics[width=28.64in]{/Users/jaylee/Desktop/thesis/img/clipped_internals} \caption{Original versus bounded shapefiles}\label{fig:unnamed-chunk-8}
 \end{figure}
 \hypertarget{precinct-consolidation}{%
 \subsubsection{Precinct Consolidation}\label{precinct-consolidation}}
@@ -1282,7 +1243,7 @@ doubled across rows), and the second table is the data with proper
 weights applied. Note that this is 6 out of the 12 total precincts that
 get combined into 6 double precincts.
 \begin{longtable}[t]{llrrrr}
-\caption[Combined Precincts - Original]{\label{tab:unnamed-chunk-8}Consolidated Precincts - Original Data}\\
+\caption[Combined Precincts - Original]{\label{tab:unnamed-chunk-9}Consolidated Precincts - Original Data}\\
 \toprule
 Election Pct. & Pct. Number & Overvotes & Not over & Undervotes & Not under\\
 \midrule
@@ -1295,21 +1256,24 @@ Pct 7527/7528 & 7528 & 2 & 392 & 94 & 300\\
 \bottomrule
 \end{longtable}
 \begin{longtable}[t]{llrrrrr}
-\caption[Combined Precincts - Weighted]{\label{tab:unnamed-chunk-9}Consolidated Precincts - Weighted Data}\\
+\caption[Combined Precincts - Weighted]{\label{tab:unnamed-chunk-10}Consolidated Precincts - Weighted Data}\\
 \toprule
 Election Pct. & Pct. Number & Weight & Overvotes & Not over & Undervotes & Not under\\
 \midrule
-Pct 1104/1105 & 1104 & 0.4060452 & 0.4060452 & 184.75056 & 39.386383 & 145.770223\\
-Pct 1104/1105 & 1105 & 0.5939548 & 0.5939548 & 270.24944 & 57.613617 & 213.229777\\
-Pct 7509/7511 & 7511 & 0.7438036 & 0.0000000 & 365.20754 & 98.182069 & 267.025476\\
-Pct 7509/7511 & 7509 & 0.2561964 & 0.0000000 & 125.79246 & 33.817931 & 91.974524\\
-Pct 7527/7528 & 7527 & 0.0129859 & 0.0259719 & 5.09049 & 1.220679 & 3.895783\\
-Pct 7527/7528 & 7528 & 0.9870141 & 1.9740281 & 386.90951 & 92.779321 & 296.104217\\
+Pct 1104/1105 & 1104 & 0.4060452 & 0 & 185 & 39 & 146\\
+Pct 1104/1105 & 1105 & 0.5939548 & 1 & 270 & 58 & 213\\
+Pct 7509/7511 & 7511 & 0.7438036 & 0 & 365 & 98 & 267\\
+Pct 7509/7511 & 7509 & 0.2561964 & 0 & 126 & 34 & 92\\
+Pct 7527/7528 & 7527 & 0.0129859 & 0 & 5 & 1 & 4\\
+Pct 7527/7528 & 7528 & 0.9870141 & 2 & 387 & 93 & 296\\
 \bottomrule
 \end{longtable}
 \hypertarget{calculating-overundervote-info}{%
 \section{Calculating over/undervote
 info}\label{calculating-overundervote-info}}
+
+Move this further up to the section where you talk about that? Or move
+that down because it lines up with the actual process
 
 RCV package (with Matthew) Data from the city elections board Data is
 missing some ballots that had to be hand-counted because it spits out
@@ -1319,7 +1283,7 @@ reports.
 Data comes in in weird double file form, then gets cleaned up and looks
 like this.
 \begin{longtable}[t]{lllll}
-\caption{\label{tab:unnamed-chunk-10}Processed Ballot Image}\\
+\caption{\label{tab:unnamed-chunk-11}Processed Ballot Image}\\
 \toprule
 Contest & Voter ID & 1 & 2 & 3\\
 \midrule
@@ -1336,13 +1300,9 @@ Mayor & 000012894 & LONDON BREED & ANGELA ALIOTO & MARK LENO\\
 Mayor & 000012895 & ELLEN LEE ZHOU & MICHELLE BRAVO & JANE KIM\\
 \bottomrule
 \end{longtable}
-To summarize the data
-\begin{verbatim}
-[1] 0.003050939
-\end{verbatim}
-\begin{verbatim}
-[1] 0.2452883
-\end{verbatim}
+In this view, an overvote in a ranking appears as \texttt{NA} in that
+ranking
+
 \hypertarget{regressions}{%
 \section{Regressions}\label{regressions}}
 
@@ -1399,8 +1359,7 @@ Planning Database, estimated for the election precincts through the
 areal interpolation method. All data is self-reported through the Census
 process.
 \begin{longtable}[]{@{}ll@{}}
-\caption{(\#tab:model\_vars) Census variables used in
-models}\tabularnewline
+\caption{Census variables used in models}\tabularnewline
 \toprule
 \begin{minipage}[b]{0.44\columnwidth}\raggedright
 Variable\strut
@@ -1538,27 +1497,30 @@ well''\strut
 \bottomrule
 \end{longtable}
 \hypertarget{modeling-turnout}{%
-\section[Modeling turnout]{\texorpdfstring{Modeling turnout\footnote{From
-  the dataset, we removed one outlier with a turnout rate of 124\%,
-  Precinct 7024. We believe this is a particlarly egregious error in the
-  interpolation process of calculating population.}}{Modeling turnout}}\label{modeling-turnout}}
+\section{Modeling turnout}\label{modeling-turnout}}
+\begin{verbatim}
+`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+\end{verbatim}
 \begin{figure}
 \centering
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-12-1.pdf}
-\caption{\label{fig:unnamed-chunk-12}Precinct turnout}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-14-1.pdf}
+\caption{\label{fig:unnamed-chunk-14}Observed turnout rate by precinct}
 \end{figure}
 With an adjusted \(R^2\) value of 0.3724189, the best linear model we
-found for predicting turnout\footnote{The gaps in the map above and
-  following maps are Golden Gate Park (to the northwest), Crocker-Amazon
-  Playground and John McLaren Park (to the south), and our removed
-  precinct 7024 (to the southeast).} included variables for both age and
-education. Having more young people (18-24) was negatively correlated
-with turnout, while having more middle-aged and college-educated people
-was positively correlated with turnout. This is consistent with general
+found for predicting turnout\footnote{From the dataset, we removed one
+  outlier with a turnout rate of 124\%, Precinct 7024. We believe this
+  is a particlarly egregious inaccuracy in the interpolation process of
+  calculating population. The gaps in the map above and following maps
+  are Golden Gate Park (to the northwest), Crocker-Amazon Playground and
+  John McLaren Park (to the south), and our removed precinct 7024 (to
+  the southeast).} included variables for both age and education. A
+district having more young people (18-24) was negatively correlated with
+turnout, while having more middle-aged and college-educated people was
+positively correlated with turnout. This is consistent with general
 literature on voter turnout - young people vote less, and the better
 educated vote more.
 \begin{longtable}[t]{lrrrr}
-\caption[Linear turnout model]{\label{tab:unnamed-chunk-13}Linear model for RCV voter turnout}\\
+\caption[Linear turnout model]{\label{tab:unnamed-chunk-15}Linear model for RCV voter turnout}\\
 \toprule
 term & estimate & std.error & statistic & p.value\\
 \midrule
@@ -1573,17 +1535,20 @@ college & 0.3529534 & 0.0230954 & 15.282383 & 0.0000000\\
 \end{verbatim}
 \begin{figure}
 \centering
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-13-1.pdf}
-\caption{\label{fig:unnamed-chunk-13}Linear turnout model validation}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-15-1.pdf}
+\caption{\label{fig:unnamed-chunk-15}Linear turnout model validation}
 \end{figure}
 Logistic -
 
 \hypertarget{modeling-overvoting}{%
 \section{Modeling overvoting}\label{modeling-overvoting}}
+\begin{verbatim}
+`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+\end{verbatim}
 \begin{figure}
 \centering
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-14-1.pdf}
-\caption{\label{fig:unnamed-chunk-14}Precinct overvoting}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-16-1.pdf}
+\caption{\label{fig:unnamed-chunk-16}Observed overvote rate by precinct}
 \end{figure}
 With an adjusted \(R^2\) value of 0.1102897, the best linear model we
 found for predicting overvoting included variables for both race and
@@ -1591,7 +1556,7 @@ education. A district being more African-American was positively
 correlated with overvoting, while having more college-educated people
 was negatively correlated with overvoting.
 \begin{longtable}[t]{lrrrr}
-\caption[Linear overvote model]{\label{tab:unnamed-chunk-15}Linear model for overvoting in RCV}\\
+\caption[Linear overvote model]{\label{tab:unnamed-chunk-17}Linear model for overvoting in RCV}\\
 \toprule
 term & estimate & std.error & statistic & p.value\\
 \midrule
@@ -1605,24 +1570,27 @@ college & -0.0027021 & 0.0006421 & -4.207959 & 2.97e-05\\
 \end{verbatim}
 \begin{figure}
 \centering
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-15-1.pdf}
-\caption{\label{fig:unnamed-chunk-15}Linear overvote model validation}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-17-1.pdf}
+\caption{\label{fig:unnamed-chunk-17}Linear overvote model validation}
 \end{figure}
 Logistic
 
 \hypertarget{modeling-undervoting}{%
 \section{Modeling undervoting}\label{modeling-undervoting}}
+\begin{verbatim}
+`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+\end{verbatim}
 \begin{figure}
 \centering
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-16-1.pdf}
-\caption{\label{fig:unnamed-chunk-16}Precinct undervoting}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-18-1.pdf}
+\caption{\label{fig:unnamed-chunk-18}Observed undervote rate by precinct}
 \end{figure}
 With an adjusted \(R^2\) value of 0.1491059, the best linear model we
 found for predicting overvoting included variables for both race and
 education. Having more African-Americans and residents over 25 without a
 high school degree was negatively correlated with turnout.
 \begin{longtable}[t]{lrrrr}
-\caption[Linear undervote model]{\label{tab:unnamed-chunk-17}Linear model for undervoting in RCV}\\
+\caption[Linear undervote model]{\label{tab:unnamed-chunk-19}Linear model for undervoting in RCV}\\
 \toprule
 term & estimate & std.error & statistic & p.value\\
 \midrule
@@ -1636,16 +1604,16 @@ no\_hs & -0.1685223 & 0.0168803 & -9.9833543 & 0.0000000\\
 \end{verbatim}
 \begin{figure}
 \centering
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-17-1.pdf}
-\caption{\label{fig:unnamed-chunk-17}Linear undervote model validation}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-19-1.pdf}
+\caption{\label{fig:unnamed-chunk-19}Linear undervote model validation}
 \end{figure}
 And these are logistic for over and under - still need to do
 training/test or cross validation, plus better model selection.
 \begin{verbatim}
 
 Call:
-glm(formula = cbind(over_count, no_over_count) ~ +hispanic + 
-    black + no_english, family = binomial, data = sf_precincts)
+glm(formula = cbind(over_count, no_over_count) ~ hispanic + black + 
+    no_english, family = binomial, data = sf_precincts)
 
 Deviance Residuals: 
     Min       1Q   Median       3Q      Max  

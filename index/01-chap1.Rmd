@@ -1,10 +1,6 @@
-<!--
-This is for including Chapter 1.  Notice that it's also good practice to name your chunk.  This will help you debug potential issues as you knit.  The chunk above is called intro and the one below is called chapter1.  Feel free to change the name of the Rmd file as you wish, but don't forget to change it here from chap1.Rmd.
--->
-
-<!--
-The {#chapter1} text after the chapter declaration will allow us to link throughout the document back to the beginning of Chapter 1.  These labels will automatically be generated (if not specified) by changing the spaces to hyphens and capital letters to lowercase.  Look for the reference to this label at the beginning of Chapter 2.
--->
+```{r include = FALSE}
+library(here)
+```
 
 # What is ranked choice voting? {#litreview}
 
@@ -38,7 +34,7 @@ Below are some definitions for frequently used terms later on. These are not all
 
 - *Skipped vote*: when a voter ranks no candidate at slot $x$, but ranks a candidate at slot $y > x$. This is typically not a problem in counting, but different jurisdictions have different rules about whether a voter's ballot is exhausted at this point or continues on to their next ranked choice. Plurality voting has no analog to this, because each race only has one "ranking" (first!).
 
-- *Duplicated vote*: when a voter ranks the same candidate for distinct slots $x$ and $y$. This is typically not a problem for counting, and the first ranking for the candidate is used. Similar to a skipped vote, plurality voting has no analog to this.
+- *Duplicated vote*: when a voter ranks the same candidate for distinct slots $x$ and $y$. This is typically not a problem for counting, and the first ranking for the candidate is used. Similar to a skipped vote, plurality voting has no analog to this. When we fit models to discuss undervoting, this category will be included as well under the heading of "undervoting" because it is also a form of not ranking as many unique candidates as offered.
 
 - *Ballot exhaustion*: as ballot counting progresses, some ballots will become "exhausted" when all the candidates selected are eliminated. Suppose the final count in an election is between candidates B and D, and a voter ranked candidates C-A-E. Their ballot would not be counted in this final round, as they expressed no preference for either candidate B or D. An analogous situation in a plurality election might be voting in the general election but not a runoff, that is only having a say in part of the election.
 
@@ -89,11 +85,11 @@ There are plenty of arguments on both sides of implementing RCV in jurisdictions
 
 There are two major types of "secondary elections" used in American voting: primary elections and runoff elections. Primaries are used by political parties to select their nominee for a general election, so the voters of any one party aren't split between different candidates. Runoffs are most often used when no candidate in the general election surpasses 50% of the vote total. Typically the top two candidates from the general election^[Or primary election - Seven Southern states require primary winners to obtain 50% of the vote to get on the general election ballot, and some other states have a requirement of 40%. (WaPo article)] advance to a later runoff. These secondary elections face two main challenges: low turnout and high cost.
 
-Secondary elections as a whole face low turnout (Wright, 1989; Ranney, 1972). Reasons: Research shows that people don't actually like voting that much <!-- find a better way to phrase this --> - the more frequently elections are held, the lower turnout will be for all of them generally (Boyd, 1986). Secondary elections increase the number of elections in a period, so this is one possible reason why they generally have low turnout. Further research indicates that holding elections concurrently with a presidential election "increase[s] the likelihood that citizens will vote" (Boyd, 1986). This is seen in off-year Congressinoal elections, where turnout drops <!-- number/stat??? --> from presidential years. Typically general elections are held concurrently with presidential elections (second Tuesday in November, super high media coverage, lots of voter outreach, yadda yadda), so secondary elections cannot be held at the same time as a presidential election and they should thus suffer in turnout. This low turnout has consequences for representation in the system. The same research (Ranney, 1972) finds that while primary voters are not ideologically unrepresentative of general election voters, they are both demographically unrepresentative and unrepresentative on some major issues. Traditional knowledge holds that primary voters are more committed partisans than general election voters, leading the eventual candidates in a general election to be polarized away from the "center" of political ideas (double check this but I'm pretty sure the cite is Hill's *Instant Runoff Voting*).
+Secondary elections as a whole face low turnout (Wright, 1989; Ranney, 1972). Reasons: Research shows that people don't actually like voting that much <!-- find a better way to phrase this --> - the more frequently elections are held, the lower turnout will be for all of them generally (Boyd, 1986). Secondary elections increase the number of elections in a period, so this is one possible reason why they generally have low turnout. Further research indicates that holding elections concurrently with a presidential election "increase[s] the likelihood that citizens will vote" (Boyd, 1986). This is seen in off-year Congressional elections, where turnout drops <!-- number/stat??? --> from presidential years. Typically general elections are held concurrently with presidential elections (second Tuesday in November, super high media coverage, lots of voter outreach, yadda yadda), so secondary elections cannot be held at the same time as a presidential election and they should thus suffer in turnout. This low turnout has consequences for representation in the system. The same research (Ranney, 1972) finds that while primary voters are not ideologically unrepresentative of general election voters, they are both demographically unrepresentative and unrepresentative on some major issues. Traditional knowledge holds that primary voters are more committed partisans than general election voters, leading the eventual candidates in a general election to be polarized away from the "center" of political ideas (double check this but I'm pretty sure the cite is Hill's *Instant Runoff Voting*).
 
 The higher costs associated with secondary elections are a little more intuitive than turnout issues - it takes money to hold elections. Pollworkers have to be paid, facilities have to be reserved, and candidates have to do more campaigning. A 2011 City Council runoff in Plano, TX cost the city an extra \$73,000 (Plano Star Courier, 2011). A 2012 Alabama runoff for multiple seats cost the state about \$3 million.
 
-Since RCV eliminates the need for primary and runoff elections while still ensuring majority rule (which is the main reason for these elections), it should avoid the problems of lower turnout and higher costs associated with secondary elections^[Or at least some of it - costs overall are indeterminate (Rhode comference paper)]. Summed up, RCV decreases costs and "boosts turnout via elimination of low-turnout elections" (Morales, 2018).
+Since RCV eliminates the need for primary and runoff elections while still ensuring majority rule (which is the main reason for these elections), it should avoid the problems of lower turnout and higher costs associated with secondary elections^[Or at least some of it - costs overall are indeterminate (Rhode conference paper)]. Summed up, RCV decreases costs and "boosts turnout via elimination of low-turnout elections" (Morales, 2018).
 
 #### Ensures majority rule
 
@@ -117,46 +113,8 @@ Ranked choice voting should incentivize candidates to avoid negative campaigning
 
 An interesting case study of this phenomena is in the 2018 San Francisco mayoral election <!-- SF Weekly article on cross-endorsement -->. There were three frontrunners heading into election day, all incumbent members of the city's Board of Supervisors: London Breed, Jane Kim, and Mark Leno. As polls showed Breed ahead about a month before the election, Kim and Leno held a joint press conference to endorse the other as voters' second choices. By drawing second-choice votes from the other candidate, the remaining candidate hoped to overcome the gap between them and Breed. In the actual election, the standing when it came time to proceed to the final round of counting was 102,767 for Breed, 68,707 for Leno, and 66,043 for Kim. While a significant proportion of Kim's voters transferred to Leno after her elimination, in the final round Breed surpassed Leno by about 2,000 votes. <!-- data from SF board of elections table page -->
 
-<!-- figure out how the hell to make this work later -->
-```{r echo = FALSE, eval = FALSE, message = FALSE}
-library(dplyr)
-library(rvest)
-# data from the html table given by the state
-link <- "https://sfelections.org/results/20180605/data/20180627/mayor/20180627_mayor.html"
-path <- '//*[@id="ResultsContainer"]/table'
-official <- read_html(link) %>%
-  html_nodes(xpath = path) %>%
-  html_table() %>%
-  as.data.frame()
-official2 <- select(official, matches("^[A-z]+\\.\\d$")) %>%
-  rbind(c("NA", as.numeric(unlist(.[16, -1])) - as.numeric(unlist(.[15, -1])))) %>%
-  slice(c(-1,-12:-17))
-official2[official2 == 0] <- NA
-official2 <- official2[c(1:8,10,9,11), ]
-rownames(official2) <- NULL
-official2$Round.1[9:10] <- official2$Round.2[9] <- 0
-colnames(official2) <- c('candidate', paste0("round", 1:9))
-official2 <- official2 %>%
-  arrange(candidate == "NA",
-          rowSums(is.na(.)),
-          dplyr::desc(.[ ,ncol(.)])) %>%
-  mutate_at(vars(starts_with('round')), as.numeric)
-renamed <- mutate(official2,
-                  first = stringr::str_sub(candidate, 1, 1),
-                  last = stringr::str_extract(candidate, "[A-z]+$"),
-                  candidate = paste(first, last, sep = ". ")) %>%
-  select(-first, -last, -round1, -round2) %>%
-  slice(-c(9,10))
-renamed[9,1] <- "NA"
-
-for_plotting <- rcv::make_d3list(results = renamed)
-
-networkD3::sankeyNetwork(Links = for_plotting$values, Nodes = for_plotting$names,
-              Source = "source", Target = "target",
-              Value = "value", NodeID = "candidate", units = "voters",
-              fontSize = 10, nodeWidth = 20, width = 800)
-# hmmmm this shows up in the gitbook but not the pdf output - find a fix for that at some point, it's a good plot and there's gonna be multiple of them
-# also figure out formatting / caption / figure referencing in template
+```{r echo=FALSE, out.width='100%', fig.cap='Cross-endorsement in SF mayoral race'}
+knitr::include_graphics(here('img', 'sankey_official_sfmayor18.png'))
 ```
 
 Though it's outside the scope of this research to tell if this cross-endorsement was effective^[Other confounding factors counld exist: maybe Kim and Leno had similar enough positions that this scenario would have happened without the endorsement, maybe this number is only significant because in the final rounds there were only 2 candidates for second choice votes to flow to, etc.], there is some evidence in favor of this theory. Leno received almost 70% of the votes previously counted for Kim compared to Breed's 20%, bringing Breed's final margin of victory down to only 1 percentage point. In previous rounds of the election, no single candidate ever received more than 35% of the transferred votes from an eliminated candidate^[Except for round 2, where all 3 votes for the same write-in candidate transferred to Breed.], so this is at least an unusual observation. <!-- This from the html data given by the state, graph and analysis by me with RCV -->

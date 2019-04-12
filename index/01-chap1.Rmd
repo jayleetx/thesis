@@ -2,7 +2,9 @@
 library(here)
 ```
 
-# What is ranked choice voting? {#litreview}
+# Background {#litreview}
+
+## What is ranked choice voting?
 
 Ranked choice voting (RCV), also known as the alternative vote (AV) or instant-runoff voting (IRV) is an alternative voting method to the first-past-the-post (FPTP) or "plurality" election system more familiar to American voters, where the candidate with the most votes wins. Each voter, instead of choosing their highest preference among a set of candidates for an office, ranks some subset of the candidates in order of preference. This system (or a close variant) is used in Australia, Maine, and some American municipalities: San Francisco, CA; Minneapolis, MN; and Cambridge, MA; among others.
 <!-- What's the best way to format these commas? -->

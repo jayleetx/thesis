@@ -1,9 +1,11 @@
 library(hot.deck)
 library(here)
 library(dplyr)
+library(tidyr)
 library(rcv)
 library(simputation)
 library(VIM)
+options(simputation.hdbackend="VIM")
 
 load(here('data', 'sf_ballot.RData'))
 
@@ -30,10 +32,24 @@ orig_counts <- count(sf_wide, `x1`, `x2`, `x3`) %>%
   arrange(desc(n)) %>%
   mutate(prop = n / sum(n))
 
+orig_results <- rcv_tally(sf, 'Mayor')
+
 # this is what listwise deletion would look like
-full_counts <- orig_counts %>%
+listwise <- sf_wide %>%
   filter(complete.cases(.)) %>%
+  rename(`1` = x1,
+         `2` = x2,
+         `3` = x3)
+
+listwise_long <- listwise %>%
+  gather(key = 'vote_rank', value = 'candidate', `1`, `2`, `3`) %>%
+  arrange(pref_voter_id)
+
+listwise_counts <- count(listwise, `1`, `2`, `3`) %>%
+  arrange(desc(n)) %>%
   mutate(prop = n / sum(n))
+
+listwise_results <- rcv_tally(listwise_long)
 
 # and here's random hot deck
 
@@ -60,7 +76,7 @@ imputed_counts <- count(imputed, `1`, `2`, `3`) %>%
   arrange(desc(n)) %>%
   mutate(new_prop = n / sum(n))
 
-errors <- full_join(full_counts, imputed_counts, by = c('x1' = '1', 'x2' = '2', 'x3' = '3')) %>%
+errors <- full_join(listwise_counts, imputed_counts, by = c('1', '2', '3')) %>%
   select(-n.x, -n.y) %>%
   mutate(difference = new_prop - prop)
 
@@ -76,5 +92,8 @@ hist(errors$difference)
 # there's probably something hard-coded into the function that accounts for NAs that are now gone
 # that's it and I'll fix it later
 # probably change "n unique candidates minus 2" to "n unique non-NA candidates minus 1"
-results <- rcv_tally(imputed_long)
+imputed_results <- rcv_tally(imputed_long)
 # okay that's fixed now but I gotta reload it from my github repo
+
+# these three things are all different in their 2nd / 3rd ranking!
+# orig_results, listwise_results, imputed_results

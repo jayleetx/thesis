@@ -52,7 +52,9 @@ by_precinct <-  sf_no_vote %>%
 
 # join in demographic data #####
 
-demo_data <- st_read(dsn = here("data", "demographic_data"), stringsAsFactors = FALSE)
+demo_data <- st_read(dsn = here("data", "demographic_data"),
+                     layer = "demo_data",
+                     stringsAsFactors = FALSE)
 # reset column names because saving the shapefile messes them up
 colnames(demo_data) <- c('PREC_2017', 'population', 'female', 'pop_18_24', 'pop_25_44',
                          'pop_45_64', 'pop_65_plus', 'hispanic', 'white', 'black', 'native',
@@ -103,3 +105,34 @@ doubles_for_table <- bind_rows(sf_unadjusted, double_cases) %>%
   mutate_at(vars(ends_with('_count')), function(x) round(x * .$weight))
 
 save(doubles_for_table, file = here('data', 'double_precincts.RData'))
+
+# okay but now combine the double precincts for dealing with the ballot data in part 2 #####
+
+demo_counts <- st_read(dsn = here("data", "demographic_data"),
+                       layer = "demo_counts",
+                       stringsAsFactors = FALSE) %>%
+  as.data.frame() %>%
+  select(-geometry)
+
+colnames(demo_counts) <- c('PREC_2017', 'shape_area', 'group1', 'population', 'female', 
+                           'pop_18_24', 'pop_25_44', 'pop_45_64', 'pop_65_plus', 'hispanic', 
+                           'white', 'black', 'native', 'asian', 'pac_islander', 'other_race', 
+                           'education_denom', 'no_hs', 'college', 'poverty_denom', 'poverty', 
+                           'no_english', 'language_denom')
+
+joined <- by_precinct %>%
+  fuzzy_full_join(demo_counts, by = c("precinct" = "PREC_2017"), match_fun = str_detect)
+
+combined_pcts <- joined %>%
+  select(-ends_with('_count'), -PREC_2017, -shape_area, -group1) %>%
+  group_by(precinct) %>%
+  mutate_at(vars(-group_cols()), sum) %>%
+  distinct() %>%
+  ungroup() %>%
+  mutate_at(vars(female:other_race), function(x) x / .$population) %>%
+  mutate_at(vars(no_hs:college), function(x) x / .$education_denom) %>%
+  mutate(poverty = poverty / poverty_denom,
+         no_english = no_english / language_denom) %>%
+  select(-c(education_denom, poverty_denom, language_denom))
+
+save(combined_pcts, file = here('data', 'combined_precincts.RData'))

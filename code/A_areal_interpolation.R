@@ -181,3 +181,11 @@ hist <- ggplot(sf_wrong, aes(x = asian - asian_wrong)) + geom_histogram()
 intensive_error <- scatter + hist + plot_layout(ncol = 2)
 
 ggsave(here('img', 'intensive_error.png'), intensive_error)
+
+# okay now combining the double precincts for the back section #####
+
+demo_counts <- precincts %>%
+  mutate(Group.1 = 1:nrow(.)) %>%
+  left_join(join, by = 'Group.1')
+
+st_write(demo_counts, here('data', 'demographic_data', 'demo_counts.shp'), delete_dsn = TRUE)

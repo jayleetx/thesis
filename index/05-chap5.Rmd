@@ -1,0 +1,42 @@
+## Methods 2
+
+The data was transformed first, to remove any duplicated votes (e.g., a row listing London Breed 3 times was reduced to its functional equivalent: listing London Breed once) and "left-align" all ballots so that ballots with one missing value always had it in slot 3, and ballots with 2 missing values always had them in slots 2 and 3.
+
+We used hot deck imputation to guess at missing values in the dataset. There were $N$ methods of dealing with the missing data that we used:
+
+- Listwise deletion. This does not have an analog to "what if everybody voted all the way", but instead just removes any ballot without 3 unique candidate choices. This has no analog to "what if everybody voted fully", because instead of using the available information on voters it 
+This gives us a "full vote choice distribution" that we can use to compare the other methods to.
+
+```{r echo = FALSE}
+listwise <- sf_wide %>%
+  filter(complete.cases(.)) %>%
+  rename(`1` = x1,
+         `2` = x2,
+         `3` = x3)
+
+listwise_counts <- count(listwise, `1`, `2`, `3`) %>%
+  arrange(desc(n)) %>%
+  mutate(prop = n / sum(n))
+
+knitr::kable(head(listwise_counts, 10), 
+      col.names = c("1", "2", "3", "Count", "Proportion"),
+      caption = "Examination of full voter counts",
+      caption.short = "Listwise vote counts",
+      longtable = TRUE,
+      booktabs = TRUE)
+```
+
+
+- Random hot deck imputation (RHD) based on vote choice alone. Missing data points are matched to potential donors by their corresponding 1st vote choice when imputing the 2nd vote choice, and by their first 2 vote choices when imputing the 3rd vote choice.
+
+- RHD based on vote choice and precinct. Same as vote choice alone, but now donors also must be from the same precinct as the missing data.
+
+Each of these methods was validated by removing some values that were present in the original dataset and seeing how well the imputation guessed the made-missing values. (Haven't done this yet but will soon). Results of that are discussed here.
+
+### Issues
+
+Too much certainty in single hot deck: To fix, we run multiple times to get some variability in the imputation method.
+
+Imputation using an imputed variable: Since we impute the 3rd choice based on the first and second choices, this means we're imputing some rows based on the imputed (unobserved) 2nd value. This can lead to issues (idk what kind?). Maybe test at by trying it with the imputed 2nd ones, then just using the 1st ones to impute and comparing.
+
+Cases where a donor pool is not available: Some combinations of vote choices (typically including unpopular candidates), or precinct and vote choices, are unique or not present in the data. This means that the hot deck method cannot match any donor to impute a value. We then fill in with the next-best method, that is: if there is no combination of 1st and 2nd that matches the case we need to impute 3rd for, we fall back to just matching 1st and imputing the value. The following is an illustration of how often this phenomenon happens (haven't mocked up yet but it's really low, something like 1%-2% of the 3rd vote choices fail even when matching precinct, 1st, and 2nd choice).

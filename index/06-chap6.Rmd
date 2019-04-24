@@ -1,0 +1,43 @@
+## Results 2
+
+We don't see a whole ton of variability running the same method multiple times (that is, multiple imputations) - maybe there's just so much data that the "randomness" in hot deck starts to approach a steady distribution no matter how you run it? Sort of law-of-large-numbers-ing itself into fixed-ness. Data for this: the rankings across 150 imputations based on vote choice all look identical. Fluctuations in number of votes per round do increase across rounds, as we would expect with the added variability of imputation compounding over time, but these are small and not enough to ever change results.
+
+```{r results = 'hold', eval = FALSE}
+# standard deviation of London Breed's number of votes
+
+```
+
+(The code doesn't run rn but these are the results)
+
+[1] 0
+
+[1] 0
+
+[1] 4.646616
+
+[1] 5.980576
+
+[1] 23.16143
+
+[1] 33.02316
+
+[1] 47.58898
+
+[1] 54.57599
+
+On the whole - These so far have not had an effect on who gets elected (as we see above, the SDs are really small). I might try to pull a Mythbusters and rig the conditions to see if there's **any** way to change the results.
+
+```{r}
+nothing_diff <- full_join(listwise_counts, nothing_counts, by = c('1', '2', '3')) %>%
+  select(-n.x, -n.y) %>%
+  mutate(difference = new_prop - prop)
+```
+
+### Future research
+
+Do this but in Cambridge - lets you rank every candidate on the ballot, so there's way more missing data. Due to having so much missing data, would have to probably get into some stuff like a Markov chain (see below).
+
+Currently only people who voted at all in this election are being imputed on. We could use the demographic multinomial model or the precinct-based hot deck to impute three vote choices for everybody in San Francisco. If certain precincts are particularly underrepresented in
+
+Stochastic process methods in general - interesting. I'm thinking about a setup where your "state" is the candidate in slot $n$, and we're trying to get at transition probabilities of moving to another state (candidate) in slot $n+1$. This would have to have some kind of memory/uniqueness, because you can't vote for the same candidate twice. Are there Markov chain-esque things where you can only move to nonrepeated states?
+*NB: "Markov chain" isn't the right word for this (because of this memory, a Markov process only takes into consideration your current state), but some sort of stochastic process with states and transition probabilities would be interesting.*

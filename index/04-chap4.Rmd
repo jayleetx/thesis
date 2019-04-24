@@ -1,0 +1,100 @@
+## Background 2: Electric Boogaloo
+
+### Missing data
+
+Many statistical methods require complete data sets, that is data where every possible observation has a proper value, to work correctly (regression, etc.). <!-- find better examples and a source for this --> In many fields of research, however, data collection often results in missing data. Respondents skipping questions (nonresponse), reeponsdents not completing all phases of a multi-stage survey (attrition), governments not reporting certain data, and errors in data collection are all examples of reasons that data can be missing.
+
+Suppose we have a matrix $X$, with some missing data, which has $m$ rows and $n$ columns. Let $Y = (y_{ij})$ be the complete version of dataset $X$, that is every missing data point in $X$ is now observed. Let $A$ be an $m \times n$ matrix, where
+\[
+A = (a_{ij}) \text{, where } a_{ij} = \cases{1, \text{ when }x_{ij}\text{ is missing}\\
+0, \text{ when }x_{ij}\text{ is not missing}}
+\]
+Let $Y_{obs}$ be the observed data in $Y$, that is the entries in $Y$ corresponding to the entries in $A$ that equal 0, and $Y_{mis}$ be the missing data in $Y$, that is the entries in $Y$ corresponding to the entries in $A$ that equal 1. Let $\phi$ denote some unknown parameters.
+
+The literature on missing data has identified three distinct subtypes of missing data (Rubin & Little, 2002/2014).
+
+- Missing completely at random (MCAR). The distribution of missing values does not depend on any data in $Y$, observed or missing. \[f(M|Y,\phi) = f(M|\phi) \;\forall\; Y,\phi\] An example of this is a survey where the respondent mislabeled a question answer by accident.
+
+- Missing at random (MAR). The distribution of missing values depends on the observed data, but not any missing data. \[f(M|Y,\phi) = f(M|Y_{obs},\phi) \;\forall\; Y_{mis},\phi\] An example of this is an election poll where members of one party are less likely to report their true vote choice than members of another party. The distribution of missing vote choice depends on an observed variable, party identification.
+
+- Non-ignorable (NI), or missing not at random (MNAR). The distribution of missing values depends on the missing values themselves. An example of this is high-income respondents leaving the income field blank in a survey to obscure their true earnings.
+
+### Methods of dealing with missing data
+
+#### Listwise deletion
+
+Listwise deletion is the most common method of dealing with missing data, as many statistical packages perform listwise deletion on datasets before running most analyses (because they need complete data). In listwise deletion, any row with a missing value is fully removed from the dataset. This can lead to biased parameter estimates when the data is not MCAR. Consider the high-income censoring case as above, with average income being the parameter of interest. If high earners are censoring their income and they are dropped from the dataset, our estimate of average income will be negatively biased. Additionally, listwise deletion will reduce the number of overall observations going into any analysis, which reduces the statistical power of methods and increases the size of equivalent confidence intervals.
+
+#### Maximum likelihood methods
+
+Maximum likelihood methods don't actually do anything with the missing data. Similar to any maximum-likelihood-based parameter estimation with full data, they use all the available data to estimate which parameter values are the most likely.
+
+#### Inverse probability weighting
+
+#### Imputation - single and multiple
+
+Unlike maximum likelihood, imputation is a way of filling in the missing data points directly. In *single imputation*, a single value is estimated for each missing cell in the data. Some variants of single imputation are:
+
+- Mean imputation, where the mean of the observed data column is taken. This can lead to biased estimates if the data is not MCAR (the observed data is not representative of the missing data), and also negatively impacts measures of variance.
+
+- Hot deck imputation, where a value from an otherwise similar row in the data is taken. This comes in two subtypes:
+  + Random hot deck, where a random case is drawn to fill in the missing values.
+  + Sequential hot deck, where the most immediately previous matching case is drawn to fill in the missing values.
+
+- Regression imputation, a model-based approach where the missing value is predicted using a regression equation that is trained using the observed data.
+
+- Multinomial imputation, another model-based approach tailored for a categorical response variable.
+
+- Last value imputation, where the missing value is copied from the immediately preceding observed value. This is particularly common in time series data, where this is a natural ordering of the observations.
+
+*Multiple imputation* is a method of running single imputation multiple times to create some variability in your estimates. A dataset is imputed multiple times (with some variability between imputations), then for each new dataset the parameter of interest is calculated. This added variability moderates the appearance of "certainty" that comes with single imputation.
+
+#### Other methods
+
+In particular, our data is *monotone* missing data - that is, for a certain order of our variables $(Y_i)$, an observation having a missing value in column $Y_j$ implies that it has a missing value in all columns $Y_J$ where $J > j$. In our case, what this looks like is that you cannot have a third choice for mayor without having a second choice present^[We treat the presence of a third choice and the absence of a second choice in a given voter's ballot as an error, and re-align our data so that the unique choices provided by each voter are filled in "minimally" to satisfy this monotone condition. Such an assumption is not unreasonable, given our access to voter's true opinions through their reporting as such on the ballot.]. There are additional methods that can be used with monotone data, on which we do not go into greater detail here. These are described at more length in Rubin, 1974.
+
+## What if everybody votes (fully)?
+
+The question of "what if everybody voted" is one studied in literature, and particularly studied under ranked choice voting as well (though by a very niche set of researchers). *NB, I have research on this it's just not currently in here.* Consider the following table, which shows the twenty most common combinations of votes in the 2018 SF mayoral election.
+
+```{r echo = FALSE}
+library(rcv)
+library(here)
+library(dplyr)
+
+load(here('data', 'sf_ballot.RData'))
+
+orig_wide <- readable(sf) %>% filter(contest == 'Mayor')
+
+precincts <- distinct(sf, pref_voter_id, precinct)
+
+# so this just organizes the data so that duplicates are dropped and non-NAs moved to the front
+sf_wide <- sf %>%
+  filter(contest == 'Mayor') %>%
+  arrange(pref_voter_id, vote_rank) %>%
+  filter(!is.na(candidate)) %>%
+  distinct(pref_voter_id, candidate, .keep_all = TRUE) %>%
+  group_by(pref_voter_id) %>%
+  mutate(vote_rank = row_number()) %>%
+  readable() %>%
+  left_join(precincts, by = 'pref_voter_id') %>%
+  ungroup() %>%
+  rename(x1 = `1`,
+         x2 = `2`,
+         x3 = `3`)
+
+orig_counts <- count(sf_wide, `x1`, `x2`, `x3`) %>%
+  arrange(desc(n)) %>%
+  mutate(prop = n / sum(n))
+
+knitr::kable(head(orig_counts, 20), 
+      col.names = c("1", "2", "3", "Count", "Proportion"),
+      caption = "Examination of voter counts",
+      caption.short = "Original vote counts",
+      longtable = TRUE,
+      booktabs = TRUE)
+```
+
+The most common vote choice was London Breed and nobody else, which shows the potential for many more people to fill in 2nd and 3rd vote choices. While this (and most other undervotes in the first few rows here) would not have changed the election result because of how they voted for final candidates, consider row 20: people who only voted for Angela Alioto, the eventual fourth-place finisher. There were 3,524 people who voted for Alioto alone, which is larger than the final margin of 2,268 between London Breed and Mark Leno. The presence of undervotes like this has the potential to change the results of an election.
+
+There's an interesting thing here, also - we're treating all undervotes as equal, but a person who voted for London Breed or Mark Leno as their first choice will never have their second choice counted, so what does it matter if they undervoted? Well for one, you can't know for sure who's going to win, so it's *still* best for everybody to hedge their bets. For example, in the course of imputing these vote choices, I still filled in 2nd and 3rd choices for those who voted for London Breed alone, on the off chance that other candidates displaced her in the tabulation process.

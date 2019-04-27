@@ -10,6 +10,7 @@
 % May 2005 Patrick Carlisle Table of contents chapter definition
 % 2004-2005 Ben Salzberg (BTS) a variety of tweaks here and in the template
 % 2015 Chester Ismay (CII) modified to create R Markdown template
+% 2019 Jay Lee (JJL) modified to swap dedication for list of abbreviations
 %
 % Oddities:
 %
@@ -241,13 +242,13 @@
   \fontsize{12}{14}\selectfont
 }{\clearpage \if@restonecol\twocolumn\fi}%
 
-\newenvironment{preface}{%
+\newenvironment{abbrevs}{%
   \if@twocolumn
     \@restonecoltrue\onecolumn
   \else
     \@restonecolfalse
   \fi
-  \chapter*{Preface}
+  \chapter*{List of Abbreviations}
   \fontsize{12}{14}\selectfont
 }{\clearpage \if@restonecol\twocolumn\fi}%
 % End of CII add
@@ -356,5 +357,5 @@
 %\newcommand{\Plainkeywords}[1]{\def\@Plainkeywords{#1}}
 \newcommand{\Acknowledgements}[1]{\def\@Acknowledgements{#1}}
 \newcommand{\Dedication}[1]{\def\@Dedication{#1}}
-\newcommand{\Preface}[1]{\def\@Preface{#1}}
+\newcommand{\Abbrevs}[1]{\def\@Abbrevs{#1}}
 % End of CII add

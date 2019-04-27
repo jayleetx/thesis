@@ -7,18 +7,38 @@ If you feel it necessary to include an appendix, it goes here.
 -->
 
 
-# The First Appendix
+# Description of variables {#appendix}
 
-This first appendix includes all of the R chunks of code that were hidden throughout the document (using the `include = FALSE` chunk tag) to help with readibility and/or setup.
+| Variable | Description |
+|---------------------|------------------------|
+| female  | The percentage of the population that is female |
+| pop_18_24 | The percentage of the population that is between 18 and 24 years old |
+| pop_25_44 | The percentage of the population that is between 25 and 44 years old |
+| pop_45_64 | The percentage of the population that is between 45 and 64 years old |
+| pop_65_up | The percentage of the population that is 65 years old or over |
+| hispanic | The percentage of the population that identify as "Mexican", "Puerto Rican", "Cuban", or "another Hispanic, Latino, or Spanish origin" |
+| white | The percentage of the population that indicate no Hispanic origin and their only race as "White" or report entries such as Irish, German, Italian, Lebanese, Arab, Moroccan, or Caucasian |
+| black | The percentage of the population that indicate no Hispanic origin and their only race as "Black, African Am., or Negro" or report entries such as African American, Kenyan, Nigerian, or Haitian |
+| native | The percentage of the population that indicate no Hispanic origin and their only race as "American Indian or Alaska Native" or report entries such as Navajo, Blackfeet, Inupiat, Yup'ik, or Central/South American Indian groups |
+| asian |The percentage of the population that indicate no Hispanic origin and their only race as "Asian Indian", "Chinese", "Filipino", "Korean", "Japanese", "Vietnamese", or "Other Asian" |
+| pac_islander | The percentage of the population that indicate no Hispanic origin and their only race as "Native Hawaiian", "Guamanian or Chamorro", "Samoan", or "Other Pacific Islander" |
+| other_race | The percentage of the population that indicate no Hispanic origin and their race as other than "White", "Hispanic", "Black or African American", "American Indian or Alaska Native", "Asian", and "Native Hawaiian or Other Pacific Islander" |
+| no_hs | The percentage of the population aged 25 years and over that are not high school graduates and have not received a diploma or the equivalent |
+| college | The percentage of the ACS population aged 25 years and over that have a college degree or higher |
+| poverty | The percentage of the eligible population^[The "eligible population" is measured by the Census as "Number of people excluding institutionalized people, people in military group quarters, people in college dormitories, and unrelated individuals under 15 years old"] that are classified as below the poverty level given their total family or household income within the last year, family size, and family composition |
+| no_english | The percentage of all occupied housing units^[This variable is at the level of housing units (not persons), and the Census measures "occupied housing units" as "Number of housing units classified as usual place of residence of the individual or group living in it"] where no one ages 14 years and over speaks English only or speaks English "very well" |
 
-**In the main Rmd file**
+Table: (\#tab:var-list) Census variables used in models
 
-```{r ref.label='include_packages', results='hide', echo = TRUE}
-```
+# List of acronyms {#appendix-2}
 
-**In Chapter \@ref(ref-labels):**
-
-```{r ref.label='include_packages_2', results='hide', echo = TRUE}
-```
-
-# The Second Appendix, for Fun
+MLE: Maximum likehood estimation
+MI: Multiple imputation
+RCV: Ranked choice voting
+SF: San Francisco
+MCAR
+MAR
+MNAR / NI
+RHD
+VAP
+VEP

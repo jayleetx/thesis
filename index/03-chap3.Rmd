@@ -20,30 +20,9 @@ best_linear_over <- lm(overvote_rate ~ black + college, data = sf_precincts)
 best_linear_under <- lm(undervote_rate ~ black + no_english, data = sf_precincts)
 ```
 
-# Results {#results}
+# Demographic analysis results {#demo-results}
 
-For the following models, I use variables taken from the US Census 2018 Planning Database, estimated for the election precincts through the areal interpolation method. All data is self-reported through the Census process.
-
-| Variable | Description^[All descriptions taken from the Planning Database.] |
-|---------------------|------------------------|
-| female  | The percentage of the population that is female^[The Census specifically asks about binary sex; there are currently no questions about gender identity.] |
-| pop_18_24 | The percentage of the population that is between 18 and 24 years old |
-| pop_25_44 | The percentage of the population that is between 25 and 44 years old |
-| pop_45_64 | The percentage of the population that is between 45 and 64 years old |
-| pop_65_up | The percentage of the population that is 65 years old or over |
-| hispanic | The percentage of the population that identify as "Mexican", "Puerto Rican", "Cuban", or "another Hispanic, Latino, or Spanish origin" |
-| white | The percentage of the population that indicate no Hispanic origin and their only race as "White" or report entries such as Irish, German, Italian, Lebanese, Arab, Moroccan, or Caucasian |
-| black | The percentage of the population that indicate no Hispanic origin and their only race as "Black, African Am., or Negro" or report entries such as African American, Kenyan, Nigerian, or Haitian |
-| native | The percentage of the population that indicate no Hispanic origin and their only race as "American Indian or Alaska Native" or report entries such as Navajo, Blackfeet, Inupiat, Yup'ik, or Central/South American Indian groups |
-| asian |The percentage of the population that indicate no Hispanic origin and their only race as "Asian Indian", "Chinese", "Filipino", "Korean", "Japanese", "Vietnamese", or "Other Asian" |
-| pac_islander | The percentage of the population that indicate no Hispanic origin and their only race as "Native Hawaiian", "Guamanian or Chamorro", "Samoan", or "Other Pacific Islander" |
-| other_race | The percentage of the population that indicate no Hispanic origin and their race as other than "White", "Hispanic", "Black or African American", "American Indian or Alaska Native", "Asian", and "Native Hawaiian or Other Pacific Islander" |
-| no_hs | The percentage of the population aged 25 years and over that are not high school graduates and have not received a diploma or the equivalent |
-| college | The percentage of the ACS population aged 25 years and over that have a college degree or higher |
-| poverty | The percentage of the eligible population^[The "eligible population" is measured by the Census as "Number of people excluding institutionalized people, people in military group quarters, people in college dormitories, and unrelated individuals under 15 years old"] that are classified as below the poverty level given their total family or household income within the last year, family size, and family composition |
-| no_english | The percentage of all occupied housing units^[This variable is at the level of housing units (not persons), and the Census measures "occupied housing units" as "Number of housing units classified as usual place of residence of the individual or group living in it"] where no one ages 14 years and over speaks English only or speaks English "very well" |
-
-Table: Census variables used in models
+For the following models, I use variables taken from the US Census 2018 Planning Database^[All descriptions taken from the Planning Database as well.], estimated for the election precincts through the areal interpolation method. All data is self-reported through the Census process^[In regards to the `female` variable: the Census specifically asks about binary sex; there are currently no questions about gender identity.]. A description of these variables is in the [Appendix](#appendix).
 
 ## Modeling turnout
 
@@ -56,7 +35,7 @@ turnout_hist <- ggplot(sf_precincts, aes(x = turnout_rate)) + geom_histogram() +
 turnout_map + turnout_hist + plot_layout(ncol = 2)
 ```
 
-With an adjusted $R^2$ value of `r summary(best_linear_turnout)$adj.r.squared`, the best linear model we found for predicting turnout^[From the dataset, we removed one outlier with a turnout rate of 124%, Precinct 7024. We believe this is a particlarly egregious inaccuracy in the interpolation process of calculating population. The gaps in the map above and following maps are Golden Gate Park (to the northwest), Crocker-Amazon Playground and John McLaren Park (to the south), and our removed precinct 7024 (to the southeast).] included variables for both age and education. A district having more young people (18-24) was negatively correlated with turnout, while having more middle-aged and college-educated people was positively correlated with turnout. This is consistent with general literature on voter turnout - young people vote less, and the better educated vote more.
+With an adjusted $R^2$ value of `r summary(best_linear_turnout)$adj.r.squared`, the best linear model we found for predicting turnout^[From the dataset, we removed one outlier with a turnout rate of 124%, Precinct 7024. We believe this is a particlarly egregious inaccuracy in the interpolation process of calculating population. The gaps in the map above and following maps are Golden Gate Park (to the northwest), Crocker-Amazon Playground and John McLaren Park (to the south), and our removed precinct 7024 (to the southeast).] included variables for both age and education. A district having more young people (ages 18-24) was negatively correlated with turnout, while having more middle-aged and college-educated people was positively correlated with turnout. This is consistent with general literature on voter turnout - young people vote less, and the better educated vote more.
 
 ```{r, fig.cap="Linear turnout model validation"}
 kable(tidy(best_linear_turnout) %>% mutate(term = stringr::str_remove_all(term, '\\(|\\)')),

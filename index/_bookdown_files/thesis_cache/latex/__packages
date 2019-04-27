@@ -1,10 +1,4 @@
 base
-methods
-datasets
-utils
-grDevices
-graphics
-stats
 devtools
 dplyr
 ggplot2
@@ -19,3 +13,7 @@ stringr
 leaps
 sf
 bindrcpp
+usethis
+purrr
+broom
+simputation

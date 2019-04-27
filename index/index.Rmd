@@ -13,7 +13,8 @@ knit: "bookdown::render_book"
 site: bookdown::bookdown_site
 always_allow_html: yes
 output: 
-  thesisdown::thesis_pdf: default
+  thesisdown::thesis_pdf:
+    toc_depth: 2
 #  thesisdown::thesis_gitbook: default
 #  thesisdown::thesis_word: default
 #  thesisdown::thesis_epub: default
@@ -26,12 +27,35 @@ abstract: |
 # like below, use a command like that for the abstract above.  Note that a tab is 
 # needed on the line after the |.
 acknowledgements: |
-  Heather, Andrew, kbott, Gronke, Manson, jcox and the collegium, the Anna Men, Alex, Mia, Jade, Matthew
-dedication: |
-  You can have a dedication here if you wish. 
-preface: |
-  This is an example of a thesis setup to use the reed thesis document class
-  (for LaTeX) and the R bookdown package, in general.
+  To Heather, for consistently keeping me on track to actually graduate and being a wonderful thesis advisor; \par
+   \bigskip
+   \noindent To Andrew, Paul G., Kristin, and Paul M., for giving me a series of good jobs and unofficially advising me over the last few years; \par
+   \bigskip
+   \noindent To the Reed Collegium Musicum and the Anna Men, for giving me a few hours a week to take my mind off of this and make some music; \par
+   \bigskip
+   \noindent To Mia, Monika, Jade, and Scottie's Gang, for each giving me a semblance of a social life and getting me off campus; \par
+   \bigskip
+   \noindent To my family, for not getting *too* mad at me for not calling as much as I should; \par
+   \bigskip
+   \noindent Thank you.
+abbrevs: |
+  \noindent ACS: American Community Survey \par
+  \noindent GIS: Geographic information system \par
+  \noindent IPW: Inverse probability weighting \par
+  \noindent MAR: Missing at random \par
+  \noindent MCAR: Missing completely at random \par
+  \noindent MI: Multiple imputation \par
+  \noindent MLE: Maximum likehood estimation \par
+  \noindent MNAR / NI: Missing not at random / Non-ignorable \par
+  \noindent PAC: Political action committee \par
+  \noindent Q-Q: Quantile-quantile \par
+  \noindent RCV: Ranked choice voting \par
+  \noindent RHD: Random hot deck \par
+  \noindent SE: Standard error \par
+  \noindent SF: San Francisco \par
+  \noindent STV: Single transferable vote \par
+  \noindent VAP: Voting-age population \par
+  \noindent VEP: Voting-eligible population \par
 bibliography: bib/thesis.bib
 # Download your specific bibliography database file and refer to it in the line above.
 csl: csl/apa.csl
@@ -41,8 +65,8 @@ lof: true
 #space_between_paragraphs: true
 # Delete the # at the beginning of the previous line if you'd like
 # to have a blank new line between each paragraph
-#header-includes:
-#- \usepackage{tikz}
+header-includes:
+- \usepackage{placeins}
 ---
 
 <!--
@@ -83,22 +107,21 @@ on chapters.
 
 # Introduction {.unnumbered}
 
-Welcome to the _R Markdown_ thesis template. This template is based on (and in many places copied directly from) the Reed College LaTeX template, but hopefully it will provide a nicer interface for those that have never used TeX or LaTeX before.  Using _R Markdown_ will also allow you to easily keep track of your analyses in **R** chunks of code, with the resulting plots and output included as well.  The hope is this _R Markdown_ template gets you in the habit of doing reproducible research, which benefits you long-term as a researcher, but also will greatly help anyone that is trying to reproduce or build onto your results down the road.
+This thesis investigates issues in ranked choice voting (RCV), using a 2018 mayoral election in San Francisco as our observation. It is split into two major parts, each attempting to answer a separate research question. The motivation for these research questions comes out of previous work on RCV with Matthew Yancheff and Mia Leung, advised by Professors Andrew Bray (statistics) and Paul Gronke (political science) at Reed College. Multiple times while presenting this research into RCV, we were asked what the effect would be "if everybody voted". To these now-anonymous^[Two years ago, I did not think to write down their names for this purpose.] questioners, I am grateful.
 
-Hopefully, you won't have much of a learning period to go through and you will reap the benefits of a nicely formatted thesis.  The use of LaTeX in combination with _Markdown_ is more consistent than the output of a word processor, much less prone to corruption or crashing, and the resulting file is smaller than a Word file. While you may have never had problems using Word in the past, your thesis is likely going to be about twice as large and complex as anything you've written before, taxing Word's capabilities.  After working with _Markdown_ and **R** together for a few weeks, we are confident this will be your reporting style of choice going forward.
+This thesis was written using the [`thesisdown`](https://github.com/ismayc/thesisdown) R Markdown template for Reed College, created by Chester Ismay. All of the data used, R code, and source documents can be found at my GitHub page: <https://github.com/jayleetx/thesis>.
 
-<!-- 
-If you're still on the fence about using _R Markdown_, check out the resource for newbies available at <https://ismayc.github.io/rbasics-book/> or email us at <data@reed.edu>. 
--->
+## Part 1 {.unnumbered}
 
-**Why use it?**
+Chapters 1-3 investigate the demographic trends associated with the phenomena of overvoting and undervoting in RCV.
+[Chapter 1](#demo-litreview) reviews the literature around RCV in general, its implementation in San Francisco, and comparisons between RCV and the more common *plurality* voting system.
+[Chapter 2](#demo-methods) describes the methods used to conduct this investigation, particularly the data transformations that were required to obtain usable data.
+[Chapter 3](#demo-results) details the results of the investigation, validations of the methods used, and some implications for further research.
 
-_R Markdown_ creates a simple and straightforward way to interface with the beauty of LaTeX.  Packages have been written in **R** to work directly with LaTeX to produce nicely formatting tables and paragraphs. In addition to creating a user friendly interface to LaTeX, _R Markdown_ also allows you to read in your data, to analyze it and to visualize it using **R** functions, and also to provide the documentation and commentary on the results of your project.  Further, it allows for **R** results to be passed inline to the commentary of your results.  You'll see more on this later.  
+## Part 2 {.unnumbered}
 
-<!-- 
-Having your code and commentary all together in one place has a plethora of benefits!
--->
+Chapters 4-6 use missing data imputation methods to simulate a situation where there were no ballot errors, particularly undervoting and undervoting.
+[Chapter 4](#missing-litreview) covers the theory around missing data and a comparison of multiple possible methods to deal with this phenomenon.
+[Chapter 5](#missing-methods) explains which methods will be used in this study, as well as the problems encountered along the way which had to be dealt with.
+[Chapter 6](#missing-results) presents the conclusions from the analysis.
 
-**Who should use it?**
-
-Anyone who needs to use data analysis, math, tables, a lot of figures, complex cross-references, or who just cares about the final appearance of their document should use _R Markdown_. Of particular use should be anyone in the sciences, but the user-friendly nature of _Markdown_ and its ability to keep track of and easily include figures, automatically generate a table of contents, index, references, table of figures, etc. should make it of great benefit to nearly anyone writing a thesis project.

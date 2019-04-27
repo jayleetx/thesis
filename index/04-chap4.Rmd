@@ -1,39 +1,64 @@
-## Background 2: Electric Boogaloo
+# Missing data literature review {#missing-litreview}
 
-### Missing data
+## Missing data {#missing-data}
 
-Many statistical methods require complete data sets, that is data where every possible observation has a proper value, to work correctly (regression, etc.). <!-- find better examples and a source for this --> In many fields of research, however, data collection often results in missing data. Respondents skipping questions (nonresponse), reeponsdents not completing all phases of a multi-stage survey (attrition), governments not reporting certain data, and errors in data collection are all examples of reasons that data can be missing.
+Many statistical methods require complete data sets, that is data where every possible observation has a proper value, to work correctly (univariate means, regression, etc.). <!-- find better examples and a source for this --> In many fields of research, however, data collection often results in missing data. Respondents skipping questions (nonresponse), respondents not completing all phases of a multi-stage survey (attrition), government agencies not reporting certain data (redaction), and errors in data collection are all examples of reasons that data can be missing.
 
 Suppose we have a matrix $X$, with some missing data, which has $m$ rows and $n$ columns. Let $Y = (y_{ij})$ be the complete version of dataset $X$, that is every missing data point in $X$ is now observed. Let $A$ be an $m \times n$ matrix, where
+
 \[
-A = (a_{ij}) \text{, where } a_{ij} = \cases{1, \text{ when }x_{ij}\text{ is missing}\\
-0, \text{ when }x_{ij}\text{ is not missing}}
+A = (a_{ij}) \text{, where } a_{ij} =
+\begin{cases}
+1, \text{ when }x_{ij}\text{ is missing}\\
+0, \text{ when }x_{ij}\text{ is not missing}
+\end{cases}
 \]
+
 Let $Y_{obs}$ be the observed data in $Y$, that is the entries in $Y$ corresponding to the entries in $A$ that equal 0, and $Y_{mis}$ be the missing data in $Y$, that is the entries in $Y$ corresponding to the entries in $A$ that equal 1. Let $\phi$ denote some unknown parameters.
 
-The literature on missing data has identified three distinct subtypes of missing data (Rubin & Little, 2002/2014).
+The literature on missing data has identified three distinct subtypes of missing data [@little_introduction_2014].
 
-- Missing completely at random (MCAR). The distribution of missing values does not depend on any data in $Y$, observed or missing. \[f(M|Y,\phi) = f(M|\phi) \;\forall\; Y,\phi\] An example of this is a survey where the respondent mislabeled a question answer by accident.
+- Missing completely at random (MCAR). The distribution of missing values does not depend on any data in $Y$, observed or missing. \[f(A|Y,\phi) = f(A|\phi) \;\forall\; Y,\phi\] An example of this is a survey where the respondent mislabeled a question answer by accident.
 
-- Missing at random (MAR). The distribution of missing values depends on the observed data, but not any missing data. \[f(M|Y,\phi) = f(M|Y_{obs},\phi) \;\forall\; Y_{mis},\phi\] An example of this is an election poll where members of one party are less likely to report their true vote choice than members of another party. The distribution of missing vote choice depends on an observed variable, party identification.
+- Missing at random (MAR). The distribution of missing values depends on the observed data, but not any missing data. \[f(A|Y,\phi) = f(A|Y_{obs},\phi) \;\forall\; Y_{mis},\phi\] An example of this is an election poll where members of one party are less likely to report their true vote choice than members of another party. The distribution of missing vote choice depends on an observed variable, party identification.
 
 - Non-ignorable (NI), or missing not at random (MNAR). The distribution of missing values depends on the missing values themselves. An example of this is high-income respondents leaving the income field blank in a survey to obscure their true earnings.
 
-### Methods of dealing with missing data
+## Methods of dealing with missing data
 
-#### Listwise deletion
+As with any data problem, a common task for a dataset with missing data is to obtain a useful estimator. Let $\hat{x}$ be an estimator of some population parameter $x$. Some of the qualities that are good in an estimator are:
 
-Listwise deletion is the most common method of dealing with missing data, as many statistical packages perform listwise deletion on datasets before running most analyses (because they need complete data). In listwise deletion, any row with a missing value is fully removed from the dataset. This can lead to biased parameter estimates when the data is not MCAR. Consider the high-income censoring case as above, with average income being the parameter of interest. If high earners are censoring their income and they are dropped from the dataset, our estimate of average income will be negatively biased. Additionally, listwise deletion will reduce the number of overall observations going into any analysis, which reduces the statistical power of methods and increases the size of equivalent confidence intervals.
+1. Lack of bias. $\hat{x}$ is *unbiased* if $E(\hat{x}) - x = 0$, that is we expect $\hat{x}$ to be an accurate guess at $x$ [@nikulin_unbiased_nodate].
 
-#### Maximum likelihood methods
+2. Efficiency. An estimator $\hat{x}_1$ is more efficient than $\hat{x}_2$ if the sampling variance of the estimator $\hat{x}_1$ is less than the variance of the estimator $\hat{x}_2$, that is we expect $\hat{x}_1$ to be a more precise guess at $x$. An unbiased estimator can be called "efficient" if its variance is equal to the Cramer-Rao Lower Bound: the inverse of the Fisher Information of the unknown parameter [@fowler_chapter_2018].
 
-Maximum likelihood methods don't actually do anything with the missing data. Similar to any maximum-likelihood-based parameter estimation with full data, they use all the available data to estimate which parameter values are the most likely.
+3. Provides good estimates of uncertainty. Metrics such as confidence intervals created by the estimator should be accurate [@allison_missing_2011].
 
-#### Inverse probability weighting
+<!-- Consistency. As the sample size $n$ gets large, the estimator should converge in probability to the parameter. That is, for all $\varepsilon > 0$, $$\lim_{n \rightarrow \infty} P([\hat{x}_n - x] < \varepsilon) = 1$$ [@nikulin_consistent_nodate]. -->
 
-#### Imputation - single and multiple
+Listed below are some of the methods for dealing with missing data, and the qualities of the estimators they produce.
 
-Unlike maximum likelihood, imputation is a way of filling in the missing data points directly. In *single imputation*, a single value is estimated for each missing cell in the data. Some variants of single imputation are:
+### Listwise deletion
+
+*Listwise deletion* (or *complete-case analysis*) is the most common method of dealing with missing data, as many statistical packages perform listwise deletion on datasets before running most analyses because they need complete data. In listwise deletion, any row with a missing value is fully removed from the dataset. This can lead to biased parameter estimates when the data is not MCAR. Consider the high-income censoring case as above, with average income being the parameter of interest. If high earners are censoring their income and they are dropped from the dataset, our estimate of average income will be negatively biased. Additionally, listwise deletion will reduce the number of overall observations going into any analysis, which reduces the statistical power of methods and increases the size of equivalent confidence intervals [@little_statistical_1987].
+
+In terms of the three goals of an estimator above, listwise deletion performs moderately. It provides good estimates of uncertainty, and can be unbiased under certain conditions (MCAR, and some MAR cases). It is quite inefficient, however, because it tosses away so much available data. Variance increases with a reduction in the number of data points, so you need more data points to obtain an estimator with a desired variance [@allison_missing_2011].
+
+### Maximum likelihood estimation
+
+*Maximum likelihood estimation* (MLE) methods generally ignore the missing data. The process is similar to any maximum-likelihood-based parameter estimation with full data: all of the available data is used to build a likelihood model for the parameter(s) of interest, and then the likelihood equation is maximized to obtain an estimate. MLE inferences which ignore the missing-data mechanism like this only require MAR to be valid [@little_statistical_1987].
+
+MLE satisfies all of the estimator criteria listed above well, but does have some drawbacks. It takes some computationally intensive software to calculate, and involves fitting some parameters on the data that may or may not apply [@allison_missing_2011]. In our case, because we're dealing with a very complex estimator (election winner as determined by the RCV algorithm) that truly depends on every single data point, any MLE method would be an intensely computational black box that produces a likely uninterpretable result.
+
+### Inverse probability weighting
+
+*Inverse probability weighting* (IPW) attempts to correct for the bias of listwise deletion by weighting each observed data point by its probability of being missing. A probability model is specified that determines if a case is complete or not: $P(\text{complete }|\text{ observed data})$^[The reader may note that this is similar to the definition of data being missing at random.]. Then a weight is assigned to each case, which is the inverse of its probability of being missing based on the observed data. The desired analysis is then performed with the newly-weighted data [@seaman_review_2013].
+
+IPW can outperform listwise deletion in terms of bias, particularly in the MNAR case where the overweighting of similar-to-missing data helps to correct for the bias in listwise deletion. IPW is less efficient than multiple imputation, because it uses only complete cases to build its weights (as opposed to MI, which uses all available data) [@seaman_review_2013].
+
+### Imputation - single and multiple
+
+*Imputation*, unlike the previous three methods, is a way of filling in the missing data points directly^[Rather than going straight to an adjusted conclusion/parameter.]. In *single imputation*, a single value is estimated for each missing cell in the data. Some variants of single imputation are:
 
 - Mean imputation, where the mean of the observed data column is taken. This can lead to biased estimates if the data is not MCAR (the observed data is not representative of the missing data), and also negatively impacts measures of variance.
 
@@ -43,21 +68,19 @@ Unlike maximum likelihood, imputation is a way of filling in the missing data po
 
 - Regression imputation, a model-based approach where the missing value is predicted using a regression equation that is trained using the observed data.
 
-- Multinomial imputation, another model-based approach tailored for a categorical response variable.
+- Multinomial imputation, a different model-based approach which is tailored for a categorical response variable.
 
-- Last value imputation, where the missing value is copied from the immediately preceding observed value. This is particularly common in time series data, where this is a natural ordering of the observations.
+- Last value imputation, where the missing value is copied from the immediately preceding observed value^[This is similar to sequential hot deck, but last value imputation doesn't have the same concerns about similarity between the cases; it just repeats the immediate last data point measured.]. This is particularly common in time series data, where this is a natural ordering of the observations.
 
-*Multiple imputation* is a method of running single imputation multiple times to create some variability in your estimates. A dataset is imputed multiple times (with some variability between imputations), then for each new dataset the parameter of interest is calculated. This added variability moderates the appearance of "certainty" that comes with single imputation.
+*Multiple imputation* (MI) is a method of running single imputation multiple times to create extra variability in your estimates. A dataset is imputed multiple times (with some variability between imputations), then for each new dataset the parameter of interest is calculated. This added variability moderates the appearance of "certainty" that comes with single imputation [@little_statistical_1987].
 
-#### Other methods
-
-In particular, our data is *monotone* missing data - that is, for a certain order of our variables $(Y_i)$, an observation having a missing value in column $Y_j$ implies that it has a missing value in all columns $Y_J$ where $J > j$. In our case, what this looks like is that you cannot have a third choice for mayor without having a second choice present^[We treat the presence of a third choice and the absence of a second choice in a given voter's ballot as an error, and re-align our data so that the unique choices provided by each voter are filled in "minimally" to satisfy this monotone condition. Such an assumption is not unreasonable, given our access to voter's true opinions through their reporting as such on the ballot.]. There are additional methods that can be used with monotone data, on which we do not go into greater detail here. These are described at more length in Rubin, 1974.
+Hot desk imputation is unbiased under MCAR and MAR [@little_statistical_1987]. Imputation typically underestimates variance in parameter estimates, because (after a random draw to fill in the data) it uses a deterministic method to calculate the estimate. Multiple imputation can increase this variance through multiple random draws, but still often underestimates variance. Depending on the parameter you're interested in, often five imputations is enough to obtain nearly-efficient estimates with MI [@allison_missing_2011].
 
 ## What if everybody votes (fully)?
 
-The question of "what if everybody voted" is one studied in literature, and particularly studied under ranked choice voting as well (though by a very niche set of researchers). *NB, I have research on this it's just not currently in here.* Consider the following table, which shows the twenty most common combinations of votes in the 2018 SF mayoral election.
+The question of "what if everybody voted" (or "what if we had 100% turnout) is one well-studied in literature, and particularly under alternative voting methods including RCV. Consider Table \@ref(tab:vote-combo-orig), which shows the twenty most common combinations of votes in the 2018 SF mayoral election.
 
-```{r echo = FALSE}
+```{r vote-combo-orig, echo = FALSE, cache = TRUE}
 library(rcv)
 library(here)
 library(dplyr)
@@ -91,10 +114,34 @@ knitr::kable(head(orig_counts, 20),
       col.names = c("1", "2", "3", "Count", "Proportion"),
       caption = "Examination of voter counts",
       caption.short = "Original vote counts",
-      longtable = TRUE,
-      booktabs = TRUE)
+      booktabs = TRUE) %>%
+  kableExtra::kable_styling(latex_options = c("scale_down"))
 ```
 
-The most common vote choice was London Breed and nobody else, which shows the potential for many more people to fill in 2nd and 3rd vote choices. While this (and most other undervotes in the first few rows here) would not have changed the election result because of how they voted for final candidates, consider row 20: people who only voted for Angela Alioto, the eventual fourth-place finisher. There were 3,524 people who voted for Alioto alone, which is larger than the final margin of 2,268 between London Breed and Mark Leno. The presence of undervotes like this has the potential to change the results of an election.
+The most common vote choice was London Breed and nobody else^[Breed herself may have increased the rate of appearance of this combination. When asked at a candidate forum who her second and third choices for mayor would be, she replied "My No. 2 choice is London Breed, and my No. 3 choice is London Breed" [@berman_rival_2018]. An interesting study would be to see if "London Breed" repeated 3 times shows up more often than we would expect it to, given how often other candidates appear 3 times.], which shows the potential for many more people to fill in 2nd and 3rd vote choices^[This data has been cleaned to consolidate repeated vote choices, so there is no difference between listing only "London Breed" as first or listing her in all three slots.]. While this (and most other undervotes in the first few rows here) would not have changed the election result because of how they voted for final candidates, consider row 20: people who only voted for Angela Alioto, the eventual fourth-place finisher. There were 3,524 people who voted for Alioto alone, which is larger than the final margin of 2,268 between London Breed and Mark Leno. The presence of undervotes like this has the potential to change the results of an election.
 
-There's an interesting thing here, also - we're treating all undervotes as equal, but a person who voted for London Breed or Mark Leno as their first choice will never have their second choice counted, so what does it matter if they undervoted? Well for one, you can't know for sure who's going to win, so it's *still* best for everybody to hedge their bets. For example, in the course of imputing these vote choices, I still filled in 2nd and 3rd choices for those who voted for London Breed alone, on the off chance that other candidates displaced her in the tabulation process.
+@citrin_what_2003 use auxiliary data to simulate vote choice of non-voters in US Senate elections. They raise an interesting consideration: while the overarching metric of electoral change is an election flipping, the numerical "amount" of change in an election may be large but not enough to overcome a yet larger margin of victory. For example, if full voter turnout improved Democratic vote shares by 5% across the country, this would only flip the seats where a) a Democrat lost, and b) the margin of victory for the other candidate was small enough that a 5% vote share would overturn it. We should thus consider alternate methods of assessing the impact of no undervotes or overvotes, aside from looking at who wins the election.
+
+@liu_using_2014 investigates imputation methods for vote choice in a Taiwanese election (conducted with plurality). They find that "the extent to which MI corrects the distribution [of vote share] is very limited, although the direction of adjustment is correct". @bernhagen_missing_2010 use multiple imputation to simulate choices in place of undervotes in an Irish general election (conducted with RCV). They find that the techniques applied were normally "not large enough to affect the counterfactual estimation of election results under universal turnout". These studies seem to indicate that MI may not be a technique which will change our election results enough to be noticeable. Further work could be done into how well MI mirrors the correct amount of variance under different conditions (MCAR, MAR, etc.).
+
+In a FairVote report, @hill_exhausted_2018 find a similar result in the 2018 San Francisco mayoral election: the exhausted ballots in this election did not have the potential to swing the election away from Breed. They also find that the majority of exhausted ballots were "voluntarily exhausted" meaning that the voter undervoted, rather then being exhausted because they ran out of available slots to list. Additionally, the involuntarily exhausted ballots were likely to pull for London Breed over Leno. In addition to the small impacts of MI mentioned above, this study indicates that the positioning of the undervotes themselves in this specific election may be a factor that contributes to a lack of change in our results. Taking this into concern in combination with the MI result, we may expect to not see much variance among methods.
+
+## Peculiarities with this study
+
+### Violated assumptions
+
+[Earlier](#missing-data) we made the implicit assumption that every "missing" data point (unobserved value) has some true value. In the case of ranked-choice voting, this is not necessarily true. It is a fully rational choice for a voter to only list one candidate when offered three options, if they truly only have one preference. While this would seem to make this study just an exercise in missing data methods, this is no more the case here than in other studies of imputing vote choice.
+
+@kroh_taking_2006 has a good discussion of methods for working with imputations when "Don't know" is a valid response, or there are valid reasons for the inapplicability of a survey question. While Kroh's study does not apply to our particular research question and data, it provides a nuanced take on the assumptions inherent in missing data imputation.
+
+### Monotonicity
+
+In particular, our data is *monotone* missing data - that is, for a certain order of our variables $(Y_i)$, an observation having a missing value in column $Y_j$ implies that it has a missing value in all columns $Y_J$ where $J > j$ [@little_introduction_2014]. In our case, what this looks like is that you cannot have a third choice for mayor without having a second choice present^[Or rather, we have enforced this condition on our data. We treat the presence of a third choice and the absence of a second choice in a given voter's ballot as an error, and re-align our data so that the unique choices provided by each voter are filled in "minimally" to satisfy this monotone condition. We consider such an enforcement to be reasonable, given our access to voter's true preferences being limited to their reporting as such on the ballot.]. There are additional methods that can be used with monotone data, on which we do not go into greater detail here. These are described at more length in @rubin_characterizing_1974.
+
+### Not all undervotes are created equal
+
+In the imputation process, we fill in all undervotes^[And weight them, in quantitative analyses.] as if they are treated equally. This is not the case, however, as the undervote of somebody who listed Mark Leno first is inherently not the same as that of somebody who listed Jane Kim first, because she was eliminated in the tabulation process. We must treat these equally, however, because under a given imputation we do not know which candidates will eventually be eliminated. This also maintains the spirit of our research question, "what if there were no undervotes".
+
+### 100% turnout
+
+Due to data limitations, in this study we did not truly ask "what if everybody voted", but instead "what if there were no overvotes or undervotes". This is a different question, both conceptually and in practice: the latter question does not involve inferring the preferences of total non-voters, for example. This is an intriguing question for further study, but in this particular research we were examining the phenomena of overvoting and undervoting, rather than nonvoting. Some of the literature above is particular to the idea of 100% turnout, but still has important insight into our research question.

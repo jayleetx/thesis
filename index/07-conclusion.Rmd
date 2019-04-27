@@ -1,8 +1,27 @@
 # Conclusion {-}
 
-If we don't want Conclusion to have a chapter number next to it, we can add the `{-}` attribute.
+## Summary of results
 
-**More info**
+### Part 1
 
-And here's some other random info: the first paragraph after a chapter title or section head _shouldn't be_ indented, because indents are to tell the reader that you're starting a new paragraph. Since that's obvious after a chapter or section title, proper typesetting doesn't add an indent there.
+The results from Part 1 didn't tell us a whole ton that's new. The demographic study seemed to reflect the same trends that we see in voting more generally, which is important but doesn't give any new input on how to better target voter education efforts.
 
+### Part 2
+
+Given the disparity in undervote levels between different precincts (and the impact of demographic factors on these undervote levels), I expected one of the models with precinct or demographic to have more of an effect (despite the research presented in [Chapter 4](#missing-litreview). We thought that if the precincts had different local preferences, then the now-higher weighting of underrepresented precincts might change the results. One possible explanation is that this disparate precinct weighting did happen and it cancelled out between different precincts on the whole. Fairvote has produced some analysis that seems to indicate regional distinctions among candidates, which could support the claim about different local preferences [@noauthor_sf_nodate; @noauthor_sf_nodate-1; @noauthor_sf_nodate-2; @noauthor_sf_nodate-3]. Another answer is that MI itself does not produce enough variance to meaningfully affect these election results, given the large number of data points and the inherent closed loop in using the observed data to modify itself. Additionally, as indicated in @hill_exhausted_2018, the positioning of the undervotes themselves in this election may have had an effect on how much change the process of imputing their values could induce.
+
+## Future research ideas
+
+The most apparent next course of action in this resarch is to extend to more elections and jurisdictions that use RCV. This was not accomplished in this thesis due to issues with obtaining and merging the correct geographic boundaries to obtain precinct demographic information for more than one election cycle or more than one city. The advantage of this would be to extend how general the results are, and see if the demographic characteristics and imputation methods here have similar effects in different case studies. One consideration moving forward is that this missing data imputation method may not work well in Cambridge, where there are often far fewer available data points at later rankings in the ballot data^[Voters, perhaps experiencing some dizziness at the sheer number of candidates on the ballot, quite reasonably don't usually fill in choices all the way to rank 30 or so.] than we had in this San Francisco election.
+
+An option to address this issue in Cambridge might be using some stochastic model (instead of hot deck imputation) to predict vote preferences. If a voter's state is the candidate they ranked in slot $n$, what are the "transition probabilities" of them ranking another given candidate in slot $n + 1$? This would not be a true Markov process because it would have to include some memory to ensure that no candidate appears twice for a given voter, but the Markov chain is a useful conceptual comparison.
+
+Another desirable task would be to obtain more accurate demographic information about the election precincts. One of the limitations of this study is the inaccuracy in precinct demographic information propagated through the areal interpolation initially performed. Perhaps a more accurate interpolation could be calculated with additional auxiliary data (e.g. street or zoning data, a more granular population density metric, etc.), to avoid relying on the uniform spatial population distribution assumption that we used here. Alternatively, we could obtain better demographic information about the precincts directly by examining the voter registration file for a given jurisdiction. The information carried in these files varies by state^[Race and gender are only collected in certain states, for example.], but they generally include age and whether someone voted in a given election. That would give us more detailed demographic information about the people who voted in the election, as opposed to general precinct demographics. As with any data containing personally identifiable information, care must be taken to maintain privacy if such a file is used.
+
+In future studies, a better model specification could be used to examine which variables are correlated with overvoting and undervoting. Notably, because overvoting is so rare, we see a significant number of precincts with 0 overvotes. A zero-inflated logistic model could be applied to further enhance the conclusions presented.
+
+Finally, we could additionally expand the research question to include 100% voter turnout, along with no overvotes or undervotes. That would require getting an accurate count of the voting-eligible population (VEP) or voting-age population (VAP) within each precinct. There would then be no information for some voters about 1st candidate supported, so precinct and demographic information alone would need to be used to predict vote choices. Such a study would be less precise in conclusions than this one, but is in turn a more broadly applicable research question. We expect that this would have some precinct-level turnout jumps that could greater impact the election result; however, this hypothesis should be considered skeptically, as we theorized the same result would appear in this study.
+
+## Problems with this study / Lessons learned
+
+May have bitten off a bit more than I can chew, conceptually... there were a lot of steps along the way, and I don't know how correct the final conclusions that I draw are because of how much error gets added along the way. See above for ways to reduce this error.

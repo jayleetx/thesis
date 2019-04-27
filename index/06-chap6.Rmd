@@ -1,43 +1,278 @@
-## Results 2
+```{r include = FALSE}
+library(here)
+library(dplyr)
+library(ggplot2)
 
-We don't see a whole ton of variability running the same method multiple times (that is, multiple imputations) - maybe there's just so much data that the "randomness" in hot deck starts to approach a steady distribution no matter how you run it? Sort of law-of-large-numbers-ing itself into fixed-ness. Data for this: the rankings across 150 imputations based on vote choice all look identical. Fluctuations in number of votes per round do increase across rounds, as we would expect with the added variability of imputation compounding over time, but these are small and not enough to ever change results.
+last_name <- function(x) stringr::str_extract(x, '\\w*$')
 
-```{r results = 'hold', eval = FALSE}
-# standard deviation of London Breed's number of votes
+counts <- readr::read_csv(here('data', 'imputation_counts.csv')) %>%
+  mutate(impute = factor(impute,
+                         levels = c('original', 'listwise', 'nothing', 'vote_choice', 
+                                    'vote_choice_precinct', 'multinomial'),
+                         labels = c('Original ballot', 'Listwise deletion',
+                                    'Hot deck - random', 'Hot deck - vote choice',
+                                    'Hot deck - vote choice, precinct',
+                                    'Multinomial logistic regression'),
+                         ordered = TRUE)) %>%
+  mutate(prop = ifelse(is.na(prop), new_prop, prop)) %>%
+  mutate_at(vars(c('1', '2', '3')), last_name) %>%
+  select(-new_prop)
+single_counts <- filter(counts, impute %in% c('Listwise deletion', 'Original ballot')) %>%
+  distinct()
+imputed_counts <- filter(counts, !(impute %in% c('Listwise deletion', 'Original ballot')))
+counts <- bind_rows(single_counts, imputed_counts)
+
+results <- readr::read_csv(here('data', 'imputation_results.csv')) %>%
+  mutate(impute = factor(impute,
+                         levels = c('original', 'listwise', 'nothing', 'vote_choice', 
+                                    'vote_choice_precinct', 'multinomial'),
+                         labels = c('Original ballot', 'Listwise deletion',
+                                    'Hot deck - random', 'Hot deck - vote choice',
+                                    'Hot deck - vote choice, precinct',
+                                    'Multinomial logistic regression'),
+                         ordered = TRUE)) %>%
+  mutate(candidate = last_name(candidate))
+single_results <- filter(results, impute %in% c('Listwise deletion', 'Original ballot')) %>%
+  distinct()
+imputed_results <- filter(results, !(impute %in% c('Listwise deletion', 'Original ballot')))
+results <- bind_rows(single_results, imputed_results)
+```
+
+# Data imputation results {#missing-results}
+
+```{r orig-results, echo = FALSE}
+results %>%
+  filter(impute == 'Original ballot') %>%
+  select(1:9) %>%
+  knitr::kable(col.names = c('Candidate', paste('Round', 1:8)),
+               caption = "Original election results",
+               caption.short = "Election results - original",
+               booktabs = TRUE) %>%
+  kableExtra::kable_styling(latex_options = c("scale_down"))
+```
+
+For context, Table \@ref(tab:orig-results) gives the original election tabulation^[This differs slightly from the official results in @noauthor_ranked_2018; specifically, our vote counts are consistently an undercount of the official results. We believe this differece is due to the omission of some ballots from the published data, particularly ballots with a scanning error that have to be hand-counted.].
+
+<!-- LaTeX table floating DIE challenge -->
+
+## Final winner
+
+We see in Table \@ref(tab:method-results) that London Breed wins consistently in all methods except the fully random hot deck imputation, in which Mark Leno was consistently elected. As this is the least "realistic" of any of the methods (since it uses the least available information to predict vote choice), we can consider it a less accurate measure of potential change. It does potentially indicate that Leno had more overall support than Breed (in terms of being listed anywhere on the ballot), just positioned in the wrong place for it to push him to victory. Perhaps under a different voting system such as Borda count, which awards points to candidates based on any ranking they appeared in, Leno would have won.
+
+```{r method-results, echo = FALSE}
+imputed_first <- results %>%
+  filter(rank == 1) %>%
+  group_by(impute) %>%
+  count(candidate)
+
+knitr::kable(imputed_first, 
+      col.names = c('Method', 'Candidate', 'First place finishes'),
+      caption = "Election results count by method",
+      caption.short = "Winner by method",
+      booktabs = TRUE)
+```
+
+## London Breed's final vote share
+
+```{r unadj-breed, echo = FALSE, fig.cap = "London Breed's simulated vote share - unadjusted variances", out.width="6in"}
+breed_share <- results %>%
+  filter(rank < 10) %>%
+  mutate(run = sort(rep(1:(nrow(.)/9), 9))) %>%
+  group_by(run) %>%
+  mutate(n = sum(round8, na.rm = TRUE),
+         prop = round8 / n) %>%
+  filter(candidate == 'BREED') %>%
+  ungroup() %>%
+  select(impute, prop, n)
+
+breed_share_summ <- breed_share %>%
+  group_by(impute) %>%
+  summarize(mean = mean(prop),
+            var_within = mean(prop * (1 - prop) / max(row_number())),
+            var_between = sum((prop - mean(prop))^2) / (max(row_number()) - 1),
+            var_total = var_within + var_between + var_between / max(row_number())) %>%
+  tidyr::replace_na(list(var_between = 0, var_total = 0))
+
+breed_share %>%
+  filter(!(impute %in% c('Listwise deletion', 'Original ballot'))) %>%
+  ggplot(aes(x = prop, col = impute)) + geom_density() +
+  geom_vline(xintercept = breed_share_summ$mean[1], col = 'red') +
+  geom_vline(xintercept = breed_share_summ$mean[2], col = 'blue') +
+  labs(x = 'Vote share', col = 'Method')
+```
+
+Figure \@ref(fig:unadj-breed) is a density plot representing London Breed's estimated final vote share across the four imputation methods. The red vertical line is the original vote share, and the blue line is her share under listwise deletion. The imputation methods that use more information^[Everything except the fully random hot deck.] indicate that Breed would likely still win if there were no undervotes or overvotes, but her margin of victory would be smaller than it was in the actual election. This could potentially offer some support for the claim that "the extent to which MI corrects the distribution [of vote share] is very limited, although the direction of adjustment is correct" [@liu_using_2014].
+
+For each imputation method, we have calculated the estimated mean and variance (using [Rubin's rules](#rubins-rules)) of London Breed's calculated final vote share^[Here a more typically specified question might be: out of all the voters who listed either London Breed or the other calculated finisher in the top two spots (Mark Leno or Jane Kim), what proportion preferred Breed to the other candidate?]. One of the assumptions for using these rules is that the parameter estimates be normally distributed, which they appear to be from Figure \@ref(fig:unadj-breed). We assess that as follows:
+
+```{r, echo = FALSE, fig.cap="Normality check, Q-Q plot of Breed's vote share", out.width="6in"}
+breed_share %>%
+  filter(!(impute %in% c('Listwise deletion', 'Original ballot'))) %>%
+  ggplot(aes(sample = prop)) +
+  stat_qq() +
+  facet_wrap(~impute, scales = 'free')
+```
+
+The Q-Q plots all follow a sufficiently linear path to assume normality in the data, so we meet the assumption to use Rubin's rules here.
+
+```{r adj-breed-tab, echo = FALSE,  results = 'asis'}
+breed_share_summ %>%
+  knitr::kable(col.names = c('Method', '$\\hat{p}$', '$V_W$', '$V_B$', '$V_T$'),
+               caption = "London Breed's simulated vote share - adjusted variances",
+               booktabs = TRUE,
+               escape = FALSE)
+```
+
+When we apply Rubin's rules to correct our underestimate of variance, the situation changes wildly^[Here the black and brown lines are the vote share for the original and listwise methods (respectively), which overlap at this scale.]. Looking at Figure \@ref(fig:adj-breed-plot), the overlap between the various methods is much more palpable. Breaking this down in Table \@ref(tab:adj-breed-tab), it is clear that the majority of the variance in these estimated distributions comes from the variance *within* each imputation, as opposed to the variance *between* the imputations^[Given the high number of imputations we made (`r max(imputed_first$n)`), as opposed to the 5 that typically suffice for MI, this makes some sense.]. This explains why the unadjusted variance in Figure \@ref(fig:unadj-breed) is so small: because it only considers the variance between each imputation.
+
+```{r adj-breed-plot, echo = FALSE, fig.cap = "London Breed's simulated vote share - adjusted variances", out.width="6in"}
+data.frame(x = runif(1000, .4, .6)) %>%
+  ggplot(aes(x)) +
+  stat_function(fun = dnorm, aes(color = breed_share_summ$impute[3]),
+                args = list(mean = breed_share_summ$mean[3],
+                            sd = sqrt(breed_share_summ$var_total[3]))) +
+  stat_function(fun = dnorm, aes(color = breed_share_summ$impute[4]),
+                args = list(mean = breed_share_summ$mean[4],
+                            sd = sqrt(breed_share_summ$var_total[4]))) +
+  stat_function(fun = dnorm, aes(color = breed_share_summ$impute[5]),
+                args = list(mean = breed_share_summ$mean[5],
+                            sd = sqrt(breed_share_summ$var_total[5]))) +
+  stat_function(fun = dnorm, aes(color = breed_share_summ$impute[6]),
+                args = list(mean = breed_share_summ$mean[6],
+                            sd = sqrt(breed_share_summ$var_total[6]))) +
+  geom_vline(xintercept = breed_share_summ$mean[1], color = 'black') +
+  geom_vline(xintercept = breed_share_summ$mean[2], color = 'brown') +
+  labs(x = 'Vote share', y = 'density') +
+  scale_colour_manual("Method", values = c('red', 'blue', 'green', 'orange'))
 
 ```
 
-(The code doesn't run rn but these are the results)
+## Intermediate switches in rankings
 
-[1] 0
+```{r ranking-count, echo = FALSE}
+rankings <- results %>%
+  filter(rank < 10) %>%
+  select(impute, candidate, rank) %>%
+  count(impute, candidate, rank) %>%
+  arrange(impute, rank) %>%
+#  select(-n) %>%
+  group_by(impute, n) %>%
+  tidyr::spread(key = rank, value = candidate) %>%
+  ungroup() %>%
+  mutate(n = ifelse(n < 10, 1, n)) %>%
+  arrange(impute, desc(n))
 
-[1] 0
-
-[1] 4.646616
-
-[1] 5.980576
-
-[1] 23.16143
-
-[1] 33.02316
-
-[1] 47.58898
-
-[1] 54.57599
-
-On the whole - These so far have not had an effect on who gets elected (as we see above, the SDs are really small). I might try to pull a Mythbusters and rig the conditions to see if there's **any** way to change the results.
-
-```{r}
-nothing_diff <- full_join(listwise_counts, nothing_counts, by = c('1', '2', '3')) %>%
-  select(-n.x, -n.y) %>%
-  mutate(difference = new_prop - prop)
+rankings %>%
+  knitr::kable(col.names = c('Method', 'Count', paste('Rank', 1:9)),
+               caption = "Candidate ranking for each imputation method",
+               caption.short = "Simulated candidate rankings",
+               booktabs = TRUE) %>%
+  kableExtra::kable_styling(latex_options = c("scale_down"))
 ```
 
-### Future research
+Table \@ref(tab:ranking-count) shows that each of the methods has the exact same candidate across all of the simulations run^[There were `r max(rankings$n)` simulations run for the imputation methods, and the two deterministic methods (original ballot data and listwise deletion) were each calculated once.]. Under listwise deletion, we see that Jane Kim edged out Mark Leno as runner-up, but still failed to defeat Breed. Under the fully random imputation, Leno took first place from Breed, but the remaining candidates are still arranged as they were in the original election.
 
-Do this but in Cambridge - lets you rank every candidate on the ballot, so there's way more missing data. Due to having so much missing data, would have to probably get into some stuff like a Markov chain (see below).
+We see no variability among these candidate rankings within each imputation method. While there were small changes in vote counts within methods between each simulation (see [Section 6.4](#vote-combo-results)), this was not enough to change the eventual ordering of the candidates within any imputation method. However, between methods we do see some slight variability. As mentioned above, listwise deletion and fully random imputation are the least informed of the methods, so we consider their candidate rearrangements to be less accurate than the consistency in the more-informed methods.
 
-Currently only people who voted at all in this election are being imputed on. We could use the demographic multinomial model or the precinct-based hot deck to impute three vote choices for everybody in San Francisco. If certain precincts are particularly underrepresented in
+## Distribution of vote combinations {#vote-combo-results}
 
-Stochastic process methods in general - interesting. I'm thinking about a setup where your "state" is the candidate in slot $n$, and we're trying to get at transition probabilities of moving to another state (candidate) in slot $n+1$. This would have to have some kind of memory/uniqueness, because you can't vote for the same candidate twice. Are there Markov chain-esque things where you can only move to nonrepeated states?
-*NB: "Markov chain" isn't the right word for this (because of this memory, a Markov process only takes into consideration your current state), but some sort of stochastic process with states and transition probabilities would be interesting.*
+For each imputation method, we can compare the rate of appearance of a single vote combination to the baseline generated from the listwise deletion.
+
+```{r vote-combos, echo = FALSE, fig.cap = "Difference in vote combination rates", warning=FALSE, out.width="6in"}
+listwise_counts <- filter(counts, impute == 'Listwise deletion')
+diff <- imputed_counts %>%
+  full_join(listwise_counts, by = c('1', '2', '3')) %>%
+  mutate(difference = prop.x - prop.y) %>%
+  select(`1`, `2`, `3`, impute = impute.x, difference) %>%
+  filter(!is.na(difference))
+
+ggplot(diff, aes(x = difference, col = impute)) +
+  geom_density() +
+  xlim(-.00125, .00125) +
+  labs(x = 'Difference in proportion',
+       col = 'Method')
+```
+
+Figure \@ref(fig:vote-combos) is a density plot displaying the difference between the rate of a given vote combination under listwise deletion to its rate in each of the imputed methods. Overall, these changes in proportion from the original data are very small, which would seem to indicate that the imputation methods aren't actually changing the distribution of the data as a whole. This makes some sense, and lines up with our observations so far that the imputation methods (particularly the more informed ones) don't impact the electoral results very much. Additionally, this highlights that these imputation methods suffer from the same "sampling issue" that techniques like bootstrapping have. Since we're trying to extrapolate from our data set, any inferences that we draw will be inherently centered around that observed data in some way.
+
+## Exhausted voters by the final round
+
+```{r unadj-exhausted, echo = FALSE, fig.cap="Simulated exhausted vote share - unadjusted variances", out.width="6in"}
+exhausted_share <- results %>%
+  filter(rank %in% c(1,2,10)) %>%
+  mutate(run = sort(rep(1:(nrow(.)/3), 3))) %>%
+  group_by(run) %>%
+  mutate(n = sum(round8, na.rm = TRUE),
+         prop = round8 / n) %>%
+  filter(is.na(candidate)) %>%
+  ungroup() %>%
+  select(impute, prop, n)
+
+exhausted_share_summ <- exhausted_share %>%
+  group_by(impute) %>%
+  mutate(m = max(row_number()),
+         se = sqrt(prop * (1 - prop) / n),
+         mean = mean(prop),
+         sqerror = (mean - prop)^2) %>%
+  summarize(mean = mean(prop),
+            var_within = mean(prop * (1 - prop) / max(row_number())),
+            var_between = sum((prop - mean(prop))^2) / (max(row_number()) - 1),
+            var_total = var_within + var_between + var_between / max(row_number())) %>%
+  tidyr::replace_na(list(var_between = 0, var_total = 0))
+
+exhausted_share %>%
+  filter(!(impute %in% c('Listwise deletion', 'Original ballot'))) %>%
+  ggplot(aes(x = prop, col = impute)) + geom_density() +
+  geom_vline(xintercept = exhausted_share_summ$mean[1], col = 'red') +
+  geom_vline(xintercept = exhausted_share_summ$mean[2], col = 'blue') +
+  labs(x = 'Exhausted vote share', col = 'Method')
+```
+
+Figure \@ref(fig:unadj-exhausted) is a density plot of the proportion of exhausted votes for each imputation method. The red line is exhausted votes in the original data, and the blue line is exhausted votes after listwise deletion. We see that the unadjusted variance for each method is small, compared to the overall decrease in exhausted votes from the original ballot data. The exhausted vote share in our imputed datasets is about `r scales::percent(mean(exhausted_share_summ$mean[3:6]) / exhausted_share_summ$mean[1])` of the exhausted vote share in the original election. This indicates that about `r round(1 - mean(exhausted_share_summ$mean[3:6]) / exhausted_share_summ$mean[1], 1)` of the exhausted data issue is "voluntary", where voters are not ranking as many candidates as they are given the option to.
+
+We again apply Rubin's rules to calculate the estimated mean and variance of the final exhausted vote share^[Here a specified question might be: out of all the voters, how many did not support either of the top two finishers?]. Checking the normal assumption:
+
+```{r echo = FALSE, fig.cap="Normality check, Q-Q plot of exhausted vote share", out.width="6in"}
+exhausted_share %>%
+  filter(!(impute %in% c('Listwise deletion', 'Original ballot'))) %>%
+  ggplot(aes(sample = prop)) +
+  stat_qq() +
+  facet_wrap(~impute, scales = 'free')
+```
+
+Since the Q-Q plots are sufficiently linear, we can assume that our parameter estimates for share of votes exhausted by the final round are normally distributed and proceed with Rubin's rules.
+
+```{r adj-exhausted-tab, echo = FALSE, results = 'asis'}
+exhausted_share_summ %>%
+  knitr::kable(col.names = c('Method', '$\\hat{p}$', '$V_W$', '$V_B$', '$V_T$'),
+               caption = "Exhausted votes for each imputation method",
+               caption.short = "Simulated exhausted votes",
+               longtable = TRUE,
+               booktabs = TRUE,
+               escape = FALSE)
+```
+
+When we apply Rubin's rules to correct our underestimate of variance, the situation changes wildly^[Here the black and brown lines are the exhausted vote share for the original and listwise methods (respectively).]. Looking at Figure \@ref(fig:adj-exhausted-plot), the overlap between the various methods is much more palpable. Similar to Breed's vote share,  Table \@ref(tab:adj-exhausted-tab) shows that the majority of the variance in these estimated distributions of exhausted vote share comes from the variance *within* each imputation, as opposed to the variance *between* the imputations. In this case, however, the improvement in exhausted vote share compared to the original data is so high that there is a much clearer impact from the imputation.
+
+```{r adj-exhausted-plot, echo = FALSE, fig.cap = "Simulated exhausted vote share - adjusted variances", out.width='100%'}
+data.frame(x = runif(1000, 0, .15)) %>%
+  ggplot(aes(x)) +
+  stat_function(fun = dnorm, aes(color = exhausted_share_summ$impute[3]),
+                args = list(mean = exhausted_share_summ$mean[3],
+                            sd = sqrt(exhausted_share_summ$var_total[3]))) +
+  stat_function(fun = dnorm, aes(color = exhausted_share_summ$impute[4]),
+                args = list(mean = exhausted_share_summ$mean[4],
+                            sd = sqrt(exhausted_share_summ$var_total[4]))) +
+  stat_function(fun = dnorm, aes(color = exhausted_share_summ$impute[5]),
+                args = list(mean = exhausted_share_summ$mean[5],
+                            sd = sqrt(exhausted_share_summ$var_total[5]))) +
+  stat_function(fun = dnorm, aes(color = exhausted_share_summ$impute[6]),
+                args = list(mean = exhausted_share_summ$mean[6],
+                            sd = sqrt(exhausted_share_summ$var_total[6]))) +
+  geom_vline(xintercept = exhausted_share_summ$mean[1], color = 'black') +
+  geom_vline(xintercept = exhausted_share_summ$mean[2], color = 'brown') +
+  labs(x = 'Exhausted vote share', y = 'density') +
+  scale_colour_manual("Method", values = c('red', 'blue', 'green', 'orange'))
+
+```
+

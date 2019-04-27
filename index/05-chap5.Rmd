@@ -1,42 +1,129 @@
-## Methods 2
+# Missing data methods {#missing-methods}
 
-The data was transformed first, to remove any duplicated votes (e.g., a row listing London Breed 3 times was reduced to its functional equivalent: listing London Breed once) and "left-align" all ballots so that ballots with one missing value always had it in slot 3, and ballots with 2 missing values always had them in slots 2 and 3.
+## Imputation {#imp-methods}
 
-We used hot deck imputation to guess at missing values in the dataset. There were $N$ methods of dealing with the missing data that we used:
+In dealing with our missing data, we chose here to use multiple imputation for a handful of reasons. First, it had the best conceptal analog to "what if there were no overvotes or undervotes", and is thus an appropriate method for measuring the effect of said ballot phenomena. Second, it does not have the same distributional assumptions that come with methods like maximum likelihood estimation. There were six methods of dealing with the missing data that we used:
 
-- Listwise deletion. This does not have an analog to "what if everybody voted all the way", but instead just removes any ballot without 3 unique candidate choices. This has no analog to "what if everybody voted fully", because instead of using the available information on voters it 
-This gives us a "full vote choice distribution" that we can use to compare the other methods to.
+- Original cases (or, not dealing with it at all). This original election data is a baseline case to compare all methods applied to.
 
-```{r echo = FALSE}
-listwise <- sf_wide %>%
-  filter(complete.cases(.)) %>%
-  rename(`1` = x1,
-         `2` = x2,
-         `3` = x3)
+- Listwise deletion. This is one form of analog to "what if there were no overvotes or undervotes", but instead of using all of the available information on voters it removes incomplete information and leaves us with a less accurate measure. This does, however, give us a "full vote choice distribution" from the original ballots that we can use to compare to other methods.
 
-listwise_counts <- count(listwise, `1`, `2`, `3`) %>%
-  arrange(desc(n)) %>%
-  mutate(prop = n / sum(n))
+    ```{r echo = FALSE, out.width='6in'}
+    listwise <- sf_wide %>%
+      filter(complete.cases(.)) %>%
+      rename(`1` = x1,
+             `2` = x2,
+             `3` = x3)
+    
+    listwise_counts <- count(listwise, `1`, `2`, `3`) %>%
+      arrange(desc(n)) %>%
+      mutate(prop = n / sum(n))
+    
+    knitr::kable(head(listwise_counts, 10), 
+          col.names = c("1", "2", "3", "Count", "Proportion"),
+          caption = "Examination of full voter counts",
+          caption.short = "Listwise vote counts",
+          booktabs = TRUE) %>%
+      kableExtra::kable_styling(latex_options = c("scale_down"))
+    ```
 
-knitr::kable(head(listwise_counts, 10), 
-      col.names = c("1", "2", "3", "Count", "Proportion"),
-      caption = "Examination of full voter counts",
-      caption.short = "Listwise vote counts",
-      longtable = TRUE,
-      booktabs = TRUE)
-```
+    This full vote choice distribution lets us compare these methods at a more granular level than the simple parameter of "who won". For example, we can see what proportion of voters under our multinomial method below voted for the `Kim - Leno - Weiss` combination, compared to the `r scales::percent(listwise_counts$prop[1])` of full voters that had this combination in the original ballot.
+    
+- Random hot deck imputation (RHD) based on nothing: that is, each voter is assigned a truly random candidate (pulled from the existing distribution of that ranking slot) that is unique from their earlier vote choices. This ignores some of the conditional distribution information available in the data. For example, given the cross-endorsement between Jane Kim and Mark Leno, we might expect their voters to be more likely to support the other candidate as their second choice than an average voter. Randomly pulling a second choice to impute for a Kim voter would then underestimate the chance that Kim would have been chosen.
 
+- RHD based on vote choice alone. Missing data points are matched to potential donors by their corresponding 1st vote choice when imputing the 2nd vote choice, and by their first two vote choices when imputing the 3rd vote choice. This solves some of the conditional information problems presented by the fully random imputation.
 
-- Random hot deck imputation (RHD) based on vote choice alone. Missing data points are matched to potential donors by their corresponding 1st vote choice when imputing the 2nd vote choice, and by their first 2 vote choices when imputing the 3rd vote choice.
+- RHD based on vote choice and precinct. This is similar to the imputation vote choice alone, but now donors also must be from the same precinct as the recipient. This method controls for which precinct the voter is from, which attempts to get at differences between precincts in candidate support.
 
-- RHD based on vote choice and precinct. Same as vote choice alone, but now donors also must be from the same precinct as the missing data.
-
-Each of these methods was validated by removing some values that were present in the original dataset and seeing how well the imputation guessed the made-missing values. (Haven't done this yet but will soon). Results of that are discussed here.
+- Multinomial logistic regression based on vote choice and demographic data. The demographic information given to each voter was the rates of demographic groups in their precinct^[This leaves us somewhat open to the genetic fallacy of assuming that every person in a precinct is identical to the precinct as a whole. However, since we are not interpreting the coefficients of this model, this precinct demographic information can just be treated as more information to make an accurate predictive model. It is a way of quantifying how similar different precincts are to each other, rather than simply treating each one as a wholly independent entity.], as described in [Chapter 2](#demo-methods). This is similar to a multinomial regression based on vote choice and precinct alone, but also includes more information about certain precincts being more demographically similar than others.
 
 ### Issues
 
-Too much certainty in single hot deck: To fix, we run multiple times to get some variability in the imputation method.
+#### Underestimate of variance {#rubins-rules}
 
-Imputation using an imputed variable: Since we impute the 3rd choice based on the first and second choices, this means we're imputing some rows based on the imputed (unobserved) 2nd value. This can lead to issues (idk what kind?). Maybe test at by trying it with the imputed 2nd ones, then just using the 1st ones to impute and comparing.
+As expressed in the [previous chapter](#missing-litreview), single imputations underestimate variance because they place an unwarranted certainty upon the newly imputed data, which is then fed into a deterministic process to calculate an estimator. This is overcome through the use of multiple imputation.
 
-Cases where a donor pool is not available: Some combinations of vote choices (typically including unpopular candidates), or precinct and vote choices, are unique or not present in the data. This means that the hot deck method cannot match any donor to impute a value. We then fill in with the next-best method, that is: if there is no combination of 1st and 2nd that matches the case we need to impute 3rd for, we fall back to just matching 1st and imputing the value. The following is an illustration of how often this phenomenon happens (haven't mocked up yet but it's really low, something like 1%-2% of the 3rd vote choices fail even when matching precinct, 1st, and 2nd choice).
+There are a set of methods to calculate the mean and variance of estimators from multiple imputation, known as "Rubin's Rules" [@heymans_applied_2009]. For a set of estimates $\{\hat{\theta}_i\}$ of a parameter $\theta$ and $m$ the number of imputations, the pooled mean can be calculated
+\[
+\bar{\theta} = \frac{1}{m} \sum_{i=1}^m \hat{\theta}_i,
+\]
+that is the mean of the estimates.
+
+For variance, we must consider two quantities. Within each imputation, any estimate will have a standard error $SE_i$^[If our estimate is a mean, this is the standard deviation of the vector divided by the square root of the sample size. If the estimate is a proportion $\hat{p}$, the standard error is $\sqrt{\hat{p} (1 - \hat{p}) / n}$.]. We can then calculate the overall variance *within* imputations, 
+\[
+V_W = \frac{1}{m} \sum_{i=1}^m SE_i^2,
+\]
+the average squared standard error within an imputation. There is also variance *between* each dataset, which comes from uncertainty about what the true values are that we are attempting to impute. This is expressed as
+\[
+V_B = \sqrt{\frac{\sum_{i=1}^m (\theta_i - \bar{\theta})^2}{m-1}},
+\]
+that is the sample variance of the estimators. Then, the *total* variance of our estimate is 
+\[
+V_T = V_W + V_B + \frac{V_B}{m},
+\]
+a combination of these two facets of variance. This is the way in which multiple imputation adjusts for the decreased variance that comes with single imputation.
+
+While our RCV algorithm does not produce typical sample parameter estimates, these rules are still useful for obtaining an accurate sense of variability in our quantitative estimates.
+
+#### Imputation on an imputation
+
+Since we impute the 3rd choice based on the first and second choices, this means we're imputing some rows based on the imputed (unobserved) 2nd choice. This can lead to further issues of certainty, because the further imputations treat the imputed 2nd choice as known. We also believe this is overcome through the use of multiple imputations.
+
+#### Incomplete hot deck matching
+
+Some combinations of vote choices (typically including unpopular candidates), or precinct and vote choices, are unique or not present in the data. This means that the hot deck method cannot match any donor to impute a value. When this is the case, we then fill in with the next-best method, that is: if there is no combination of 1st and 2nd that matches the case we need to impute 3rd for, we fall back to just matching 1st and imputing the value. Table \@ref(tab:no-rhd-match) is an illustration of how often this phenomenon happens.
+
+```{r no-rhd-match, echo = FALSE, cache = TRUE}
+library(simputation)
+options(simputation.hdbackend="VIM")
+
+imputed <- sf_wide
+x3_prop <- mean(is.na(imputed$x3))
+
+imputed <- impute_rhd(imputed, x2 ~ x1 + precinct) %>%
+  impute_rhd(x2 ~ x1) %>%
+  impute_rhd(x3 ~ x1 + x2 + precinct)
+x3_prop <- c(x3_prop, mean(is.na(imputed$x3)))
+
+imputed <- impute_rhd(imputed, x3 ~ x1 + x2)
+x3_prop <- c(x3_prop, mean(is.na(imputed$x3)))
+
+imputed <- impute_rhd(imputed, x3 ~ x1)
+x3_prop <- c(x3_prop, mean(is.na(imputed$x3)))
+
+x3_missing <- data.frame(step = c('Original', '1st, 2nd choice & precinct', '1st, 2nd choice', '1st choice'),
+                         prop = x3_prop)
+
+knitr::kable(x3_missing, 
+          col.names = c("Imputation step", "Proportion"),
+          caption = "Proportion of unfilled 3rd vote choices through imputation steps",
+          caption.short = "Imputation mismatches - 3rd choice",
+          longtable = TRUE,
+          booktabs = TRUE)
+```
+
+Even in the worst case scenario out of all the imputations (3rd vote choice, imputed on 1st choice, 2nd choice, and precinct), only `r scales::percent(x3_missing$prop[2])` of 3rd vote choices are missing. Of the choices that were missing originally, even this method is able to match `r scales::percent(1 - x3_missing$prop[2] / x3_missing$prop[1])` of them. Since this is a small problem, we feel it does not negatively impact our results.
+
+#### Choice of which imputations to perform
+
+There are any number of alternative imputation methods we could have used to get simulated elections. The ones here were chosen for a mix of applicability (not all methods apply to cetegorical data as well as numerical data), feasibility, and our subjective assessment of what would make an interesting comparison^[E.g., the missing data methods progress from least information used (listwise deletion) to most information used (all available vote choices and precinct demographic information).].
+
+For all of these methods, we had to ensure that no duplicate votes were created in the process^[As this would represent an "undervote", not using as many unique candidates as allowed.]. For example, a multinomial model considering demographic information alone (no vote choices) was considered, but did not work because it created duplicated votes for a number of the voters.
+
+## Data preparation
+
+The election data was transformed first, to remove any duplicated votes (e.g., a row listing London Breed three times was reduced to its functional equivalent: listing London Breed once) and "left-align" all ballots so that ballots with one missing value always had it in slot 3, and ballots with two missing values always had them in slots 2 and 3.
+
+The demographic data used is the same that was used to answer the previous research question: precinct-level demographic rates, obtained through areal interpolation, and joined to each voter by their precinct. This is the most granular method we have to establish demographics for each voter, because the only identifying information we have about any given voter is their precinct. As such, the multinomial model used is not considering a voter's personal demographics, but rather the demographics of their precinct at large. As mentioned earlier, this gives us a way to quantify certain precincts as being more or less "distant" demographically to each other, as opposed to treating them all fully independently.
+
+## Metrics for comparing methods
+
+At the end of the day, the ultimate metric of any election-related experiment like this is the winner of the election. While we are foremostly concerned with this, other metrics should not be ignored for consideration as well. We also examine:
+
+- London Breed's^[Breed was the winner of the real-life election.] vote share in the final round of counting. This metric gives us a quantitative assessment of how close an election was to changing its eventual winner. Here we ignore exhausted ballots and just consider the binary comparison between the final two candidates.
+
+- Intermediate switches in rankings. The smaller absolute margins between candidates in earlier rounds of counting provide a potentially easier opportunity to change the ultimate result (who is elected). These have a cascading effect on later rounds of the election, so even a seemingly insignificant swap in an earlier round of the tabulation can impact the eventual winner.
+
+- Changes in proportions of vote combinations. This makes use of the calculated proportions of each combination of vote choices from the [listwise deletion](#imp-methods) mentioned earlier. This is an attempt at a quantitative assessment of these intermediate ranking swaps, to see how big the impact of the imputation was. If a method has a strangely high or low proportion of a certain vote choice combination compared to the original data (here equivalent to the listwise deletion), then that method may have had some serious impact on the election results.
+
+- Number of exhausted voters by the final round. This is secondary in terms of electoral impact, but does illustrate the impact of undervotes on representation. One of the complaints against RCV is that it has large numbers of exhausted ballots by the final round of the election (depending on how many candidates run and how many candidates voters are allowed to rank). By removing the undervotes and overvotes, we can see how much of the ballot exhaustion phenomenon is attributable to the limit on voter rankings.

@@ -1,3 +1,7 @@
+# this script performs multiple imputation on the ballot data
+# you can change the number of iterations on line 16 and write to the data files
+# heads up that this takes so so much time, you can barely get 200 draws overnight
+
 # remotes::install_github('ds-elections/rcv')
 library(hot.deck)
 library(here)

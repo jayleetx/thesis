@@ -4,6 +4,7 @@ library(ggplot2)
 library(broom)
 library(here)
 library(knitr)
+knitr::opts_chunk$set(echo = FALSE)
 
 sf_precincts <- st_read(dsn = here("data", "sf_precincts"), stringsAsFactors = FALSE)
 colnames(sf_precincts) <- c('precinct', 'over_count', 'no_over_count', 'under_count',
@@ -15,151 +16,281 @@ colnames(sf_precincts) <- c('precinct', 'over_count', 'no_over_count', 'under_co
                             'no_turnout', 'turnout_rate', 'geometry')
 # this just undoes the var name shortening in the shapefile format
 
-best_linear_turnout <- lm(turnout_rate ~ pop_18_24 + pop_45_64 + college, data = sf_precincts)
-best_linear_over <- lm(overvote_rate ~ black + college, data = sf_precincts)
-best_linear_under <- lm(undervote_rate ~ black + no_english, data = sf_precincts)
+best_linear_turnout <- lm(log(turnout_rate) ~ pop_18_24
+                          + pop_45_64
+                          + no_hs
+                          + college
+                          + white,
+                          data = sf_precincts)
+best_linear_over <- lm(overvote_rate ~ black,
+                       data = sf_precincts)
+best_linear_under <- lm(undervote_rate ~ black
+                        + pop_18_24
+                        + pop_25_44
+                        + pop_45_64
+                        + college
+                        + pac_islander
+                        + white
+                        + no_hs,
+                        data = sf_precincts)
+
+logit_turnout <- glm(cbind(turnout, no_turnout) ~ college
+                    + no_hs
+                    + pop_18_24
+                    + pop_45_64
+                    + poverty
+                    + asian
+                    + pac_islander 
+                    + pop_65_plus
+                    + female
+                    + native
+                    + no_english
+                    + hispanic
+                    + white
+                    + black
+                    + pop_25_44
+                    + other_race,
+                    data = sf_precincts, family = 'binomial')
+logit_over <- glm(cbind(over_count, no_over_count) ~ black,
+                  data = sf_precincts, family = 'binomial')
+logit_under <- glm(cbind(under_count, no_under_count) ~ black
+                  + college
+                  + pop_18_24
+                  + pop_25_44
+                  + pop_45_64
+                  + white
+                  + asian
+                  + hispanic
+                  + no_hs
+                  + pac_islander,
+                  data = sf_precincts, family = 'binomial')
 ```
 
 # Demographic analysis results {#demo-results}
 
-For the following models, I use variables taken from the US Census 2018 Planning Database^[All descriptions taken from the Planning Database as well.], estimated for the election precincts through the areal interpolation method. All data is self-reported through the Census process^[In regards to the `female` variable: the Census specifically asks about binary sex; there are currently no questions about gender identity.]. A description of these variables is in the [Appendix](#appendix).
+For the following models, I use variables^[These variables do experience some collinearity, but were included anyway in an attempt to "cover all our bases" in regards to the demographic variables. Further research could better refine the choice of variables.] taken from the US Census 2018 Planning Database^[All descriptions taken from the Planning Database as well.], estimated for the election precincts through the areal interpolation method^[We removed from the dataset one outlier with a turnout rate of 124%, Precinct 7024. We believe this is a particularly egregious inaccuracy in the interpolation process of calculating population. The gaps in the maps in this chapter are Golden Gate Park (to the northwest), Crocker-Amazon Playground and John McLaren Park (to the south), and our removed precinct 7024 (to the southeast).]. All data is self-reported through the Census process^[In regards to the `female` variable: the Census specifically asks about binary sex; there are currently no questions about gender identity. We thus refer to this as "percentage female" later on to avoid undue conclusions as a result of this distinction.]. A description of these variables is in the [Appendix](#appendix).
 
-## Modeling turnout
+## Voter turnout
 
-```{r, fig.cap='Observed turnout rate by precinct'}
+The turnout across the city is displayed in Figure \@ref(fig:turnout-map). This election apparently saw low turnout (generally sub-50% in precincts), and has a right-skewed distribution - that is, a handful of precincts had notably high turnout rates. There is no discernable spatial pattern to the turnout rate, other than maybe some slightly higher turnout in the central and east central parts of the city.
+
+```{r turnout-map, fig.cap='Observed turnout rate by precinct', out.width = '6in', message=FALSE}
 turnout_map <- ggplot(sf_precincts) + geom_sf(aes(fill = turnout_rate), lwd = 0) +
-  theme_void()
+  theme_void() + labs(fill = 'Turnout rate')
 turnout_hist <- ggplot(sf_precincts, aes(x = turnout_rate)) + geom_histogram() +
-  theme_void()
+  theme_bw() + labs(x = 'Turnout rate', y = 'Count')
 
-turnout_map + turnout_hist + plot_layout(ncol = 2)
+turnout_map + turnout_hist + plot_layout(ncol = 2, widths = c(4,2))
 ```
 
-With an adjusted $R^2$ value of `r summary(best_linear_turnout)$adj.r.squared`, the best linear model we found for predicting turnout^[From the dataset, we removed one outlier with a turnout rate of 124%, Precinct 7024. We believe this is a particlarly egregious inaccuracy in the interpolation process of calculating population. The gaps in the map above and following maps are Golden Gate Park (to the northwest), Crocker-Amazon Playground and John McLaren Park (to the south), and our removed precinct 7024 (to the southeast).] included variables for both age and education. A district having more young people (ages 18-24) was negatively correlated with turnout, while having more middle-aged and college-educated people was positively correlated with turnout. This is consistent with general literature on voter turnout - young people vote less, and the better educated vote more.
+### Linear
 
-```{r, fig.cap="Linear turnout model validation"}
+With an adjusted $R^2$ value of `r round(summary(best_linear_turnout)$adj.r.squared, 3)`, the best linear model (Table \@ref(tab:linear-turnout-model)) we found for predicting turnout^[This was actually set to predict the natural log of turnout because the raw turnout saw heteroskedasticity in residuals, which indicates that a linear model was not an accurate descriptor of this phenomenon.] included variables for age, education, and race. Having more young people (ages 18-24) and people without high school degrees was negatively correlated with turnout, while having more middle-aged, college-educated, and White people was positively correlated with turnout. This is consistent with general literature on voter turnout - racial and ethnic minorities vote less, while the older and better educated vote more.
+
+```{r linear-turnout-model, fig.cap="Linear turnout model validation", message=FALSE, out.width='6in'}
 kable(tidy(best_linear_turnout) %>% mutate(term = stringr::str_remove_all(term, '\\(|\\)')),
-      caption = "Linear model for RCV voter turnout",
+      caption = "Linear model for RCV voter turnout (log)",
       caption.short = "Linear turnout model",
-      longtable = TRUE,
       booktabs = TRUE)
 
 a <- ggplot(best_linear_turnout, aes(x = .fitted, y = .resid)) +
   geom_point() +
   geom_hline(yintercept = 0, linetype = "dashed") +
+  theme_bw() +
   xlab("Fitted values") +
   ylab("Residuals")
 
 b <- ggplot(best_linear_turnout, aes(x = .resid)) +
   geom_histogram() +
+  theme_bw() +
   xlab("Residuals")
-# linear model is not half bad at turnout
-# slightly right skewed residuals, a few super high outliers
+# log-linear model is not half bad at turnout
+# slightly left skewed residuals, one super low outliers
 # investigate these
 
 a + b + plot_layout(ncol = 2)
 ```
 
-Logistic -
+Figure \@ref(fig:linear-turnout-model) details the residuals from the model. These are normally distributed, with no systematic change in variance. There is one particularly low outlier, but on the whole the residuals are distributed evenly. Unfortunately, the residuals here are quite large - since we're predicting turnout rates, a "valid" residual^[That is, a residual where the predicted value is indeed a rate between 0 and 1.] should only range between -1 and 1. This and the adjusted $R^2$ mentioned earlier indicate that this model is not particularly well fitted to the data.
 
-## Modeling overvoting
+### Logistic
 
-```{r, fig.cap='Observed overvote rate by precinct'}
+With a McFadden's Pseudo-$R^2$ value^[This is an alternative $R^2$ metric for categorical response variables. It is interpretable as the amount of variability explained by the model or how much of an improvement the model is compared to the null model, but not as the square of the correlation coefficient. Other metrics satisfy different combinations of these interpretations [@noauthor_faq_2011]. This pseudo-$R^2$ should not be compared to the $R^2$ from a linear method, but can be compared between logistic models.] of `r round(DescTools::PseudoR2(logit_turnout, 'McFadden'), 3)`, the best logistic model (Table \@ref(tab:logit-turnout-model)) we found for predicting turnout^[Now, we are predicting the raw, un-logged turnout scores again.] included all of our variables. Education and age were positively correlated with turnout, while poverty, percentage female, and non-English-speaking population were negatively correlated. All of the racial groups were correlated negatively with turnout, and there is no distinct pattern among minority groups versus White voters.
+
+```{r logit-turnout-model, fig.cap="Logistic turnout model validation", message=FALSE, out.width='6in'}
+kable(tidy(logit_turnout) %>% mutate(term = stringr::str_remove_all(term, '\\(|\\)')),
+      caption = "Logistic model for RCV voter turnout",
+      caption.short = "Logit turnout model",
+      booktabs = TRUE)
+
+df <- data.frame(fitted = predict(logit_turnout, sf_precincts, type = 'response'),
+                 actual = sf_precincts$turnout_rate) %>%
+  mutate(resid = fitted - actual)
+
+a <- ggplot(df, aes(x = fitted, y = resid)) +
+  geom_point() +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  theme_bw() +
+  xlab("Predicted turnout rates") +
+  ylab("Residuals")
+
+b <- ggplot(df, aes(x = resid)) +
+  geom_histogram() +
+  theme_bw() +
+  xlab("Residuals") +
+  ylab("Count")
+
+a + b + plot_layout(ncol = 2)
+```
+
+Figure \@ref(fig:logit-turnout-model) details the residuals of our predictions^[This is somewhat an abuse of the linear model validation plots. Since we're using the logit link function to predict a turnout rate (rather than an individual's binary turnout measure), this was the best visualization I could come up with to express the "accuracy" of the logistic method. There are no equivalent assumptions that these plots address, like in the linear case.]. These are normally distributed (with a slight left skew), and notably are much smaller in general than the linear method^[They are bound to $[-1,1]$ because the logistic method outputs a probability, but are still much smaller aside from this limitation.]. The middle 95% of residuals for the linear model lie between `r round(quantile(best_linear_turnout$residuals, .025), 3)` and `r round(quantile(best_linear_turnout$residuals, .975), 3)`, significantly wider than the `r round(quantile(df$resid, .025), 3)` and `r round(quantile(df$resid, .975), 3)` from the logistic method. We see some heteroskedasticity, as the residuals are much smaller at the high and low ends of the predicted values. While a better version of this model may exist, the smaller residuals alone indicate that this is a much better explanation of the turnout method than the linear model.
+
+## Overvoting
+
+The rate of overvoting across the city is displayed in Figure \@ref(fig:overvote-map). Overvote rates are usually very small fractions, and here we see that no precinct had an overvote rates higher than 2%. Many, in fact, had no overvotes at all. There is no discernable spatial pattern to the overvote rate.
+
+```{r overvote-map, fig.cap='Observed overvote rate by precinct', out.width = '6in', message=FALSE}
 overvote_map <- ggplot(sf_precincts) + geom_sf(aes(fill = overvote_rate), lwd = 0) +
-  theme_void()
+  theme_void() + labs(fill = 'Overvote rate')
 overvote_hist <- ggplot(sf_precincts, aes(x = overvote_rate)) + geom_histogram() +
-  theme_void()
+  theme_bw() + labs(x = 'Overvote rate', y = 'Count')
 
-overvote_map + overvote_hist + plot_layout(ncol = 2)
+overvote_map + overvote_hist + plot_layout(ncol = 2, widths = c(4,2))
 ```
 
-With an adjusted $R^2$ value of `r summary(best_linear_over)$adj.r.squared`, the best linear model we found for predicting overvoting included variables for both race and education. A district being more African-American was positively correlated with overvoting, while having more college-educated people was negatively correlated with overvoting.
+### Linear
 
-```{r, fig.cap="Linear overvote model validation"}
+With an adjusted $R^2$ value of `r round(summary(best_linear_over)$adj.r.squared, 3)`, the best linear model (Table \@ref(tab:linear-overvote-model)) we found for predicting overvote rates included only the variable `black`. Having more African-Americans in a precinct was positively correlated with overvoting.
+
+```{r linear-overvote-model, fig.cap="Linear overvote model validation", message=FALSE, out.width='6in'}
 kable(tidy(best_linear_over) %>% mutate(term = stringr::str_remove_all(term, '\\(|\\)')),
-      caption = "Linear model for overvoting in RCV",
+      caption = "Linear model for overvote rates",
       caption.short = "Linear overvote model",
-      longtable = TRUE,
       booktabs = TRUE)
 
-c <- ggplot(best_linear_over, aes(x = .fitted, y = .resid)) +
+a <- ggplot(best_linear_over, aes(x = .fitted, y = .resid)) +
   geom_point() +
   geom_hline(yintercept = 0, linetype = "dashed") +
+  theme_bw() +
   xlab("Fitted values") +
   ylab("Residuals")
 
-d <- ggplot(best_linear_over, aes(x = .resid)) +
+b <- ggplot(best_linear_over, aes(x = .resid)) +
   geom_histogram() +
+  theme_bw() +
   xlab("Residuals")
-# linear model is not half bad at turnout
-# slightly right skewed residuals, a few super high outliers
+# log-linear model is not half bad at turnout
+# slightly left skewed residuals, one super low outliers
 # investigate these
 
-c + d + plot_layout(ncol = 2)
+a + b + plot_layout(ncol = 2)
 ```
 
-Logistic
+Figure \@ref(fig:linear-overvote-model) details the residuals from the model. Here we see that the linear model is not a great fit for this data. The combination of low overvoting rates and a lower bound at 0 mean that we see significant heteroskedasticity in the residuals. They are skewed in a strange way due to the prevalence of so many 0s, with the "normal mass" of residuals showing a right skew but the 0 residuals causing large spikes on the negative end. Interestingly, there also seems to be a line of residuals in the upper section of the scatter plot, indicating that there are a set of precincts with roughly the same high overvote rate that were predicted to have much lower rates. All this and the extremely low adjusted $R^2$ mentioned earlier indicate that this model is poorly fitted to the data.
 
-## Modeling undervoting
+### Logistic
 
-```{r, fig.cap='Observed undervote rate by precinct'}
+With a McFadden's Pseudo-$R^2$ value of `r round(DescTools::PseudoR2(logit_over, 'McFadden'), 3)`, the best logistic model (Table \@ref(tab:logit-overvote-model)) we found for predicting overvote rates also included only the variable `black` (again positively correlated with overvoting).
+
+```{r logit-overvote-model, fig.cap="Logistic overvote model validation", message=FALSE, out.width='6in'}
+kable(tidy(logit_over) %>% mutate(term = stringr::str_remove_all(term, '\\(|\\)')),
+      caption = "Logistic model for overvote rates",
+      caption.short = "Logit overvote model",
+      booktabs = TRUE)
+
+df <- data.frame(fitted = predict(logit_over, sf_precincts, type = 'response'),
+                 actual = sf_precincts$overvote_rate) %>%
+  mutate(resid = fitted - actual)
+
+a <- ggplot(df, aes(x = fitted, y = resid)) +
+  geom_point() +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  theme_bw() +
+  xlab("Predicted overvote rates") +
+  ylab("Residuals")
+
+b <- ggplot(df, aes(x = resid)) +
+  geom_histogram() +
+  theme_bw() +
+  xlab("Residuals") +
+  ylab("Count")
+
+a + b + plot_layout(ncol = 2)
+```
+
+Figure \@ref(fig:logit-overvote-model) details the residuals of our predictions. We see a similarly strange pattern in the residual scatterplot as in the linear overvote model, but this time the lower line is curved and the upper line is straight. There is no clear modal pattern in the residuals, except for an increase moving from the negative end that looks roughly like a bell curve. The middle 95% of the data is equally spread between the two methods ([`r paste(round(quantile(best_linear_over$residuals, c(.025, .975)), 3), collapse = ",")`] for the linear model and [`r paste(round(quantile(df$resid, c(.025, .975)), 3), collapse = ",")`] for the logistic), but they have different signs - the logistic model has more negative values, the linear more positive. Neither the linear nor the logistic model appears to be a good fit for overvote rates here. Perhaps a zero-inflated method would perform better with this unusual distribution.
+
+## Undervoting
+
+The rate of undervoting across the city is displayed in Figure \@ref(fig:undervote-map). These are somewhat normally distributed, and show no clear spatial pattern. Most precincts had between 20% and 40% of voters undervote.
+
+```{r undervote-map, fig.cap='Observed undervote rate by precinct', out.width = '6in', message=FALSE}
 undervote_map <- ggplot(sf_precincts) + geom_sf(aes(fill = undervote_rate), lwd = 0) +
-  theme_void()
+  theme_void() + labs(fill = 'Undervote rate')
 undervote_hist <- ggplot(sf_precincts, aes(x = undervote_rate)) + geom_histogram() +
-  theme_void()
+  theme_bw() + labs(x = 'Undervote rate', y = 'Count')
 
-undervote_map + undervote_hist + plot_layout(ncol = 2)
+undervote_map + undervote_hist + plot_layout(ncol = 2, widths = c(4,2))
 ```
 
-With an adjusted $R^2$ value of `r summary(best_linear_under)$adj.r.squared`, the best linear model we found for predicting undervoting^[Here, the percentage of people who listed only 1 or 2 unique candidates out of the percentage of people who listed any number of candidates. This combines both "undervoting" as skipping ranking slots and "duplicated voting" as ranking the same candidate in multiple slots.] included variables for both race and education. Having more African-Americans and residents over 25 without a high school degree was negatively correlated with undervoting.
+### Linear
 
-```{r, fig.cap="Linear undervote model validation"}
+With an adjusted $R^2$ value of `r round(summary(best_linear_under)$adj.r.squared, 3)`, the best linear model (Table \@ref(tab:linear-undervote-model)) we found for predicting undervote rates included predictors about age, education, and race. The three youngest age categories were negatively correlated with undervoting, both education variables were positively correlated, and three ethnic groups (`black`, `pac_islander`, `white`) were positively correlated as well. While this doesn't agree with previous literature on voting habits, neither does it provide a clear pattern with which to base a disagreement on. Particularly, we would not expect the percentage of people with a college degree *and* the percentage of people with no high school diploma to trend in the same direction.
+
+```{r linear-undervote-model, fig.cap="Linear undervote model validation", message=FALSE, out.width='6in'}
 kable(tidy(best_linear_under) %>% mutate(term = stringr::str_remove_all(term, '\\(|\\)')),
-      caption = "Linear model for undervoting in RCV",
+      caption = "Linear model for undervote rates",
       caption.short = "Linear undervote model",
-      longtable = TRUE,
       booktabs = TRUE)
 
-e <- ggplot(best_linear_under, aes(x = .fitted, y = .resid)) +
+a <- ggplot(best_linear_under, aes(x = .fitted, y = .resid)) +
   geom_point() +
   geom_hline(yintercept = 0, linetype = "dashed") +
+  theme_bw() +
   xlab("Fitted values") +
   ylab("Residuals")
 
-f <- ggplot(best_linear_under, aes(x = .resid)) +
+b <- ggplot(best_linear_under, aes(x = .resid)) +
   geom_histogram() +
+  theme_bw() +
   xlab("Residuals")
-# linear model is not half bad at turnout
-# slightly right skewed residuals, a few super high outliers
+# log-linear model is not half bad at turnout
+# slightly left skewed residuals, one super low outliers
 # investigate these
 
-e + f + plot_layout(ncol = 2)
+a + b + plot_layout(ncol = 2)
 ```
 
-Honestly I'm really unsure what's going on here. Heavily black precincts are more likely to undervote (lines up with general voting literature), but precincts with less education (less HS grads / less college grads) are less likely to undervote (doesn't line up), and precincts that speak English less well are also less likely to undervote. Just some unexpected and not always significant results.
+Figure \@ref(fig:linear-overvote-model) details the residuals from the model. The linear model seems to be a decent fit for this data, with relatively normal residuals and no clear variance pattern. The scale of the residuals could be improved (in combination with the adjusted $R^2$ from earlier), but on the whole this is not a poorly fitting model.
 
-And these are logistic for over and under - still need to do training/test or cross validation, plus better model selection.
+### Logistic
 
-```{r}
-logit_over <- glm(cbind(over_count, no_over_count) ~ hispanic + black + no_english,
-                  data = sf_precincts, family = binomial)
+With a McFadden's Pseudo-$R^2$ value of `r round(DescTools::PseudoR2(logit_under, 'McFadden'), 3)`, the best logistic model (Table \@ref(tab:logit-undervote-model)) we found for predicting undervote rates also included variables in age, education, and race. We see this strange pattern in variable coefficients here as well - both educational groups and all of these ethnic groups are positively associated with undervoting (no clear minority vs. White distinction), and the three younger age categories are negatively associated with it.
 
-logit_under <- glm(cbind(under_count, no_under_count) ~
-                  + pop_18_24
-                  + pop_25_44
-                  + pop_45_64
-                  + hispanic
-                  + white
-                  + black
-                  + asian
-                  + no_hs
-                  + college
-                   ,
-                   data = sf_precincts, family = binomial)
+```{r logit-undervote-model, fig.cap="Logistic undervote model validation", message=FALSE, out.width='6in'}
+kable(tidy(logit_under) %>% mutate(term = stringr::str_remove_all(term, '\\(|\\)')),
+      caption = "Logistic model for undervote rates",
+      caption.short = "Logit undervote model",
+      booktabs = TRUE)
 
-summary(logit_over)
-summary(logit_under)
+df <- data.frame(fitted = predict(logit_under, sf_precincts, type = 'response'),
+                 actual = sf_precincts$undervote_rate) %>%
+  mutate(resid = fitted - actual)
+
+a <- ggplot(df, aes(x = fitted, y = resid)) +
+  geom_point() +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  theme_bw() +
+  xlab("Predicted overvote rates") +
+  ylab("Residuals")
+
+b <- ggplot(df, aes(x = resid)) +
+  geom_histogram() +
+  theme_bw() +
+  xlab("Residuals") +
+  ylab("Count")
+
+a + b + plot_layout(ncol = 2)
 ```
 
-Try the glmulti package on the mLab computers, maybe their rJava will work better...?
-https://rstudio-pubs-static.s3.amazonaws.com/2897_9220b21cfc0c43a396ff9abf122bb351.html
+Figure \@ref(fig:logit-undervote-model) details the residuals of our predictions. These look very similar to the linear model: approximately normally distributed, with no clear heteroskedasticy, and even the same cluster shape in the residual scatter plot. They even have similar spreads in the residuals ([`r paste(round(quantile(best_linear_under$residuals, c(.025, .975)), 3), collapse = ",")`] for the middle 95% of the linear model's residuals and [`r paste(round(quantile(df$resid, c(.025, .975)), 3), collapse = ",")`] for the logistic). Under all these metrics, the logistic model performs well. Despite these models seeming to fit appropriately, it's hard to draw a useful conclusion from them due to the aforementioned issues with variable meaning.

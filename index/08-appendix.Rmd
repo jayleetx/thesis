@@ -29,16 +29,3 @@ If you feel it necessary to include an appendix, it goes here.
 | no_english | The percentage of all occupied housing units^[This variable is at the level of housing units (not persons), and the Census measures "occupied housing units" as "Number of housing units classified as usual place of residence of the individual or group living in it"] where no one ages 14 years and over speaks English only or speaks English "very well" |
 
 Table: (\#tab:var-list) Census variables used in models
-
-# List of acronyms {#appendix-2}
-
-MLE: Maximum likehood estimation
-MI: Multiple imputation
-RCV: Ranked choice voting
-SF: San Francisco
-MCAR
-MAR
-MNAR / NI
-RHD
-VAP
-VEP

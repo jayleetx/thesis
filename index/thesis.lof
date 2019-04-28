@@ -1,0 +1,32 @@
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {1.1}{\ignorespaces Cross-endorsement in SF mayoral race\relax }}{10}{figure.caption.14}
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {2.1}{\ignorespaces Original ballot image data\relax }}{18}{figure.caption.22}
+\contentsline {figure}{\numberline {2.2}{\ignorespaces Cleaned RCV ballot\relax }}{18}{figure.caption.23}
+\contentsline {figure}{\numberline {2.3}{\ignorespaces Boundary mismatch between data sources\relax }}{20}{figure.caption.24}
+\contentsline {figure}{\numberline {2.4}{\ignorespaces Example regions for interpolation\relax }}{22}{figure.caption.26}
+\contentsline {figure}{\numberline {2.5}{\ignorespaces Proportion of residents aged 25-44\relax }}{23}{figure.caption.27}
+\contentsline {figure}{\numberline {2.6}{\ignorespaces Sample error in intensive interpolation - Percentage aged 25-44\relax }}{24}{figure.caption.29}
+\contentsline {figure}{\numberline {2.7}{\ignorespaces Boundary intersection between shapefiles\relax }}{26}{figure.caption.31}
+\contentsline {figure}{\numberline {2.8}{\ignorespaces Original versus bounded shapefiles\relax }}{27}{figure.caption.32}
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Observed turnout rate by precinct\relax }}{32}{figure.caption.37}
+\contentsline {figure}{\numberline {3.2}{\ignorespaces Linear turnout model validation\relax }}{33}{figure.caption.39}
+\contentsline {figure}{\numberline {3.3}{\ignorespaces Logistic turnout model validation\relax }}{35}{figure.caption.41}
+\contentsline {figure}{\numberline {3.4}{\ignorespaces Observed overvote rate by precinct\relax }}{36}{figure.caption.42}
+\contentsline {figure}{\numberline {3.5}{\ignorespaces Linear overvote model validation\relax }}{37}{figure.caption.44}
+\contentsline {figure}{\numberline {3.6}{\ignorespaces Logistic overvote model validation\relax }}{38}{figure.caption.46}
+\contentsline {figure}{\numberline {3.7}{\ignorespaces Observed undervote rate by precinct\relax }}{39}{figure.caption.47}
+\contentsline {figure}{\numberline {3.8}{\ignorespaces Linear undervote model validation\relax }}{40}{figure.caption.49}
+\contentsline {figure}{\numberline {3.9}{\ignorespaces Logistic undervote model validation\relax }}{42}{figure.caption.51}
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {6.1}{\ignorespaces London Breed's simulated vote share - unadjusted variances\relax }}{59}{figure.caption.61}
+\contentsline {figure}{\numberline {6.2}{\ignorespaces Normality check, Q-Q plot of Breed's vote share\relax }}{60}{figure.caption.62}
+\contentsline {figure}{\numberline {6.3}{\ignorespaces London Breed's simulated vote share - adjusted variances\relax }}{61}{figure.caption.64}
+\contentsline {figure}{\numberline {6.4}{\ignorespaces Difference in vote combination rates\relax }}{62}{figure.caption.66}
+\contentsline {figure}{\numberline {6.5}{\ignorespaces Simulated exhausted vote share - unadjusted variances\relax }}{63}{figure.caption.67}
+\contentsline {figure}{\numberline {6.6}{\ignorespaces Normality check, Q-Q plot of exhausted vote share\relax }}{64}{figure.caption.68}
+\contentsline {figure}{\numberline {6.7}{\ignorespaces Simulated exhausted vote share - adjusted variances\relax }}{65}{figure.caption.70}
+\addvspace {10\p@ }

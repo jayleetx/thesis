@@ -42,6 +42,7 @@ abbrevs: |
   \noindent ACS: American Community Survey \par
   \noindent GIS: Geographic information system \par
   \noindent IPW: Inverse probability weighting \par
+  \noindent IRV: Instant-runoff voting \par
   \noindent MAR: Missing at random \par
   \noindent MCAR: Missing completely at random \par
   \noindent MI: Multiple imputation \par
@@ -90,7 +91,7 @@ if(!require(devtools))
 if(!require(thesisdown))
   devtools::install_github("ismayc/thesisdown")
 library(thesisdown)
-knitr::opts_chunk$set(echo = FALSE, eval = TRUE)
+knitr::opts_chunk$set(echo = FALSE, eval = TRUE, cache = TRUE)
 # generally I don't want code to show up in the doc
 # I'll just link to the (eventually public) thesis repository to find source code
 # or put them as appendices? who knows
@@ -122,6 +123,6 @@ Chapters 1-3 investigate the demographic trends associated with the phenomena of
 
 Chapters 4-6 use missing data imputation methods to simulate a situation where there were no ballot errors, particularly undervoting and undervoting.
 [Chapter 4](#missing-litreview) covers the theory around missing data and a comparison of multiple possible methods to deal with this phenomenon.
-[Chapter 5](#missing-methods) explains which methods will be used in this study, as well as the problems encountered along the way which had to be dealt with.
+[Chapter 5](#missing-methods) explains the imputation methods used in this study, as well as problems encountered along the way which had to be dealt with.
 [Chapter 6](#missing-results) presents the conclusions from the analysis.
 

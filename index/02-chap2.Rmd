@@ -17,38 +17,40 @@ We use two major types of data for this study: election records, from the San Fr
 ### Election records
 
 From the San Francisco Department of Elections, we have a cast ballot record of the June 2018 mayoral election. This is presented by the city as two text files:
+
 - The ballot image [@noauthor_ranked-choice_2018-1], a 45-character fixed-width file with fields corresponding to election, candidate, unique voter number (anonymized and disconnected from any voter registration ID), ranking, precinct, and other information. Each of these is encoded numerically, so each line of the file appears as a 45-digit number (see Figure \@ref(fig:ballot-image)).
+
 - The lookup table [@noauthor_ranked-choice_2018], an 83-character fixed-width file that defines the encodings used to create the numerical values in the ballot image.
 
-We also obtain a precinct boundary shapefile from the Department [@noauthor_maps_nodate].
+We also obtain a precinct boundary shapefile from the Department of Elections [@noauthor_maps_nodate].
 
 ```{r ballot-image, echo = FALSE, out.width='3in', fig.cap = 'Original ballot image data', fig.align="center"}
 knitr::include_graphics(here('img', 'ballot_image.png'))
 ```
 
-In the ballot file, each voter is spread across three rows of data (one for each ranking). We use the `clean_ballot()` function from our `rcv` R package [@lee_rcv_2019] to read in the data and cobine the ballot image with the lookup table. From this data we obtain the full ranked preference set of candidates (up to 3) from each voter (see Figure \@ref(fig:cleaned-ballot)).
+In the ballot file, each voter is spread across three rows of data (one for each ranking). We use the `clean_ballot()` function from our `rcv` R package [@lee_rcv_2019] to read in the data and combine the ballot image with the lookup table. From this data we obtain the full ranked preference set of candidates (up to 3) from each voter, displayed in Figure \@ref(fig:cleaned-ballot).
 
 ```{r cleaned-ballot, echo = FALSE, out.width='6in', fig.cap = 'Cleaned RCV ballot'}
 knitr::include_graphics(here('img', 'cleaned_ballot.png'))
 ```
 
-Since the voter-level data is fully anonymized, we have no demographic information at the individual level. For any given voter, because the most identifying piece of information we have about them is their precinct, it is impossible to know any one voter's gender or ethnicity. To gain insight into these demographic trends, we instead aggregate up to the precinct level.
+Since the voter-level data is fully anonymized, we have no demographic information at the individual level. For any given voter, because the most identifying piece of information we have about them is their precinct, it is impossible to determine their gender or ethnicity. To gain insight into these demographic trends, we instead aggregate up to the precinct level.
 
-At the precinct level, we can now only study the rates of these ballot phenomena (as opposed to an individual's response). For example, in Precinct 1101, we see that `r scales::percent(66 / (213 + 66))` of voters undervote. Rather than building a classification model (error / no error), we can now instead build regression models with a numerical dependent variable - the rate of ballot error. Moving up this level of abstraction does remove some granularity from the model (inference and prediction at the precinct level is less specific than at the individual level), but this is the least we can do that stil allows us to to access demographic information.
+At the precinct level, we can now only study the rates of these ballot phenomena (as opposed to an individual's response). For example, in Precinct 1101, we see that `r scales::percent(66 / (213 + 66))` of voters undervote. Rather than building a classification model (error / no error), we can now instead build regression models with a numerical dependent variable - the rate of ballot error. Moving up this level of abstraction does remove some granularity from the model (inference and prediction at the precinct level is less specific than at the individual level), but this is the least we can do that still allows us to to access demographic information.
 
-### Demographic data
+### Demographic information
 
-Now that we have precinct-level rates, we need to obtain precinct-level demographic information in order to build a model. Our source of demographic data is the 2012-2016 American Community Surveys (ACS) as part of the 2018 Census Planning Database [@us_census_bureau_2018_2018]. This data was chosen^[Over the 2010 Census, which is also included in the Planning Database. While the Census has "zero error" since it's not a survey, it is also more out of date this late in the decade and didn't contain the same useful variables we were interested in.] because it contained demographic variables which we thought would be informative to our question: age, race and ethnicity, education, and poverty levels.
+Now that we have precinct-level ballot completion rates, we need to obtain precinct-level demographic information in order to build a model. Our demographic data comes from the 2012-2016 American Community Surveys (ACS) as part of the 2018 Census Planning Database [@us_census_bureau_2018_2018]. This data was chosen^[As opposed to the 2010 Census, which is also included in the Planning Database. While the Census has "zero error" since it's not a survey, it is also more out of date this late in the decade and didn't contain the same useful variables we were interested in.] because it contained demographic variables which we thought would be informative to our question: age, race and ethnicity, education, and poverty levels.
 
-One consideration with this is that the voting population is not always representative of the general population. It might be more informative to obtain demographics about the voting population specifically, rather than the entire population of each precinct. However, the only information directly available about voters is their age (from the county voter registration file), and we consider the discontinuity introduced by using two different data sets for demographic information to be more of an issue than using a less accurate (but universal) census data set.
+One consideration with this is that the voting population is not always representative of the general population. It might be more informative to obtain demographics about the voting population specifically, rather than the entire population of each precinct. However, the only information directly available about voters is their age (from the county voter registration file), and we consider the discontinuity introduced by using two different data sets for demographic information to be more of an issue than using a less accurate (but universal) Census data set.
 
-We also obtain a block group boundary shapefile from the Bureau [@noauthor_2010_nodate].
+We also obtain a block group boundary shapefile from the Census Bureau [@noauthor_2010_nodate].
 
 ## Data processing methods
 
 ### Areal Interpolation
 
-We now encounter a problem. Since census regions (block groups, tracts) are set by the federal government, and election precincts are set by San Francisco County^[The city and county government are unified in this case, because the county comprises entirely of the city of San Francisco.], the regions don't line up cleanly^[There's no inherent reason that they should, it's just unfortunate for this study.] (see Figure \@ref(fig:boundary-mismatch)). Given this mismatch, how do we obtain demographic estimates for our precincts?
+We now encounter a problem. Since census regions (block groups, tracts, etc.) are set by the federal government, and election precincts are set by San Francisco County^[The city and county government are unified in this case, because the county comprises entirely of the city of San Francisco.], the regions don't line up cleanly^[There's no inherent reason that they should, it's just unfortunate for this study.] (see Figure \@ref(fig:boundary-mismatch)). Given this mismatch, how do we obtain demographic estimates for our precincts?
 
 Stated more generally: if we have a division of a geographic region and some set of properties on the divisions, how do we estimate measures of these properties for other possible divisions?
 
@@ -81,7 +83,7 @@ cen <- ggplot(census_shape) + geom_sf() +
 pct + plot_spacer() + cen + plot_layout(nrow = 1, widths = c(8, 0.5, 8))
 ```
 
-One field of GIS (geographic information system) research that looks into this is called *areal interpolation*. The goal of areal interpolation is to take a variable distributed over a set of "source zones" and estimate its distribution over a set of "target zones" (Schroeder, 2007). These two zoning systems must overlap at least partially to get any estimate for the target zones (e.g. information about Oregon doesn't directly tell us anything about information in Washington, under any zoning system), but are incompatible in some way^[A set of "compatible" zoning systems would be something like the US Census' hierarchical systems: multiple blocks are combined to make a block group, multiple block groups are combined into a census tract, etc. Since the areas overlap neatly, you can directly add together certain numbers (like population) from block groups to get a very accurate estimate for the census tract.]. When compatibility is not an option, areal interpolation can help get parameter estimates for the target zones.
+One field of GIS (geographic information system) research that looks into this is called *areal interpolation*. The goal of areal interpolation is to take a variable distributed over a set of "source zones" and estimate its distribution over a set of "target zones" (Schroeder, 2007). These two zoning systems must overlap at least partially to get any estimate for the target zones (e.g. information about Oregon doesn't directly tell us anything about information in Washington, under any zoning system), but are incompatible in some way^[A set of "compatible" zoning systems would be something like the US Census' hierarchical systems: multiple blocks are combined to make a block group, multiple block groups are combined to make a census tract, etc. Since the areas overlap neatly, directly adding together certain numbers (like population) from block groups can get a very accurate estimate for the census tract.]. When compatibility is not an option, areal interpolation can help get parameter estimates for the target zones.
 
 Some common types of areal interpolation are:
 
@@ -89,11 +91,11 @@ Some common types of areal interpolation are:
 
 - Modified areal weighting, which creates a continuous map from region to region to better reflect changes in population density.
 
-- Target density weighting, which uses extra information about the target zones, typically population density, to increase accuracy (Schroeder, 2007).
+- Target density weighting, which uses extra information about the target zones (typically population density) to increase accuracy (Schroeder, 2007).
 
-- Dasymetric mapping, which uses alternative data, also called *ancillary data* to produce a continuous estimate of population density (Sleeter and Gould, 2008). Examples of ancillary data include land cover information, parcel classifications, and street locations.
+- Dasymetric mapping, which uses auxiliary data (also called *ancillary data*) to produce a continuous estimate of population density (Sleeter and Gould, 2008). Examples of ancillary data include land cover information, parcel classifications, and street locations.
 
-In this work we will use areal weighting for our interpolation. The other methods above, while typically more accurate, are infeasible under the constraints of the research^[Mostly time limitations; see Conclusion section for further research ideas.]. The assumption of uniformity is not necessarily correct, but in an urban area such as San Francisco it is more accurate than an area like the entire state of California, with a large urban/rural spread.
+In this work we will use areal weighting for our interpolation. The other methods above, while typically more accurate, are infeasible under the constraints of the research^[Mostly time limitations; see [Conclusion](#further-research) section for further research ideas.]. The assumption of uniformity is not necessarily correct, but in an urban area such as San Francisco it is more accurate than an area like the entire state of California, with a large urban/rural spread.
 
 #### Areal weighting
 
@@ -101,9 +103,9 @@ Areal weighting first makes the assumption that populations are distributed unif
 
 Conversely, data that applies to any given sub-region of a region is called *spatially intensive*. Properties like population density are spatially intensive under the uniformity assumption, because the ratio of population to area does not change upon examining a sub-region. Percentages are also spatially intensive - considering the sub-population as above, the percentage of non-White Hispanic people in Region X (20 out of 100, 20%) does not change when we look at one of the sub-regions (10 out of 50, 20%).
 
-We will use the following example case to illustrate the areal interpolation process. Suppose regions $A$, $B$, $C$, and $D$ are the source regions (each taking up a quadrant of the square), and regions $X$, $Y$, and $Z$ are the target regions (each taking up a third of the square vertically). Further suppose that the boundaries of the source regions and target regions are fully coincident^[This example ignores the case where the covered regions are not coincident, which is a possibility in general. In this research we enforce coincidence in our data, however.], that is $A \cup B \cup C \cup D = X \cup Y \cup Z$.
+We will use the following example case to illustrate the areal interpolation process, illustrated in Figure \@ref(fig:toy-regions). Suppose regions $A$, $B$, $C$, and $D$ are the source regions (each taking up a quadrant of the square), and regions $X$, $Y$, and $Z$ are the target regions (each taking up a third of the square vertically). Further suppose that the boundaries of the source regions and target regions are fully coincident^[This example ignores the case where the covered regions are not coincident, which is a possibility in general. In this research we enforce coincidence in our data, however.], that is $A \cup B \cup C \cup D = X \cup Y \cup Z$.
 
-```{r echo=FALSE, fig.cap='Example regions for interpolation', out.width='6in'}
+```{r toy-regions, echo=FALSE, fig.cap='Example regions for interpolation', out.width='6in'}
 source <- st_read(here('raw_data', 'source_zones'), quiet = TRUE) %>%
   transmute(name = c('D','C','A','B'),
             lon = purrr::map_dbl(geometry, ~st_centroid(.x)[[1]]),
@@ -113,9 +115,11 @@ target <- st_read(here('raw_data', 'target_zones'), quiet = TRUE) %>%
             lon = purrr::map_dbl(geometry, ~st_centroid(.x)[[1]]),
             lat = purrr::map_dbl(geometry, ~st_centroid(.x)[[2]]))
 
-source_plot <- ggplot(source) + geom_sf() + geom_text(aes(x = lon, y = lat, label = name)) + theme_void() + ggtitle('Source regions')
+source_plot <- ggplot(source) + geom_sf() + geom_text(aes(x = lon, y = lat, label = name)) + theme_void() + ggtitle('Source regions') +
+  theme(plot.title = element_text(hjust = 0.5))
 
-target_plot <- ggplot(target) + geom_sf() + geom_text(aes(x = lon, y = lat, label = name)) + theme_void() + ggtitle('Target regions')
+target_plot <- ggplot(target) + geom_sf() + geom_text(aes(x = lon, y = lat, label = name)) + theme_void() + ggtitle('Target regions') +
+  theme(plot.title = element_text(hjust = 0.5))
 
 source_plot + plot_spacer() + target_plot + plot_layout(nrow = 1, widths = c(8, 0.5, 8))
 ```
@@ -146,17 +150,17 @@ Since the intensive property isn't "divisible" within a region, we instead take 
 
 Since $A$ and $B$ each take up half of target region $X$, each of them gets weighted by half before being added to get the estimate of $y_X$.
 
-To validate the application of this method to the data at hand, we can visually compare the spatial distribution of a variable before the interpolation to its distribution after the interpolation.
+To validate the application of this method to the data at hand, we can visually compare the spatial distribution of a variable before the interpolation to its distribution after the interpolation (Figure \@ref(fig:interp-check)).
 
-```{r echo = FALSE, out.width='6in', fig.cap = 'Proportion of non-Hispanic Asian residents'}
+```{r interp-check, echo = FALSE, out.width='6in', fig.cap = 'Proportion of residents aged 25-44'}
 knitr::include_graphics(here('img', 'interpolation_check.png'))
 ```
 
 #### Interpolation - counts vs. percentages
 
-One consideration in the data preparation stage was whether to use counts or percentages as input for the regression. The census data contains total population in a region, as well as a count and percentage for a given variable (say, people between the ages of 25 and 44). The percentage can equivalently be calculated by dividing the count by the population. After performing the areal interpolation on the data, we ran this percentage calculation again to double check that it lined up with the reported percentages (post-interpolation). Our intuition was that these steps should be commutative - calculating a percentage and then interpolating should have the same result as interpolating and then calculating the percentage. This was not the case, however - in the variable for population between 25 and 44, the error between these two methods ranged from -12 to 26 percentage points.
+One consideration in the data preparation stage was whether to use counts or percentages as input for the regression. The census data contains total population in a region, as well as a count and percentage for a given variable (say, people between the ages of 25 and 44). The percentage can equivalently be calculated by dividing the count by the population. After performing the areal interpolation on the data, we ran this percentage calculation again to double check that it lined up with the reported percentages (post-interpolation). Our intuition was that these steps should be commutative - calculating a percentage and then interpolating should have the same result as interpolating and then calculating the percentage. This was not the case, however - in the variable for population between 25 and 44, the error between these two methods ranged from -26 to 12 percentage points (Figure \@ref(fig:interp-error)).
 
-```{r, fig.cap = 'Sample error in intensive interpolation', warning=FALSE, out.width='6in'}
+```{r interp-error, fig.cap = 'Sample error in intensive interpolation - Percentage aged 25-44', warning=FALSE, out.width='6in'}
 knitr::include_graphics(here('img', 'intensive_error.png'))
 ```
 
@@ -182,7 +186,7 @@ knitr::include_graphics(here('img', 'clipped_internals.png'))
 
 #### Precinct Consolidation
 
-One peculiarity in San Francisco is the combination of certain precincts during elections. California state law allows for counties to "consolidate" precincts with low numbers of registered voters during an election. This eases administration by not requiring counties to set up and staff a full polling place in a precinct with few voters, while still giving voters a physical polling location in their approximate area^[This method of precinct consolidation may change with the 2018 California Voter's Choice Act, which lets counties (except for Los Angeles County) move fully to vote-by-mail in combination with voting centers (California Senate Bill 450).]. While San Francisco does this less often than other counties, there are still some precincts that are consolidated each election.
+One peculiarity in San Francisco is the combination of certain precincts during elections. California state law allows for counties to "consolidate" precincts with low numbers of registered voters during an election. This eases administration by not requiring counties to set up and staff a full polling place in a precinct with few voters, while still giving voters a physical polling location in their approximate area^[This method of precinct consolidation may change with the 2018 California Voter's Choice Act, which lets counties (except for Los Angeles County) move fully to vote-by-mail in combination with voting centers [@allen_elections_2016].]. While San Francisco does this less often than other counties, there are still some precincts that are consolidated each election.
 
 The areal interpolation process produces demographic estimates for areas in the map, however, which are non-consolidated. This causes a mismatch: we have demographic data for individual precincts, but election data for the consolidated precincts. To address this issue, we have split the election data (a count of overvotes and undervotes) in the consolidated precincts into their two component precincts. This split is weighted by the population of each precinct in 2010^[The most simple weight would be 50-50 for each split, but this is inaccurate for many of these precincts: see the gap in the weights for Pct 7527/7528. The flaw in this method was discovered after calculating turnout of over 1000% for Precinct 7527...]. For example, suppose Precinct X/Y had 100 undervotes, the population of Precinct X in 2010 was 325, and the population of Precinct Y in 2010 was 175. Then the "population split" between X and Y is 65%-35%, and we adjust the undervotes accordingly: Precinct X should have 65 of the 100 undervotes, and Precinct Y should have the remaining 35.
 
@@ -229,16 +233,19 @@ image <- sf %>%
             over = sum(as.numeric(over_vote)) > 0,
             under = length(unique(na.omit(candidate))) < 3)
 
-knitr::kable(sample_n(image, 10), 
-      col.names = c("Contest", "Voter ID", "1", "2", "3"),
+table <- sample_n(image, 10) %>%
+  left_join(rcv::readable(sf), by = 'pref_voter_id') %>%
+  filter(contest == "Mayor") %>%
+  select(contest, pref_voter_id, `1`, `2`, `3`, precinct, over, under)
+
+knitr::kable(table, 
+      col.names = c("Contest", "Voter ID", "1", "2", "3", "Precinct", "Overvote", "Undervote"),
       caption = "Processed Ballot Image",
       booktabs = TRUE) %>%
   kableExtra::kable_styling(latex_options = c("scale_down"))
 ```
 
-In this view, an overvote in a given ranking appears as `NA` in that ranking, so the only way to observe an overvote from this data is with the given flag. Since we recalculate the undervote variable, the new definition of it will always include any overvote (since these are `NA` in the data). This does not lead to a particular imprecision in our results, but should be made note of conceptually.
-
-In this election, `r scales::percent(mean(image$over))` of mayoral voters overvoted, and `r scales::percent(mean(image$under))` of mayoral voters undervoted.
+In this view, an overvote in a given ranking appears as `NA` in that ranking, so the only way to observe an overvote from this data is with the given flag. Since we recalculate the undervote variable, the new definition of it will always include any overvote (since these are `NA` in the data). This does not lead to a particular imprecision in our results, but should be made note of conceptually. In this election, `r scales::percent(mean(image$over))` of mayoral voters overvoted, and `r scales::percent(mean(image$under))` of mayoral voters undervoted^[Further research could examine how this compares to other RCV elections, in SF or otherwise.].
 
 ## Regressions
 
@@ -248,5 +255,7 @@ To evaluate what demographic factors impact these ballot phenomena, we use two f
 
 - Logistic regression. Here the dependent variables to train the model are individuals (who either overvoted or not / undervoted or not). This study is a good fit for logistic regression because of this inherent binary nature in overvoting and undervoting, but the demographic data issues are a limitation. Since the demographic data is at the precinct level, every voter in a given precinct is given the same demographic information as predictors, which is an interesting situation. The real advantage to using the logistic method is that it cannot predict an overvote or undervote rate (for any set of demographic values) outside of $[0,1]$.
 
-To choose which variables went into the final models produced, we used best subset selection on a training subset of half the data, and validated the models on the other half as a test set.
+To choose which variables went into the final models produced, we used bootstrapping and best subset selection. We bootstrapped the data multiple times, each time performing best subset selection on the data and choosing the model with the lowest BIC^[The Bayesian Information Criterion is a metric that can be used to select a "best" model specification from a finite set of options. It is chosen here for consistency, because one of the packages used (`leaps`) uses this criterion internally.]. Then, across all of the bootstrapped models, we identified variables that were included most often^[Arbitrarily, any variable that appeared in more than half of the sample models was included.] to put into our final model.
+
+In addition to modelling overvote and undervote rate, we also model turnout rate in general. This gives us an opportunity to see if the demographic factors associated with RCV ballot issues are different from those associated with voting more generally.
 

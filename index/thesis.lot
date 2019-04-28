@@ -1,0 +1,26 @@
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {1.1}{\ignorespaces Comparison of RCV rules by jurisdiction\relax }}{5}{table.1.1}
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {2.1}{\ignorespaces Consolidated Precincts - Original}}{28}{table.caption.34}
+\contentsline {table}{\numberline {2.2}{\ignorespaces Consolidated Precincts - Weighted}}{28}{table.caption.35}
+\contentsline {table}{\numberline {2.3}{\ignorespaces Processed Ballot Image\relax }}{29}{table.caption.36}
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {3.1}{\ignorespaces Linear turnout model}}{33}{table.caption.38}
+\contentsline {table}{\numberline {3.2}{\ignorespaces Logit turnout model}}{34}{table.caption.40}
+\contentsline {table}{\numberline {3.3}{\ignorespaces Linear overvote model}}{36}{table.caption.43}
+\contentsline {table}{\numberline {3.4}{\ignorespaces Logit overvote model}}{38}{table.caption.45}
+\contentsline {table}{\numberline {3.5}{\ignorespaces Linear undervote model}}{40}{table.caption.48}
+\contentsline {table}{\numberline {3.6}{\ignorespaces Logit undervote model}}{41}{table.caption.50}
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {4.1}{\ignorespaces Original vote counts}}{47}{table.caption.52}
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {5.1}{\ignorespaces Listwise vote counts}}{52}{table.caption.53}
+\contentsline {table}{\numberline {5.2}{\ignorespaces Imputation mismatches - 3rd choice}}{54}{table.caption.57}
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {6.1}{\ignorespaces Election results - original}}{58}{table.caption.59}
+\contentsline {table}{\numberline {6.2}{\ignorespaces Winner by method}}{58}{table.caption.60}
+\contentsline {table}{\numberline {6.3}{\ignorespaces London Breed's simulated vote share - adjusted variances\relax }}{60}{table.caption.63}
+\contentsline {table}{\numberline {6.4}{\ignorespaces Simulated candidate rankings}}{61}{table.caption.65}
+\contentsline {table}{\numberline {6.5}{\ignorespaces Simulated exhausted votes}}{64}{table.caption.69}
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {A.1}{\ignorespaces Census variables used in models\relax }}{71}{table.A.1}

@@ -98,7 +98,6 @@ knitr::kable(x3_missing,
           col.names = c("Imputation step", "Proportion"),
           caption = "Proportion of unfilled 3rd vote choices through imputation steps",
           caption.short = "Imputation mismatches - 3rd choice",
-          longtable = TRUE,
           booktabs = TRUE)
 ```
 

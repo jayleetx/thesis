@@ -120,6 +120,7 @@ census_props <- census %>%
 join <- st_interpolate_aw(census, to = precincts, extensive = TRUE) %>%
   as.data.frame() %>%
   select(-geometry)
+save(join, file = here('data', 'intermediate_join.RData'))
 
 demo_data <- precincts %>%
   mutate(Group.1 = 1:nrow(.)) %>%
@@ -147,6 +148,7 @@ demo_data_int <- precincts %>%
   as.data.frame() %>%
   select(-geometry)
 colnames(demo_data_int) <- paste0(colnames(demo_data_int), "_wrong")
+save(demo_data_int, file = here('data', 'demo_data_int.RData'))
 
 sf_wrong <- left_join(demo_data, demo_data_int, by = c('PREC_2017' = 'PREC_2017_wrong'))
 
@@ -154,29 +156,31 @@ sf_wrong <- left_join(demo_data, demo_data_int, by = c('PREC_2017' = 'PREC_2017_
 
 # checking interpolation
 
-asian_pre <- ggplot(census_props) + geom_sf(aes(fill = asian), lwd = 0) + theme_void() + ggtitle('Pre-interpolation (block groups)')
-asian_post <- ggplot(demo_data) + geom_sf(aes(fill = asian), lwd = 0) + theme_void() + ggtitle('Post-interpolation (precincts)')
+age_pre <- ggplot(census_props) + geom_sf(aes(fill = pop_25_44), lwd = 0) + theme_void() + ggtitle('Pre-interpolation (block groups)')
+age_post <- ggplot(demo_data) + geom_sf(aes(fill = pop_25_44), lwd = 0) + theme_void() + ggtitle('Post-interpolation (precincts)')
 
-asian <- asian_pre + asian_post + plot_layout(ncol = 2)
+age <- age_pre + age_post + plot_layout(ncol = 2)
 
-ggsave(here('img', 'interpolation_check.png'), asian)
+ggsave(here('img', 'interpolation_check.png'), age)
 
 # error in intensive methods
 
-scatter <- ggplot(sf_wrong, aes(x = asian,
-                                y = asian_wrong,
-                                col = abs(asian - asian_wrong),
+scatter <- ggplot(sf_wrong, aes(x = pop_25_44,
+                                y = pop_25_44_wrong,
+                                col = abs(pop_25_44 - pop_25_44_wrong),
                                 size = population)) +
   geom_point(shape = 1) +
-  labs(title = "Error in percentage non-Hispanic Asian",
-       x = "Calculated Percentage",
+  labs(x = "Calculated Percentage",
        y = "Reported Percentage",
        col = "Absolute Error") +
   scale_colour_gradient(high = "#132B43", low = "#56B1F7") +
   theme_bw()
 # maybe pick a new variable that really exemplifies the issue
 
-hist <- ggplot(sf_wrong, aes(x = asian - asian_wrong)) + geom_histogram()
+hist <- ggplot(sf_wrong, aes(x = pop_25_44 - pop_25_44_wrong)) + geom_histogram() +
+  theme_bw() +
+  labs(x = 'Error in calculated percentage',
+       y = 'Count')
 
 intensive_error <- scatter + hist + plot_layout(ncol = 2)
 

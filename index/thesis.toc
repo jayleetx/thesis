@@ -1,0 +1,83 @@
+\contentsline {chapter}{Introduction}{1}{chapter*.7}
+\contentsline {section}{Part 1}{1}{section*.8}
+\contentsline {section}{Part 2}{1}{section*.9}
+\contentsline {chapter}{Chapter 1: RCV Background}{3}{chapter.1}
+\contentsline {section}{\numberline {1.1}What is ranked choice voting?}{3}{section.1.1}
+\contentsline {section}{\numberline {1.2}Frequently Used Terms}{4}{section.1.2}
+\contentsline {section}{\numberline {1.3}Claims about RCV}{5}{section.1.3}
+\contentsline {section}{\numberline {1.4}History of RCV in the US}{6}{section.1.4}
+\contentsline {section}{\numberline {1.5}Why, or why not, implement RCV?}{6}{section.1.5}
+\contentsline {subsection}{\numberline {1.5.1}Pros}{6}{subsection.1.5.1}
+\contentsline {subsubsection}{No secondary elections}{6}{section*.10}
+\contentsline {subsubsection}{Ensures majority rule}{7}{section*.11}
+\contentsline {subsubsection}{Reduces strategic voting - spoiler candidates and third parties}{8}{section*.12}
+\contentsline {subsubsection}{Disincentivizes negative campaigning}{9}{section*.13}
+\contentsline {subsubsection}{Minority representation}{10}{section*.15}
+\contentsline {subsubsection}{Turnout improvements}{11}{section*.16}
+\contentsline {subsection}{\numberline {1.5.2}Cons}{11}{subsection.1.5.2}
+\contentsline {subsubsection}{What is a majority, anyway?}{11}{section*.17}
+\contentsline {subsubsection}{Legal challenges}{12}{section*.18}
+\contentsline {subsubsection}{More complicated tabulation}{12}{section*.19}
+\contentsline {subsubsection}{Less intuitive rules}{13}{section*.20}
+\contentsline {subsubsection}{Lack of true adoption by voters}{13}{section*.21}
+\contentsline {section}{\numberline {1.6}Research into San Francisco}{13}{section.1.6}
+\contentsline {subsection}{\numberline {1.6.1}Results supporting RCV}{14}{subsection.1.6.1}
+\contentsline {subsection}{\numberline {1.6.2}Mixed results}{14}{subsection.1.6.2}
+\contentsline {subsection}{\numberline {1.6.3}Results criticizing RCV}{14}{subsection.1.6.3}
+\contentsline {chapter}{Chapter 2: Data structure and demographic analysis methods}{17}{chapter.2}
+\contentsline {section}{\numberline {2.1}Data Structure and Source}{17}{section.2.1}
+\contentsline {subsection}{\numberline {2.1.1}Election records}{17}{subsection.2.1.1}
+\contentsline {subsection}{\numberline {2.1.2}Demographic information}{19}{subsection.2.1.2}
+\contentsline {section}{\numberline {2.2}Data processing methods}{19}{section.2.2}
+\contentsline {subsection}{\numberline {2.2.1}Areal Interpolation}{19}{subsection.2.2.1}
+\contentsline {subsubsection}{Areal weighting}{21}{section*.25}
+\contentsline {subsubsection}{Interpolation - counts vs.\nobreakspace {}percentages}{24}{section*.28}
+\contentsline {subsubsection}{Boundary mismatch}{25}{section*.30}
+\contentsline {subsubsection}{Precinct Consolidation}{27}{section*.33}
+\contentsline {section}{\numberline {2.3}Calculating overvote and undervote rates}{28}{section.2.3}
+\contentsline {section}{\numberline {2.4}Regressions}{29}{section.2.4}
+\contentsline {chapter}{Chapter 3: Demographic analysis results}{31}{chapter.3}
+\contentsline {section}{\numberline {3.1}Voter turnout}{31}{section.3.1}
+\contentsline {subsection}{\numberline {3.1.1}Linear}{32}{subsection.3.1.1}
+\contentsline {subsection}{\numberline {3.1.2}Logistic}{34}{subsection.3.1.2}
+\contentsline {section}{\numberline {3.2}Overvoting}{35}{section.3.2}
+\contentsline {subsection}{\numberline {3.2.1}Linear}{36}{subsection.3.2.1}
+\contentsline {subsection}{\numberline {3.2.2}Logistic}{37}{subsection.3.2.2}
+\contentsline {section}{\numberline {3.3}Undervoting}{39}{section.3.3}
+\contentsline {subsection}{\numberline {3.3.1}Linear}{39}{subsection.3.3.1}
+\contentsline {subsection}{\numberline {3.3.2}Logistic}{41}{subsection.3.3.2}
+\contentsline {chapter}{Chapter 4: Missing data literature review}{43}{chapter.4}
+\contentsline {section}{\numberline {4.1}Missing data}{43}{section.4.1}
+\contentsline {section}{\numberline {4.2}Methods of dealing with missing data}{44}{section.4.2}
+\contentsline {subsection}{\numberline {4.2.1}Listwise deletion}{44}{subsection.4.2.1}
+\contentsline {subsection}{\numberline {4.2.2}Maximum likelihood estimation}{45}{subsection.4.2.2}
+\contentsline {subsection}{\numberline {4.2.3}Inverse probability weighting}{45}{subsection.4.2.3}
+\contentsline {subsection}{\numberline {4.2.4}Imputation - single and multiple}{45}{subsection.4.2.4}
+\contentsline {section}{\numberline {4.3}What if everybody votes (fully)?}{46}{section.4.3}
+\contentsline {section}{\numberline {4.4}Peculiarities with this study}{48}{section.4.4}
+\contentsline {subsection}{\numberline {4.4.1}Violated assumptions}{48}{subsection.4.4.1}
+\contentsline {subsection}{\numberline {4.4.2}Monotonicity}{48}{subsection.4.4.2}
+\contentsline {subsection}{\numberline {4.4.3}Not all undervotes are created equal}{49}{subsection.4.4.3}
+\contentsline {subsection}{\numberline {4.4.4}100\% turnout}{49}{subsection.4.4.4}
+\contentsline {chapter}{Chapter 5: Missing data methods}{51}{chapter.5}
+\contentsline {section}{\numberline {5.1}Imputation}{51}{section.5.1}
+\contentsline {subsection}{\numberline {5.1.1}Issues}{52}{subsection.5.1.1}
+\contentsline {subsubsection}{Underestimate of variance}{52}{section*.54}
+\contentsline {subsubsection}{Imputation on an imputation}{53}{section*.55}
+\contentsline {subsubsection}{Incomplete hot deck matching}{53}{section*.56}
+\contentsline {subsubsection}{Choice of which imputations to perform}{54}{section*.58}
+\contentsline {section}{\numberline {5.2}Data preparation}{54}{section.5.2}
+\contentsline {section}{\numberline {5.3}Metrics for comparing methods}{55}{section.5.3}
+\contentsline {chapter}{Chapter 6: Data imputation results}{57}{chapter.6}
+\contentsline {section}{\numberline {6.1}Final winner}{57}{section.6.1}
+\contentsline {section}{\numberline {6.2}London Breed's final vote share}{59}{section.6.2}
+\contentsline {section}{\numberline {6.3}Intermediate switches in rankings}{61}{section.6.3}
+\contentsline {section}{\numberline {6.4}Distribution of vote combinations}{62}{section.6.4}
+\contentsline {section}{\numberline {6.5}Exhausted voters by the final round}{63}{section.6.5}
+\contentsline {chapter}{Conclusion}{67}{chapter*.71}
+\contentsline {section}{\numberline {6.6}Summary of results}{67}{section.6.6}
+\contentsline {subsection}{\numberline {6.6.1}Part 1}{67}{subsection.6.6.1}
+\contentsline {subsection}{\numberline {6.6.2}Part 2}{67}{subsection.6.6.2}
+\contentsline {section}{\numberline {6.7}Future research ideas}{68}{section.6.7}
+\contentsline {chapter}{Appendix A: Description of variables}{71}{appendix.A}
+\contentsline {chapter}{References}{75}{appendix*.72}

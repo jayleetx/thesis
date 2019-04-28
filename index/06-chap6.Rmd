@@ -247,7 +247,6 @@ exhausted_share_summ %>%
   knitr::kable(col.names = c('Method', '$\\hat{p}$', '$V_W$', '$V_B$', '$V_T$'),
                caption = "Exhausted votes for each imputation method",
                caption.short = "Simulated exhausted votes",
-               longtable = TRUE,
                booktabs = TRUE,
                escape = FALSE)
 ```

@@ -51,13 +51,13 @@ results %>%
   kableExtra::kable_styling(latex_options = c("scale_down"))
 ```
 
-For context, Table \@ref(tab:orig-results) gives the original election tabulation^[This differs slightly from the official results in @noauthor_ranked_2018; specifically, our vote counts are consistently an undercount of the official results. We believe this differece is due to the omission of some ballots from the published data, particularly ballots with a scanning error that have to be hand-counted.].
+For context, Table \@ref(tab:orig-results) displays the original election tabulation^[This differs slightly from the official results in @noauthor_ranked_2018; specifically, our vote counts are consistently an undercount of the official results. We believe this differece is due to the omission of some ballots from the published data, particularly ballots with a scanning error that have to be hand-counted.].
 
 <!-- LaTeX table floating DIE challenge -->
 
 ## Final winner
 
-We see in Table \@ref(tab:method-results) that London Breed wins consistently in all methods except the fully random hot deck imputation, in which Mark Leno was consistently elected. As this is the least "realistic" of any of the methods (since it uses the least available information to predict vote choice), we can consider it a less accurate measure of potential change. It does potentially indicate that Leno had more overall support than Breed (in terms of being listed anywhere on the ballot), just positioned in the wrong place for it to push him to victory. Perhaps under a different voting system such as Borda count, which awards points to candidates based on any ranking they appeared in, Leno would have won.
+We see in Table \@ref(tab:method-results) that London Breed wins consistently in all methods except the fully random hot deck imputation, in which Mark Leno was consistently elected. As this is the least "realistic" of any of the methods (since it uses the least available information to predict vote choice), we can consider it a less accurate measure of potential change. It does potentially indicate that Leno had more overall support than Breed (in terms of being listed anywhere on the ballot), just positioned in the wrong place for it to push him to victory. Perhaps under a different voting system such as Borda count, which awards points to candidates based on any ranking they appeared in^[Under Borda Count, a candidate would be given 3 points for a 1st ranking from a voter, 2 points from a 2nd ranking, and 1 point from a 3rd ranking [@noauthor_borda_nodate].], Leno would have won.
 
 ```{r method-results, echo = FALSE}
 imputed_first <- results %>%

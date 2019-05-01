@@ -40,6 +40,7 @@ acknowledgements: |
    \noindent Thank you.
 abbrevs: |
   \noindent ACS: American Community Survey \par
+  \noindent BIC: Bayesian Information Criterion \par
   \noindent GIS: Geographic information system \par
   \noindent IPW: Inverse probability weighting \par
   \noindent IRV: Instant-runoff voting \par
@@ -68,6 +69,9 @@ lof: true
 # to have a blank new line between each paragraph
 header-includes:
 - \usepackage{placeins}
+- \usepackage{caption}
+- \usepackage[hyphens]{url}
+- \urlstyle{same}
 ---
 
 <!--
@@ -110,7 +114,17 @@ on chapters.
 
 This thesis investigates issues in ranked choice voting (RCV), using a 2018 mayoral election in San Francisco as our observation. It is split into two major parts, each attempting to answer a separate research question. The motivation for these research questions comes out of previous work on RCV with Matthew Yancheff and Mia Leung, advised by Professors Andrew Bray (statistics) and Paul Gronke (political science) at Reed College. Multiple times while presenting this research into RCV, we were asked what the effect would be "if everybody voted". To these now-anonymous^[Two years ago, I did not think to write down their names for this purpose.] questioners, I am grateful.
 
-This thesis was written using the [`thesisdown`](https://github.com/ismayc/thesisdown) R Markdown template for Reed College, created by Chester Ismay. All of the data used, R code, and source documents can be found at my GitHub page: <https://github.com/jayleetx/thesis>.
+This thesis was written using the [`thesisdown`](https://github.com/ismayc/thesisdown) R Markdown template for Reed College [@ismay_thesisdown_nodate]. The computation was performed in the R programming language, with significant use of the following packages:
+
+- [`rcv`](https://github.com/ds-elections/rcv), for tabulating the results of our ranked choice elections [@lee_rcv_2019].
+
+- [`sf`](https://github.com/r-spatial/sf), for spatial analysis and areal interpolation [@pebesma_sf_nodate].
+
+- [`simputation`](https://github.com/markvanderloo/simputation), for multiple imputation of our ballot data [@vanderloo_simputation_2017].
+
+- The [`tidyverse`](https://www.tidyverse.org/), for data wrangling and visualization [@noauthor_tidyverse_nodate].
+
+All of the data used, R code, and source documents can be found at my GitHub page: <https://github.com/jayleetx/thesis>.
 
 ## Part 1 {.unnumbered}
 

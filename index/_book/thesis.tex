@@ -180,6 +180,10 @@ To Heather, for consistently keeping me on track to actually graduate and being 
 
 \par
 
+\noindent BIC: Bayesian Information Criterion
+
+\par
+
 \noindent GIS: Geographic information system
 
 \par
@@ -254,6 +258,10 @@ To Heather, for consistently keeping me on track to actually graduate and being 
 
 \par
 
+\noindent BIC: Bayesian Information Criterion
+
+\par
+
 \noindent GIS: Geographic information system
 
 \par
@@ -324,14 +332,17 @@ To Heather, for consistently keeping me on track to actually graduate and being 
 }
 
 \Abstract{
-One of the arguments against implementing ranked-choice voting (RCV) is that RCV is harder for voters to participate in. Two of the reasons for this are the more complicated ballot design and the extra effort that goes into forming an ordered preference of candidates. To evaluate this claim, we examine rates of ballot errors and undervoting (ranking fewer than the allowed number of candidates) in some American elections conducted with RCV. Results are somewhat inconclusive, but indicate that the variables which are significant in predicting RCV ballot completion are similar to those which are significant in predicting voting rates in general.
+Ranked choice voting (RCV) is an alternative voting system where voters rank multiple candidates (instead of simply selecting their highest preference), then these multiple preferences are taken into account during the vote tabulation. One of the arguments against implementing RCV is that it is harder for voters to participate in. Two of the reasons for this are the more complicated ballot design and the extra effort that goes into forming an ordered preference of candidates. To evaluate this claim, we examine rates of ballot errors and undervoting (ranking fewer than the allowed number of candidates) in some American elections conducted with RCV. Results are somewhat inconclusive, but indicate that the variables which are significant in predicting RCV ballot completion are similar to those which are significant in predicting voting rates in general.
 
 \par
 
-We further investigate the impact of overvotes and undervotes on an RCV election. By simulating vote choices for those not present in the ballot data, we obtain a number of counterfactual datasets where overvoting and undervoting never occur, and re-tabulate election results with this simulated data. Methods used include hot deck imputation and multinomial logistic regression. Results here show little effect, but show promise for further research on the topic.
+We further investigate the impact of overvotes and undervotes on an RCV election. By simulating vote choices for those not present in the ballot data (\emph{imputing} the missing data), we obtain a number of simulated datasets. By re-tabulating the election results with this new data, we create a set of simulated elections where overvoting and undervoting never occur. These are used as a comparison against the true election to see what impact these undervotes and overvotes have on the electoral outcome. Methods used include hot deck imputation and multinomial logistic regression. Our results here show little effect on who actually gets elected, but indicate that the margin of victory might have been smaller without the presence of overvotes and undervotes. This result shows promise for further research on the topic, particularly using different methods and considering different elections.
 }
 
 	\usepackage{placeins}
+	\usepackage{caption}
+	\usepackage[hyphens]{url}
+	\urlstyle{same}
 % End of CII addition
 %%
 %% End Preamble
@@ -374,6 +385,10 @@ We further investigate the impact of overvotes and undervotes on an RCV election
   \end{acknowledgements}
   \begin{abbrevs}
     \noindent ACS: American Community Survey
+    
+    \par
+    
+    \noindent BIC: Bayesian Information Criterion
     
     \par
     
@@ -453,11 +468,11 @@ We further investigate the impact of overvotes and undervotes on an RCV election
 
   \listoffigures
   \begin{abstract}
-    One of the arguments against implementing ranked-choice voting (RCV) is that RCV is harder for voters to participate in. Two of the reasons for this are the more complicated ballot design and the extra effort that goes into forming an ordered preference of candidates. To evaluate this claim, we examine rates of ballot errors and undervoting (ranking fewer than the allowed number of candidates) in some American elections conducted with RCV. Results are somewhat inconclusive, but indicate that the variables which are significant in predicting RCV ballot completion are similar to those which are significant in predicting voting rates in general.
+    Ranked choice voting (RCV) is an alternative voting system where voters rank multiple candidates (instead of simply selecting their highest preference), then these multiple preferences are taken into account during the vote tabulation. One of the arguments against implementing RCV is that it is harder for voters to participate in. Two of the reasons for this are the more complicated ballot design and the extra effort that goes into forming an ordered preference of candidates. To evaluate this claim, we examine rates of ballot errors and undervoting (ranking fewer than the allowed number of candidates) in some American elections conducted with RCV. Results are somewhat inconclusive, but indicate that the variables which are significant in predicting RCV ballot completion are similar to those which are significant in predicting voting rates in general.
     
     \par
     
-    We further investigate the impact of overvotes and undervotes on an RCV election. By simulating vote choices for those not present in the ballot data, we obtain a number of counterfactual datasets where overvoting and undervoting never occur, and re-tabulate election results with this simulated data. Methods used include hot deck imputation and multinomial logistic regression. Results here show little effect, but show promise for further research on the topic.
+    We further investigate the impact of overvotes and undervotes on an RCV election. By simulating vote choices for those not present in the ballot data (\emph{imputing} the missing data), we obtain a number of simulated datasets. By re-tabulating the election results with this new data, we create a set of simulated elections where overvoting and undervoting never occur. These are used as a comparison against the true election to see what impact these undervotes and overvotes have on the electoral outcome. Methods used include hot deck imputation and multinomial logistic regression. Our results here show little effect on who actually gets elected, but indicate that the margin of victory might have been smaller without the presence of overvotes and undervotes. This result shows promise for further research on the topic, particularly using different methods and considering different elections.
   \end{abstract}
 
 \mainmatter % here the regular arabic numbering starts
@@ -469,7 +484,18 @@ We further investigate the impact of overvotes and undervotes on an RCV election
 
 This thesis investigates issues in ranked choice voting (RCV), using a 2018 mayoral election in San Francisco as our observation. It is split into two major parts, each attempting to answer a separate research question. The motivation for these research questions comes out of previous work on RCV with Matthew Yancheff and Mia Leung, advised by Professors Andrew Bray (statistics) and Paul Gronke (political science) at Reed College. Multiple times while presenting this research into RCV, we were asked what the effect would be ``if everybody voted''. To these now-anonymous\footnote{Two years ago, I did not think to write down their names for this purpose.} questioners, I am grateful.
 
-This thesis was written using the \href{https://github.com/ismayc/thesisdown}{\texttt{thesisdown}} R Markdown template for Reed College, created by Chester Ismay. All of the data used, R code, and source documents can be found at my GitHub page: \url{https://github.com/jayleetx/thesis}.
+This thesis was written using the \href{https://github.com/ismayc/thesisdown}{\texttt{thesisdown}} R Markdown template for Reed College (Ismay \& Solomon, n.d.). The computation was performed in the R programming language, with significant use of the following packages:
+\begin{itemize}
+\item
+  \href{https://github.com/ds-elections/rcv}{\texttt{rcv}}, for tabulating the results of our ranked choice elections (Lee \& Yancheff, 2019).
+\item
+  \href{https://github.com/r-spatial/sf}{\texttt{sf}}, for spatial analysis and areal interpolation (Pebesma et al., n.d.).
+\item
+  \href{https://github.com/markvanderloo/simputation}{\texttt{simputation}}, for multiple imputation of our ballot data (Vanderloo, 2017).
+\item
+  The \href{https://www.tidyverse.org/}{\texttt{tidyverse}}, for data wrangling and visualization (``Tidyverse,'' n.d.).
+\end{itemize}
+All of the data used, R code, and source documents can be found at my GitHub page: \url{https://github.com/jayleetx/thesis}.
 
 \hypertarget{part-1}{%
 \section*{Part 1}\label{part-1}}
@@ -552,22 +578,19 @@ The second facet should be reflected in incomplete ballots filled out by voters.
 \item
   The number of seats elected in a given race
 \end{itemize}
-This first variable is determined for each election, the second for each jurisdiction, and the third a mix of both. For a clear example of these differences, consider a \href{https://sfelections.org/results/20161108/data/20161206/d3/20161206_d3.pdf}{2016 San Francisco Board of Supervisors race (District 3)} versus a \href{https://www.cambridgema.gov/election2017/Council\%20Order\%20Round.htm}{2017 Cambridge City Council race} (Table rcv-rules).
-\begin{longtable}[]{@{}lll@{}}
-\caption{\label{tab:rcv-rules} Comparison of RCV rules by jurisdiction}\tabularnewline
+This first variable is determined for each election, the second for each jurisdiction, and the third a mix of both. For a clear example of these differences, consider a \href{https://sfelections.org/results/20161108/data/20161206/d3/20161206_d3.pdf}{2016 San Francisco Board of Supervisors race (District 3)} versus a \href{https://www.cambridgema.gov/election2017/Council\%20Order\%20Round.htm}{2017 Cambridge City Council race} (Table \ref{tab:rcv-rules}).
+\begin{table}[]
+\centering
+\caption{Comparison of RCV rules by jurisdiction}
+\label{tab:rcv-rules}
+\begin{tabular}{@{}l | ll@{}}
 \toprule
-Factor & San Francisco 2016 & Cambridge 2017\tabularnewline
-\midrule
-\endfirsthead
-\toprule
-Factor & San Francisco 2016 & Cambridge 2017\tabularnewline
-\midrule
-\endhead
-Candidates running & 2 & 27\tabularnewline
-Candidates rankable & 2 (Generally, up to 3\footnote{This is changing in 2019 to be up to 10.}) & 27 (Generally, all)\tabularnewline
-Seats elected & 1 & 9\tabularnewline
-\bottomrule
-\end{longtable}
+\multicolumn{1}{l}{} & \multicolumn{1}{l}{San Francisco 2016} & \multicolumn{1}{l}{Cambridge 2017} \\ \midrule
+\multicolumn{1}{l}{Candidates running} & \multicolumn{1}{l}{2} & \multicolumn{1}{l}{27} \\
+\multicolumn{1}{l}{Candidates rankable} & \multicolumn{1}{l}{2 (Generally, up to 3)} & \multicolumn{1}{l}{27 (Generally, all)} \\
+\multicolumn{1}{l}{Seats elected} & \multicolumn{1}{l}{1} & \multicolumn{1}{l}{9} \\ \bottomrule
+\end{tabular}
+\end{table}
 \hypertarget{history-of-rcv-in-the-us}{%
 \section{History of RCV in the US}\label{history-of-rcv-in-the-us}}
 
@@ -616,8 +639,10 @@ Ranked choice voting should incentivize candidates to avoid negative campaigning
 
 An interesting case study of this phenomena is in the 2018 San Francisco mayoral election (Kukura, 2018). There were three frontrunners heading into election day, all incumbent members of the city's Board of Supervisors: London Breed, Jane Kim, and Mark Leno. As polls showed Breed ahead about a month before the election, Kim and Leno held a joint press conference to endorse the other as voters' second choices. By drawing second-choice votes from the other candidate, the remaining candidate hoped to overcome the gap between them and Breed. In the actual election, the standing when it came time to proceed to the final round of counting was 102,767 for Breed, 68,707 for Leno, and 66,043 for Kim. While a significant proportion of Kim's voters transferred to Leno after her elimination, in the final round Breed surpassed Leno by about 2,000 votes\footnote{Data from (``Ranked Choice Voting Results Table,'' 2018); Figure \ref{fig:sankey} and analysis with Lee \& Yancheff (2019).} (Figure \ref{fig:sankey}).
 \begin{figure}
-\includegraphics[width=6in]{/Users/jaylee/Desktop/thesis/img/sankey_official_sfmayor18} \caption{Cross-endorsement in SF mayoral race}\label{fig:sankey}
+\includegraphics[width=6in]{/Users/jaylee/Desktop/thesis/img/sankey_official_sfmayor18} \caption{Sankey diagram of vote tabulation}\label{fig:sankey}
 \end{figure}
+Figure \ref{fig:sankey} is a \emph{Sankey diagram} for this election, a type of data visualization used to display flows between states. Each ``column'' is a round of tabulation, with bar heights proportional to the number of votes counted for each candidate in that round. At the end of each round, the candidate with the lowest amount of votes is eliminated, and their votes get transferred to the voters' second choices. We see from this plot that Breed, Leno, and Kim were the clear front-runners throughout the election, and that a high proportion of Kim's voters transferred to Leno in the final round of tabulation.
+
 Though it's outside the scope of this research to tell if this cross-endorsement was effective\footnote{Other confounding factors counld exist: maybe Kim and Leno had similar enough positions that this scenario would have happened without the endorsement, maybe this number is only significant because in the final rounds there were only 2 candidates for second choice votes to flow to, etc.}, there is some evidence in favor of this theory. Leno received almost 70\% of the votes previously counted for Kim compared to Breed's 20\%, bringing Breed's final margin of victory down to only 1 percentage point. In previous rounds of the election, no single candidate ever received more than 35\% of the transferred votes from an eliminated candidate\footnote{Except for round 2, where all 3 votes for the same write-in candidate transferred to Breed.}, so this is an unusual observation at least.
 
 \hypertarget{minority-representation}{%
@@ -911,7 +936,7 @@ To evaluate what demographic factors impact these ballot phenomena, we use two f
 \item
   Logistic regression. Here the dependent variables to train the model are individuals (who either overvoted or not / undervoted or not). This study is a good fit for logistic regression because of this inherent binary nature in overvoting and undervoting, but the demographic data issues are a limitation. Since the demographic data is at the precinct level, every voter in a given precinct is given the same demographic information as predictors, which is an interesting situation. The real advantage to using the logistic method is that it cannot predict an overvote or undervote rate (for any set of demographic values) outside of \([0,1]\).
 \end{itemize}
-To choose which variables went into the final models produced, we used bootstrapping and best subset selection. We bootstrapped the data multiple times, each time performing best subset selection on the data and choosing the model with the lowest BIC\footnote{The Bayesian Information Criterion is a metric that can be used to select a ``best'' model specification from a finite set of options. It is chosen here for consistency, because one of the packages used (\texttt{leaps}) uses this criterion internally.}. Then, across all of the bootstrapped models, we identified variables that were included most often\footnote{Arbitrarily, any variable that appeared in more than half of the sample models was included.} to put into our final model.
+To choose which variables went into the final models produced, we used bootstrapping and best subset selection. We bootstrapped the data multiple times, each time performing best subset selection on the data and choosing the model with the lowest BIC\footnote{The Bayesian Information Criterion is a metric that can be used to select a ``best'' model specification from a finite set of options. It is chosen here for consistency, because one of the packages we used for analysis internally uses this criterion.}. Then, across all of the bootstrapped models, we identified variables that were included most often\footnote{Arbitrarily, any variable that appeared in more than half of the sample models was included.} to put into our final model.
 
 In addition to modelling overvote and undervote rate, we also model turnout rate in general. This gives us an opportunity to see if the demographic factors associated with RCV ballot issues are different from those associated with voting more generally.
 
@@ -930,7 +955,7 @@ The turnout across the city is displayed in Figure \ref{fig:turnout-map}. This e
 \hypertarget{linear}{%
 \subsection{Linear}\label{linear}}
 
-With an adjusted \(R^2\) value of 0.411, the best linear model (Table \ref{tab:linear-turnout-model}) we found for predicting turnout\footnote{This was actually set to predict the natural log of turnout because the raw turnout saw heteroskedasticity in residuals, which indicates that a linear model was not an accurate descriptor of this phenomenon.} included variables for age, education, and race. Having more young people (ages 18-24) and people without high school degrees was negatively correlated with turnout, while having more middle-aged, college-educated, and White people was positively correlated with turnout. This is consistent with general literature on voter turnout - racial and ethnic minorities vote less, while the older and better educated vote more.
+With a BIC value of \(420.5\), the best linear model (Table \ref{tab:linear-turnout-model}) we found for predicting turnout\footnote{This was actually set to predict the natural log of turnout because the raw turnout saw heteroskedasticity in residuals, which indicates that a linear model was not an accurate descriptor of this phenomenon.} included variables for age, education, and race. Having more young people (ages 18-24) and people without high school degrees was negatively correlated with turnout, while having more middle-aged, college-educated, and White people was positively correlated with turnout. This is consistent with general literature on voter turnout - racial and ethnic minorities vote less, while the older and better educated vote more.
 \begin{table}[t]
 
 \caption[Linear turnout model]{\label{tab:linear-turnout-model}Linear model for RCV voter turnout (log)}
@@ -952,12 +977,12 @@ white & 0.3787332 & 0.1462976 & 2.588786 & 0.0098666\\
 \begin{figure}
 \includegraphics[width=6in]{thesis_files/figure-latex/linear-turnout-model-1} \caption{Linear turnout model validation}\label{fig:linear-turnout-model}
 \end{figure}
-Figure \ref{fig:linear-turnout-model} details the residuals from the model. These are normally distributed, with no systematic change in variance. There is one particularly low outlier, but on the whole the residuals are distributed evenly. Unfortunately, the residuals here are quite large - since we're predicting turnout rates, a ``valid'' residual\footnote{That is, a residual where the predicted value is indeed a rate between 0 and 1.} should only range between -1 and 1. This and the adjusted \(R^2\) mentioned earlier indicate that this model is not particularly well fitted to the data.
+Figure \ref{fig:linear-turnout-model} details the residuals from the model. These are normally distributed, with no systematic change in variance. There is one particularly low outlier, but on the whole the residuals are distributed evenly. Unfortunately, the residuals here are quite large - since we're predicting turnout rates, a ``valid'' residual\footnote{That is, a residual where the predicted value is indeed a rate between 0 and 1.} should only range between -1 and 1. This indicates that this model is not particularly well fitted to the data.
 
 \hypertarget{logistic}{%
 \subsection{Logistic}\label{logistic}}
 
-With a McFadden's Pseudo-\(R^2\) value\footnote{This is an alternative \(R^2\) metric for categorical response variables. It is interpretable as the amount of variability explained by the model or how much of an improvement the model is compared to the null model, but not as the square of the correlation coefficient. Other metrics satisfy different combinations of these interpretations (``FAQ,'' 2011). This pseudo-\(R^2\) should not be compared to the \(R^2\) from a linear method, but can be compared between logistic models.} of 0.435, the best logistic model (Table \ref{tab:logit-turnout-model}) we found for predicting turnout\footnote{Now, we are predicting the raw, un-logged turnout scores again.} included all of our variables. Education and age were positively correlated with turnout, while poverty, percentage female, and non-English-speaking population were negatively correlated. All of the racial groups were correlated negatively with turnout, and there is no distinct pattern among minority groups versus White voters.
+With a BIC value of \(3.3019\times 10^{4}\), the best logistic model (Table \ref{tab:logit-turnout-model}) we found for predicting turnout\footnote{Now, we are predicting the raw, un-logged turnout scores again.} included all of our variables. Education and age were positively correlated with turnout, while poverty, percentage female, and non-English-speaking population were negatively correlated. All of the racial groups were correlated negatively with turnout, and there is no distinct pattern among minority groups versus White voters.
 \begin{table}[t]
 
 \caption[Logit turnout model]{\label{tab:logit-turnout-model}Logistic model for RCV voter turnout}
@@ -1004,7 +1029,7 @@ The rate of overvoting across the city is displayed in Figure \ref{fig:overvote-
 \hypertarget{linear-1}{%
 \subsection{Linear}\label{linear-1}}
 
-With an adjusted \(R^2\) value of 0.086, the best linear model (Table \ref{tab:linear-overvote-model}) we found for predicting overvote rates included only the variable \texttt{black}. Having more African-Americans in a precinct was positively correlated with overvoting.
+With a BIC value of \(-5267.6\), the best linear model (Table \ref{tab:linear-overvote-model}) we found for predicting overvote rates included only the variable \texttt{black}. Having more African-Americans in a precinct was positively correlated with overvoting.
 \begin{table}[t]
 
 \caption[Linear overvote model]{\label{tab:linear-overvote-model}Linear model for overvote rates}
@@ -1021,12 +1046,12 @@ black & 0.0117459 & 0.0015530 & 7.563142 & 0\\
 \begin{figure}
 \includegraphics[width=6in]{thesis_files/figure-latex/linear-overvote-model-1} \caption{Linear overvote model validation}\label{fig:linear-overvote-model}
 \end{figure}
-Figure \ref{fig:linear-overvote-model} details the residuals from the model. Here we see that the linear model is not a great fit for this data. The combination of low overvoting rates and a lower bound at 0 mean that we see significant heteroskedasticity in the residuals. They are skewed in a strange way due to the prevalence of so many 0s, with the ``normal mass'' of residuals showing a right skew but the 0 residuals causing large spikes on the negative end. Interestingly, there also seems to be a line of residuals in the upper section of the scatter plot, indicating that there are a set of precincts with roughly the same high overvote rate that were predicted to have much lower rates. All this and the extremely low adjusted \(R^2\) mentioned earlier indicate that this model is poorly fitted to the data.
+Figure \ref{fig:linear-overvote-model} details the residuals from the model. Here we see that the linear model is not a great fit for this data. The combination of low overvoting rates and a lower bound at 0 mean that we see significant heteroskedasticity in the residuals. They are skewed in a strange way due to the prevalence of so many 0s, with the ``normal mass'' of residuals showing a right skew but the 0 residuals causing large spikes on the negative end. Interestingly, there also seems to be a line of residuals in the upper section of the scatter plot, indicating that there are a set of precincts with roughly the same high overvote rate that were predicted to have much lower rates. All this indicates that this model is poorly fitted to the data.
 
 \hypertarget{logistic-1}{%
 \subsection{Logistic}\label{logistic-1}}
 
-With a McFadden's Pseudo-\(R^2\) value of 0.023, the best logistic model (Table \ref{tab:logit-overvote-model}) we found for predicting overvote rates also included only the variable \texttt{black} (again positively correlated with overvoting).
+With a BIC value of \(1733.4\), the best logistic model (Table \ref{tab:logit-overvote-model}) we found for predicting overvote rates also included only the variable \texttt{black} (again positively correlated with overvoting).
 \begin{table}[t]
 
 \caption[Logit overvote model]{\label{tab:logit-overvote-model}Logistic model for overvote rates}
@@ -1055,7 +1080,7 @@ The rate of undervoting across the city is displayed in Figure \ref{fig:undervot
 \hypertarget{linear-2}{%
 \subsection{Linear}\label{linear-2}}
 
-With an adjusted \(R^2\) value of 0.396, the best linear model (Table \ref{tab:linear-undervote-model}) we found for predicting undervote rates included predictors about age, education, and race. The three youngest age categories were negatively correlated with undervoting, both education variables were positively correlated, and three ethnic groups (\texttt{black}, \texttt{pac\_islander}, \texttt{white}) were positively correlated as well. While this doesn't agree with previous literature on voting habits, neither does it provide a clear pattern with which to base a disagreement on. Particularly, we would not expect the percentage of people with a college degree \emph{and} the percentage of people with no high school diploma to trend in the same direction.
+With a BIC value of \(-2039.4\), the best linear model (Table \ref{tab:linear-undervote-model}) we found for predicting undervote rates included predictors about age, education, and race. The three youngest age categories were negatively correlated with undervoting, both education variables were positively correlated, and three ethnic groups (\texttt{black}, \texttt{pac\_islander}, \texttt{white}) were positively correlated as well. While this doesn't agree with previous literature on voting habits, neither does it provide a clear pattern with which to base a disagreement on. Particularly, we would not expect the percentage of people with a college degree \emph{and} the percentage of people with no high school diploma to trend in the same direction.
 \begin{table}[t]
 
 \caption[Linear undervote model]{\label{tab:linear-undervote-model}Linear model for undervote rates}
@@ -1080,12 +1105,12 @@ no\_hs & 0.1262080 & 0.0361406 & 3.492142 & 0.0005148\\
 \begin{figure}
 \includegraphics[width=6in]{thesis_files/figure-latex/linear-undervote-model-1} \caption{Linear undervote model validation}\label{fig:linear-undervote-model}
 \end{figure}
-Figure \ref{fig:linear-overvote-model} details the residuals from the model. The linear model seems to be a decent fit for this data, with relatively normal residuals and no clear variance pattern. The scale of the residuals could be improved (in combination with the adjusted \(R^2\) from earlier), but on the whole this is not a poorly fitting model.
+Figure \ref{fig:linear-overvote-model} details the residuals from the model. The linear model seems to be a decent fit for this data, with relatively normal residuals and no clear variance pattern. The scale of the residuals could be improved, but on the whole this is not a poorly fitting model.
 
 \hypertarget{logistic-2}{%
 \subsection{Logistic}\label{logistic-2}}
 
-With a McFadden's Pseudo-\(R^2\) value of 0.169, the best logistic model (Table \ref{tab:logit-undervote-model}) we found for predicting undervote rates also included variables in age, education, and race. We see this strange pattern in variable coefficients here as well - both educational groups and all of these ethnic groups are positively associated with undervoting (no clear minority vs.~White distinction), and the three younger age categories are negatively associated with it.
+With a BIC value of \(5493.9\), the best logistic model (Table \ref{tab:logit-undervote-model}) we found for predicting undervote rates also included variables in age, education, and race. We see this strange pattern in variable coefficients here as well - both educational groups and all of these ethnic groups are positively associated with undervoting (no clear minority vs.~White distinction), and the three younger age categories are negatively associated with it.
 \begin{table}[t]
 
 \caption[Logit undervote model]{\label{tab:logit-undervote-model}Logistic model for undervote rates}
@@ -1114,6 +1139,36 @@ pac\_islander & 3.5887730 & 0.5142211 & 6.979047 & 0.0e+00\\
 \includegraphics[width=6in]{thesis_files/figure-latex/logit-undervote-model-1} \caption{Logistic undervote model validation}\label{fig:logit-undervote-model}
 \end{figure}
 Figure \ref{fig:logit-undervote-model} details the residuals of our predictions. These look very similar to the linear model: approximately normally distributed, with no clear heteroskedasticy, and even the same cluster shape in the residual scatter plot. They even have similar spreads in the residuals ({[}-0.073,0.079{]} for the middle 95\% of the linear model's residuals and {[}-0.084,0.074{]} for the logistic). Under all these metrics, the logistic model performs well. Despite these models seeming to fit appropriately, it's hard to draw a useful conclusion from them due to the aforementioned issues with variable meaning.
+
+\hypertarget{summary}{%
+\section{Summary}\label{summary}}
+\begin{longtable}[]{@{}lllll@{}}
+\caption{\label{tab:model-comp} Comparison of models fit}\tabularnewline
+\toprule
+Metric & Model & BIC & Residual spread (95\%) & Residual shape\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+Metric & Model & BIC & Residual spread (95\%) & Residual shape\tabularnewline
+\midrule
+\endhead
+Turnout & Linear & \(420.537241\) & \(1.219\) & Normal\tabularnewline
+& Logistic & \(3.301895\times 10^{4}\) & \(0.404\) & Normal\tabularnewline
+Overvoting & Linear & \(-5267.5585476\) & \(0.012\) & Non-normal\tabularnewline
+& Logistic & \(1733.3913291\) & \(0.011\) & Non-normal\tabularnewline
+Undervoting & Linear & \(-2039.4170766\) & \(0.152\) & Normal\tabularnewline
+& Logistic & \(5493.8649095\) & \(0.158\) & Normal\tabularnewline
+\bottomrule
+\end{longtable}
+In Table \ref{tab:model-comp} we compare the models fit earlier. While the BIC is not entirely comparable between the linear and logistic models, we can still draw some insights here. A lower BIC is better, so on the whole the models for overvoting and undervoting were much better fits than the models for turnout. The spread of residuals also supports the above. We did see, however, that
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  The overvoting models had some significantly non-normal residual patterns, and
+\item
+  The undervoting models showed strange relationships between the coefficients.
+\end{enumerate}
+Overall, however, this analysis shows that the rates of overvoting and undervoting are affected by some of the same demographic considerations as turnout rate in general is affected by: age, race, and education.
 
 \hypertarget{missing-litreview}{%
 \chapter{Missing data literature review}\label{missing-litreview}}
@@ -1205,7 +1260,7 @@ IPW can outperform listwise deletion in terms of bias, particularly in the MNAR 
 \end{itemize}
 \emph{Multiple imputation} (MI) is a method of running single imputation multiple times to create extra variability among estimates. A dataset is imputed multiple times (with some variability between imputations), then for each new dataset the parameter of interest is calculated. This added variability moderates the appearance of ``certainty'' that comes with single imputation (Little \& Rubin, 1987).
 
-Hot desk imputation is unbiased under MCAR and MAR (Little \& Rubin, 1987). Imputation typically underestimates variance in parameter estimates, because (after a random draw to fill in the data) it uses a deterministic method to calculate the estimate. Multiple imputation can increase this variance through multiple random draws, but still often underestimates variance. Depending on the parameter of interest, often five imputations is enough to obtain nearly-efficient estimates with MI (Allison, 2011).
+Hot deck imputation is unbiased under MCAR and MAR (Little \& Rubin, 1987). Imputation typically underestimates variance in parameter estimates, because (after a random draw to fill in the data) it uses a deterministic method to calculate the estimate. Multiple imputation can increase this variance through multiple random draws, but still often underestimates variance. Depending on the parameter of interest, often five imputations is enough to obtain nearly-efficient estimates with MI (Allison, 2011).
 
 \hypertarget{what-if-everybody-votes-fully}{%
 \section{What if everybody votes (fully)?}\label{what-if-everybody-votes-fully}}
@@ -1250,7 +1305,7 @@ The most common vote choice was London Breed and nobody else\footnote{Breed hers
 
 Citrin, Schickler, \& Sides (2003) use auxiliary data to simulate vote choice of non-voters in US Senate elections. They raise an interesting consideration: while the overarching metric of electoral change is an election flipping, the numerical ``amount'' of change in an election may be large but not enough to overcome a yet larger margin of victory. For example, if full voter turnout improved Democratic vote shares by 5\% across the country, this would only flip the seats where a) a Democrat lost, and b) the margin of victory for the other candidate was small enough that a 5\% vote share would overturn it. We should thus consider alternate methods of assessing the impact of no undervotes or overvotes, aside from looking at who wins the election.
 
-Liu (2014) investigates imputation methods for vote choice in a Taiwanese election (conducted with plurality). They find that ``the extent to which MI corrects the distribution {[}of vote share{]} is very limited, although the direction of adjustment is correct''. Bernhagen \& Marsh (2010) use multiple imputation to simulate choices in place of undervotes in an Irish general election (conducted with RCV). They find that the techniques applied were normally ``not large enough to affect the counterfactual estimation of election results under universal turnout''. These studies seem to indicate that MI may not be a technique which will change our election results enough to be noticeable. Further work could be done into how well MI mirrors the correct amount of variance under different conditions (MCAR, MAR, etc.).
+Liu (2014) investigates imputation methods for vote choice in a Taiwanese election (conducted with plurality). They find that ``the extent to which MI corrects the distribution {[}of vote share{]} is very limited, although the direction of adjustment is correct''. Bernhagen \& Marsh (2010) use multiple imputation to simulate choices in place of undervotes in an Irish general election (conducted with RCV). They find that the techniques applied were normally ``not large enough to affect the counterfactual estimation of election results under universal turnout''. These studies offer the idea that MI may not shift the observed data enough to observe a change, even if one would truly be present under full voting. Further work could be done into how well MI mirrors the correct amount of variance under different conditions (MCAR, MAR, etc.).
 
 In a FairVote report, S. Hill \& Hernandez (2018) find a similar result in the 2018 San Francisco mayoral election: the exhausted ballots in this election did not have the potential to swing the election away from Breed. They also find that the majority of exhausted ballots were ``voluntarily exhausted'' meaning that the voter undervoted, rather then being exhausted because they ran out of available slots to list. Additionally, the involuntarily exhausted ballots were likely to pull for London Breed over Leno. In addition to the small impacts of MI mentioned above, this study indicates that the positioning of the undervotes themselves in this specific election may be a factor that contributes to a lack of change in our results. Taking this into concern in combination with the MI result, we may expect to not see much variance among methods.
 
@@ -1260,7 +1315,7 @@ In a FairVote report, S. Hill \& Hernandez (2018) find a similar result in the 2
 \hypertarget{violated-assumptions}{%
 \subsection{Violated assumptions}\label{violated-assumptions}}
 
-\protect\hyperlink{missing-data}{Earlier} we made the implicit assumption that every ``missing'' data point (unobserved value) has some true value. In the case of ranked-choice voting, this is not necessarily true. It is a fully rational choice for a voter to only list one candidate when offered three options, if they truly only have one preference. While this would seem to make this study just an exercise in missing data methods, this is no more the case here than in other studies of imputing vote choice.
+\protect\hyperlink{missing-data}{Earlier} we made the implicit assumption that every ``missing'' data point (unobserved value) has some true value. In the case of ranked choice voting, this is not necessarily true. It is a fully rational choice for a voter to only list one candidate when offered three options, if they truly only have one preference. While this would seem to make this study just an exercise in missing data methods, this is no more the case here than in other studies of imputing vote choice.
 
 Kroh (2006) has a good discussion of methods for working with imputations when ``Don't know'' is a valid response, or there are valid reasons for the inapplicability of a survey question. While Kroh's study does not apply to our particular research question and data, it provides a nuanced take on the assumptions inherent in missing data imputation.
 
@@ -1433,12 +1488,12 @@ NA & 3640 & 3640 & 3778 & 3972 & 6262 & 9483 & 19230 & 29790\\
 \bottomrule
 \end{tabular}}
 \end{table}
-For context, Table \ref{tab:orig-results} gives the original election tabulation\footnote{This differs slightly from the official results in (``Ranked Choice Voting Results Table,'' 2018); specifically, our vote counts are consistently an undercount of the official results. We believe this differece is due to the omission of some ballots from the published data, particularly ballots with a scanning error that have to be hand-counted.}.
+For context, Table \ref{tab:orig-results} displays the original election tabulation\footnote{This differs slightly from the official results in (``Ranked Choice Voting Results Table,'' 2018); specifically, our vote counts are consistently an undercount of the official results. We believe this differece is due to the omission of some ballots from the published data, particularly ballots with a scanning error that have to be hand-counted.}.
 
 \hypertarget{final-winner}{%
 \section{Final winner}\label{final-winner}}
 
-We see in Table \ref{tab:method-results} that London Breed wins consistently in all methods except the fully random hot deck imputation, in which Mark Leno was consistently elected. As this is the least ``realistic'' of any of the methods (since it uses the least available information to predict vote choice), we can consider it a less accurate measure of potential change. It does potentially indicate that Leno had more overall support than Breed (in terms of being listed anywhere on the ballot), just positioned in the wrong place for it to push him to victory. Perhaps under a different voting system such as Borda count, which awards points to candidates based on any ranking they appeared in, Leno would have won.
+We see in Table \ref{tab:method-results} that London Breed wins consistently in all methods except the fully random hot deck imputation, in which Mark Leno was consistently elected. As this is the least ``realistic'' of any of the methods (since it uses the least available information to predict vote choice), we can consider it a less accurate measure of potential change. It does potentially indicate that Leno had more overall support than Breed (in terms of being listed anywhere on the ballot), just positioned in the wrong place for it to push him to victory. Perhaps under a different voting system such as Borda count, which awards points to candidates based on any ranking they appeared in\footnote{Under Borda Count, a candidate would be given 3 points for a 1st ranking from a voter, 2 points from a 2nd ranking, and 1 point from a 3rd ranking (``Borda Count,'' n.d.).}, Leno would have won.
 \begin{table}[t]
 
 \caption[Winner by method]{\label{tab:method-results}Election results count by method}
@@ -1569,16 +1624,20 @@ When we apply Rubin's rules to correct our underestimate of variance, the situat
 \hypertarget{part-1-1}{%
 \subsection{Part 1}\label{part-1-1}}
 
-Part 1 left us with some inconclusive results on the whole. The models for turnout and undervoting had relevant variables dealing with age, education and race, which are variables commonly linked to voting habits more generally in other research. Our turnout model seemed to agree with the direction of these correlates as well, but the relationships in the undervoting model were very unclear.
+Part 1 left us with some interesting results. While not all of our methods gave conclusive interpretations, we saw that (on the whole) overvoting and undervoting were related to some similar variables as voter turnout is in general. The models for turnout and undervoting had relevant variables dealing with age, education and race, which are variables commonly linked to voting habits more generally in other research. Our turnout and undervoting models seemed to agree on the direction of these correlates as well. The coefficients provided by the overvoting model were clear that precincts with high number of African-American residents were more likely to overvote (and thus lose a number of votes that were attempted to be cast).
 
-In contrast, the coefficients provided by the overvoting model were clear that precincts with high number of African-American residents were more likely to overvote (and thus lose a number of votes that were attempted to be cast), but the poor fit and violated assumptions of these models indicate that these results are not accurate. A better tool than these will be needed to parse further into this question.
+There were some weaknesses in our models, however. The poor fit and violated assumptions of the overvoting models indicate that these results may not be entirely accurate. Our undervoting model produced some unexpected relationships between demographic variables, which we could not interpret. A better tool than these regressions may be needed to parse further into this question.
 
-We hoped that a clear result here would be able to better inform voter education efforts, but do not feel confident in making any recommendation as such from this study. Given that the level of overvoting is so low across the board and only spikes in a few precincts, a geographically targeted education approach might be the best solution to this issue.
+We hoped that a more clear result here would be able to better inform voter education efforts, but do not feel confident in making any recommendation as such from this study. Given that the level of overvoting is so low across the board and only spikes in a few precincts, a geographically targeted education approach might be the best solution to this issue. Another course of action may be to continue voter education efforts in line with previous research on voter turnout more generally, as these same correlates are important to rates of overvoting and undervoting.
 
 \hypertarget{part-2-1}{%
 \subsection{Part 2}\label{part-2-1}}
 
-Given the disparity in undervote levels between different precincts (and the impact of demographic factors on these undervote levels), we expected one of the models with precinct or demographic to have more of an effect (despite the research presented in \protect\hyperlink{missing-litreview}{Chapter 4} on the electoral results. We thought that if the precincts had different local preferences, then the now-higher weighting of underrepresented precincts might flip the election. One possible explanation as to why this did not occur is that this disparate precinct weighting did happen and it cancelled out between different precincts on the whole. Fairvote has produced some analysis that seems to indicate regional distinctions among candidates, which could support the claim about different local preferences (``SF Mayor's Race,'' n.d.-a; ``SF Mayor's Race,'' n.d.-b; ``SF Mayor's Race,'' n.d.-c; ``SF Mayor's Race,'' n.d.-d). Another answer is that MI itself does not produce enough variance to meaningfully affect these election results, given the large number of data points and the inherent closed loop in using the observed data to modify itself. Additionally, as indicated in S. Hill \& Hernandez (2018), the positioning of the undervotes themselves in this election may have had an effect on how much change the process of imputing their values could induce.
+In Part 2, we saw that the more informed MI methods did not change the election results, though they did sometimes decrease the winner's margin of victory. This is the same result obtained by Bernhagen \& Marsh (2010) for a separate election.
+
+Given the disparity in undervote levels between different precincts (and the impact of demographic factors on these undervote levels), we expected one of the models with precinct or demographic to have more of an effect on the electoral results. We thought that if the precincts had different local preferences, then the now-higher weighting of underrepresented precincts might flip the election. One possible explanation as to why this did not occur is that this disparate precinct weighting did happen and it cancelled out between different precincts on the whole, leading to Breed's continued victory. Fairvote has produced some analysis that seems to indicate regional distinctions among candidates, which could support the claim about different local preferences (``SF Mayor's Race,'' n.d.-a; ``SF Mayor's Race,'' n.d.-b; ``SF Mayor's Race,'' n.d.-c; ``SF Mayor's Race,'' n.d.-d). Additionally, as indicated in S. Hill \& Hernandez (2018), the positioning of the undervotes themselves in this election may have limited the impact of full voting, and even under full voting Breed still would have won due to this positioning. Another answer is that MI itself may not produce enough variance to meaningfully affect these election results (even if there \emph{were} a true change in the election winner), given the large number of data points and the inherent closed loop of using the observed data to modify itself\footnote{The same problem faced by methods like the bootstrap.}. This may be a limitation of MI, as after correcting variance with Rubin's rules there was much more potential overlap in election results (\protect\hyperlink{missing-results}{Chapter 6}).
+
+We also saw that almost half of the exhausted ballots in the final round of our original election can be explained by ``voluntary'' undervotes, that is voters not completing the ballot fully. This evidence complicates the claim that RCV does not produce true majorities, because the phenomenon of undervoting is not \emph{only} a function of limited rankings imposed by the jurisdiction. Further research should be conducted into the effect of taking voluntary undervoting into account on how often we observe a non-majority in RCV elections.
 
 \hypertarget{further-research}{%
 \section{Future research ideas}\label{further-research}}
@@ -1713,16 +1772,19 @@ The percentage of all occupied housing units\footnote{This variable is at the le
 
 \hypertarget{refs}{}
 \leavevmode\hypertarget{ref-noauthor_2000_2001}{}%
-2000 Presidential General Election Results. (2001, December). \emph{Federal Election Commission}. https://transition.fec.gov/pubrec/2000presgeresults.htm.
+2000 Presidential General Election Results. (2001, December). \emph{Federal Election Commission}. Retrieved from \url{https://transition.fec.gov/pubrec/2000presgeresults.htm}
 
 \leavevmode\hypertarget{ref-noauthor_2010_nodate}{}%
-2010 TIGER/Line Shapefiles. (n.d.). \emph{United States Census Bureau}. https://www.census.gov/cgi-bin/geo/shapefiles/index.php?year=2010\&layergroup=Block+Groups.
+2010 TIGER/Line Shapefiles. (n.d.). \emph{United States Census Bureau}. Retrieved from \url{https://www.census.gov/cgi-bin/geo/shapefiles/index.php?year=2010/\&layergroup=Block+Groups}
 
 \leavevmode\hypertarget{ref-allen_elections_2016}{}%
 Allen, B., \& Hertzberg, B. (2016, September). Elections: Vote by mail voting and mail ballot elections.
 
 \leavevmode\hypertarget{ref-allison_missing_2011}{}%
 Allison, P. D. (2011). Missing Data. In R. E. Millsap \& A. Maydeu-Olivares (Eds.), \emph{The SAGE Handbook of Quantitative Methods in Psychology}.
+
+\leavevmode\hypertarget{ref-amunategui_predicting_nodate}{}%
+Amunategui, M. (n.d.). Predicting Multiple Discrete Values with Multinomials, Neural Networks and the \{nnet\} Package. Retrieved from \url{https://amunategui.github.io/multinomial-neuralnetworks-walkthrough/index.html}
 
 \leavevmode\hypertarget{ref-arrow_handbook_2002}{}%
 Arrow, K. J., Sen, A. K., \& Suzumura, K. (Eds.). (2002). \emph{Handbook of social choice and welfare} (Vol. 1). Amsterdam ; Boston: Elsevier.
@@ -1731,13 +1793,13 @@ Arrow, K. J., Sen, A. K., \& Suzumura, K. (Eds.). (2002). \emph{Handbook of soci
 Bartholdi, J. J., \& Orlin, J. B. (1991). Single transferable vote resists strategic voting. \emph{Social Choice and Welfare}, \emph{8}(4). \url{http://doi.org/10.1007/BF00183045}
 
 \leavevmode\hypertarget{ref-berman_rival_2018}{}%
-Berman, R. (2018, May). Rival Candidates Try an Unusual Election Message: Vote for Both of Us. \emph{The Atlantic}. https://www.theatlantic.com/politics/archive/2018/05/san-francisco-mayor-jane-kim-mark-leno-ranked-choice-voting/561053/.
+Berman, R. (2018, May). Rival Candidates Try an Unusual Election Message: Vote for Both of Us. \emph{The Atlantic}. Retrieved from \url{https://www.theatlantic.com/politics/archive/2018/05/san-francisco-mayor-jane-kim-mark-leno-ranked-choice-voting/561053/}
 
 \leavevmode\hypertarget{ref-bernhagen_missing_2010}{}%
 Bernhagen, P., \& Marsh, M. (2010). Missing Voters, Missing Data: Using Multiple Imputation to Estimate the Effects of Low Turnout. \emph{Journal of Elections, Public Opinion, and Parties}.
 
 \leavevmode\hypertarget{ref-noauthor_borda_nodate}{}%
-Borda Count. (n.d.). \emph{Electoral Reform Society}. https://www.electoral-reform.org.uk/voting-systems/types-of-voting-system/borda-count/.
+Borda Count. (n.d.). \emph{Electoral Reform Society}. Retrieved from \url{https://www.electoral-reform.org.uk/voting-systems/types-of-voting-system/borda-count/}
 
 \leavevmode\hypertarget{ref-boyd_election_1986}{}%
 Boyd, R. W. (1986). Election Calendars and Voter Turnout. \emph{American Politics Quarterly}, \emph{14}(1-2), 89--104. \url{http://doi.org/10.1177/1532673X8601400106}
@@ -1746,28 +1808,31 @@ Boyd, R. W. (1986). Election Calendars and Voter Turnout. \emph{American Politic
 Burnett, C. M., \& Kogan, V. (2015). Ballot (and voter) ``exhaustion'' under Instant Runoff Voting: An examination of four ranked-choice elections. \emph{Electoral Studies}, \emph{37}, 41--49. \url{http://doi.org/10.1016/j.electstud.2014.11.006}
 
 \leavevmode\hypertarget{ref-callaghan_has_2017}{}%
-Callaghan, P. (2017, October). Has ranked-choice voting lived up to its promise in the Twin Cities? \emph{MinnPost}. https://www.minnpost.com/politics-policy/2017/10/has-ranked-choice-voting-lived-its-promise-twin-cities/.
+Callaghan, P. (2017, October). Has ranked-choice voting lived up to its promise in the Twin Cities? \emph{MinnPost}. Retrieved from \url{https://www.minnpost.com/politics-policy/2017/10/has-ranked-choice-voting-lived-its-promise-twin-cities/}
 
 \leavevmode\hypertarget{ref-citrin_what_2003}{}%
 Citrin, J., Schickler, E., \& Sides, J. (2003). What If Everyone Voted? Simulating the Impact of Increased Turnout in Senate Elections. \emph{American Journal of Political Science}, \emph{47}(1), 75--90. \url{http://doi.org/10.2307/3186094}
 
 \leavevmode\hypertarget{ref-noauthor_comments_nodate}{}%
-Comments on Proposed Rules for RCV. (n.d.). \emph{League of Women Voters of Maine}. http://www.lwvme.org/files/Comments\_on\_Proposed\_Rules\_for\_RCV.pdf.
+Comments on Proposed Rules for RCV. (n.d.). \emph{League of Women Voters of Maine}. Retrieved from \url{http://www.lwvme.org/files/Comments/_on/_Proposed/_Rules/_for/_RCV.pdf}
 
 \leavevmode\hypertarget{ref-noauthor_condorcet_2008}{}%
-Condorcet Method. (2008, August). \emph{Princeton University Department of Mathematics}. http://web.math.princeton.edu/math\_alive/Voting/Lab1/Condorcet.html.
+Condorcet Method. (2008, August). \emph{Princeton University Department of Mathematics}. Retrieved from \url{http://web.math.princeton.edu/math/_alive/Voting/Lab1/Condorcet.html}
 
 \leavevmode\hypertarget{ref-cook_ranked_2011}{}%
-Cook, C. (2011, December). Ranked Choice Voting. \emph{SPUR}. https://www.spur.org/publications/urbanist-article/2011-12-01/ranked-choice-voting.
+Cook, C. (2011, December). Ranked Choice Voting. \emph{SPUR}. Retrieved from \url{https://www.spur.org/publications/urbanist-article/2011-12-01/ranked-choice-voting}
 
 \leavevmode\hypertarget{ref-dennis_ballot-marking_2004}{}%
 Dennis, G. (2004). Ballot-Marking Errors in the First San Francisco Instant Runoff Election, 15.
+
+\leavevmode\hypertarget{ref-do_spatial_2014}{}%
+Do, V. H., Thomas-Agnan, C., \& Vanhems, A. (2014). \emph{Spatial reallocation of areal data - another look at basic methods Réaffectation spatiale de données surfaciques - une autre approche des méthodes de base} (p. 32).
 
 \leavevmode\hypertarget{ref-donovan_campaign_2016}{}%
 Donovan, T., Tolbert, C., \& Gracey, K. (2016). Campaign civility under preferential and plurality voting. \emph{Electoral Studies}, \emph{42}, 157--163. \url{http://doi.org/10.1016/j.electstud.2016.02.009}
 
 \leavevmode\hypertarget{ref-douglas_cambridge_2013}{}%
-Douglas, A. (2013, November). Cambridge, Massachusetts Elections a Model for America. \emph{FairVote}. https://www.fairvote.org/cambridge-massachusetts-elections-a-model-for-america.
+Douglas, A. (2013, November). Cambridge, Massachusetts Elections a Model for America. \emph{FairVote}. Retrieved from \url{https://www.fairvote.org/cambridge-massachusetts-elections-a-model-for-america}
 
 \leavevmode\hypertarget{ref-eberhard_what_2017}{}%
 Eberhard, K. (2017, September). What Really Happened With Instant Runoff Voting in Pierce County, Washington? \emph{Sightline Institute}.
@@ -1775,17 +1840,17 @@ Eberhard, K. (2017, September). What Really Happened With Instant Runoff Voting 
 \leavevmode\hypertarget{ref-noauthor_electoral_2013}{}%
 Electoral Systems: Contingent and Alternative Voting. (2013, September). \emph{UK Engage}.
 
-\leavevmode\hypertarget{ref-noauthor_faq_2011}{}%
-FAQ: What are pseudo R-squareds? (2011, October). \emph{UCLA Institute for Digital Research \& Education}. https://stats.idre.ucla.edu/other/mult-pkg/faq/general/faq-what-are-pseudo-r-squareds/.
+\leavevmode\hypertarget{ref-noauthor_epsg7132_nodate}{}%
+EPSG:7132. (n.d.). \emph{EPSG.io}. Retrieved from \url{https://epsg.io/7132}
 
 \leavevmode\hypertarget{ref-fowler_chapter_2018}{}%
 Fowler, M. (n.d.). \emph{Chapter 3: Cramer-Rao Lower Bound}. Binghamton University.
 
 \leavevmode\hypertarget{ref-noauthor_funding_2019}{}%
-Funding Elections Technology. (2019, February). \emph{National Conference of State Legislatures}. http://www.ncsl.org/research/elections-and-campaigns/funding-election-technology.aspx.
+Funding Elections Technology. (2019, February). \emph{National Conference of State Legislatures}. Retrieved from \url{http://www.ncsl.org/research/elections-and-campaigns/funding-election-technology.aspx}
 
 \leavevmode\hypertarget{ref-hawkins_major_2011}{}%
-Hawkins, L. D. (2011, June). Major Legal Victory for Ranked Choice Voting and Reform. \emph{FairVote}. https://www.fairvote.org/major-legal-victory-for-ranked-choice-voting-and-reform.
+Hawkins, L. D. (2011, June). Major Legal Victory for Ranked Choice Voting and Reform. \emph{FairVote}. Retrieved from \url{https://www.fairvote.org/major-legal-victory-for-ranked-choice-voting-and-reform}
 
 \leavevmode\hypertarget{ref-henry_implementation_2016}{}%
 Henry, M. A. (n.d.). \emph{THE IMPLEMENTATION AND EFFECTS OF RANKED CHOICE VOTING IN CALIFORNIA CITIES} (PhD thesis). California State University, Sacramento.
@@ -1797,13 +1862,16 @@ Herron, M. C., \& Lewis, J. B. (2007). Did Ralph Nader spoil Al Gore's president
 Heymans, M. W., \& Eekhout, I. (2009). \emph{Applied Missing Data Analysis with SPSS and (R)Studio}.
 
 \leavevmode\hypertarget{ref-hill_sf_2018}{}%
-Hill, C., Jerdonek, C., \& Mogi, V. (2018, June). SF elections are working - and getting even better. \emph{The San Francisco Examiner}. http://www.sfexaminer.com/sf-elections-working-getting-even-better/.
+Hill, C., Jerdonek, C., \& Mogi, V. (2018, June). SF elections are working - and getting even better. \emph{The San Francisco Examiner}. Retrieved from \url{http://www.sfexaminer.com/sf-elections-working-getting-even-better/}
 
 \leavevmode\hypertarget{ref-hill_instant_2007}{}%
 Hill, S. (2007). Instant Runoff Voting. In \emph{Ten Big Ideas for a New America}. New America Foundation.
 
 \leavevmode\hypertarget{ref-hill_exhausted_2018}{}%
 Hill, S., \& Hernandez, P. (2018, July). Exhausted Ballots in the 2018 San Francisco Mayoral Election. \emph{FairVote California}.
+
+\leavevmode\hypertarget{ref-ismay_thesisdown_nodate}{}%
+Ismay, C., \& Solomon, N. (n.d.). Thesisdown.
 
 \leavevmode\hypertarget{ref-jerdonek_ranked_2006}{}%
 Jerdonek, C. (2006). \emph{Ranked Choice Voting and Voter Turnout in San Francisco's 2005 Election} (p. 10). FairVote.
@@ -1815,16 +1883,19 @@ John, S., Smith, H., \& Zack, E. (2018). The alternative vote: Do changes in sin
 Kimball, D. C., \& Anthony, J. (2016). \emph{Voter Participation with Ranked Choice Voting in the United States}.
 
 \leavevmode\hypertarget{ref-kimball_estimated_2010}{}%
-Kimball, J. (2010, May). Estimated cost of Ranked Choice Voting in Minneapolis: \$365,000. \emph{MinnPost}. https://www.minnpost.com/political-agenda/2010/05/estimated-cost-ranked-choice-voting-minneapolis-365000/.
+Kimball, J. (2010, May). Estimated cost of Ranked Choice Voting in Minneapolis: \$365,000. \emph{MinnPost}. Retrieved from \url{https://www.minnpost.com/political-agenda/2010/05/estimated-cost-ranked-choice-voting-minneapolis-365000/}
 
 \leavevmode\hypertarget{ref-kroh_taking_2006}{}%
 Kroh, M. (2006). Taking ``Don't Knows'' as Valid Responses: A Multiple Complete Random Imputation of Missing Data. \emph{Quality \& Quantity}, \emph{40}(2), 225--244. \url{http://doi.org/10.1007/s11135-005-5360-3}
 
 \leavevmode\hypertarget{ref-kukura_leno_2018}{}%
-Kukura, J. (2018, May). Leno and Kim Endorse Each Other for Mayor - May 10, 2018. \emph{SF Weekly}. http://www.sfweekly.com/topstories/leno-and-kim-endorse-each-other-for-mayor/.
+Kukura, J. (2018, May). Leno and Kim Endorse Each Other for Mayor - May 10, 2018. \emph{SF Weekly}. Retrieved from \url{http://www.sfweekly.com/topstories/leno-and-kim-endorse-each-other-for-mayor/}
 
 \leavevmode\hypertarget{ref-lee_rcv_2019}{}%
 Lee, J., \& Yancheff, M. (2019, April). Rcv: Ranked Choice Voting.
+
+\leavevmode\hypertarget{ref-levi_why_2018}{}%
+Levi, R. (2018, November). Why Is Part of Alameda Island in San Francisco? \emph{KQED}. Retrieved from \url{https://www.kqed.org/news/11702058/why-is-part-of-alameda-island-in-san-francisco}
 
 \leavevmode\hypertarget{ref-little_statistical_1987}{}%
 Little, R. J. A., \& Rubin, D. B. (1987). \emph{Statistical Analysis with Missing Data}. New York, NY: John Wiley \& Sons, Inc.
@@ -1836,7 +1907,7 @@ Little, R. J. A., \& Rubin, D. B. (2014). Introduction. In \emph{Statistical Ana
 Liu, F. C. S. (2014). Using Multiple Imputation for Vote Choice Data: A Comparison across Multiple Imputation Tools. \emph{Open Journal of Political Science}, \emph{04}(02), 39--46. \url{http://doi.org/10.4236/ojps.2014.42006}
 
 \leavevmode\hypertarget{ref-noauthor_maps_nodate}{}%
-Maps. (n.d.). \emph{San Francisco Department of Elections}. https://sfelections.sfgov.org/maps.
+Maps. (n.d.). \emph{San Francisco Department of Elections}. Retrieved from \url{https://sfelections.sfgov.org/maps}
 
 \leavevmode\hypertarget{ref-mcdaniel_ranked_2016}{}%
 McDaniel, J. (2016). Ranked Choice Voting Likely Means Lower Turnout, More Errors. \emph{Cato Unbound}, (Should We Choose Ranked Choice Voting?).
@@ -1848,19 +1919,22 @@ McDaniel, J. (2018). Does More Choice Lead to Reduced Racially Polarized Voting?
 Mcdaniel, J. A. (2016). Writing the Rules to Rank the Candidates: Examining the Impact of Instant-Runoff Voting on Racial Group Turnout in San Francisco Mayoral Elections. \emph{Journal of Urban Affairs}, \emph{38}(3), 387--408. \url{http://doi.org/10.1111/juaf.12209}
 
 \leavevmode\hypertarget{ref-meckler_gop_2000}{}%
-Meckler, L. (2000, October). GOP Group To Air Pro-Nader TV Ads. \emph{Washington Post}. https://www.washingtonpost.com/wp-srv/aponline/20001027/aponline115918\_000.htm.
+Meckler, L. (2000, October). GOP Group To Air Pro-Nader TV Ads. \emph{Washington Post}. Retrieved from \url{https://www.washingtonpost.com/wp-srv/aponline/20001027/aponline115918/_000.htm}
 
 \leavevmode\hypertarget{ref-miller_jared_2018}{}%
-Miller, K., \& Thistle, S. (2018, November). Jared Golden declared winner of first ranked-choice congressional election, but challenge looms. \emph{Portland Press-Herald}. https://www.pressherald.com/2018/11/15/final-ranked-choice-vote-count-slated-for-noon/.
+Miller, K., \& Thistle, S. (2018, November). Jared Golden declared winner of first ranked-choice congressional election, but challenge looms. \emph{Portland Press-Herald}. Retrieved from \url{https://www.pressherald.com/2018/11/15/final-ranked-choice-vote-count-slated-for-noon/}
 
 \leavevmode\hypertarget{ref-mistler_tight_2018}{}%
-Mistler, S. (2018, November). In Tight Race, Maine Republican Sues To Block State's Ranked-Choice Voting Law. \emph{NPR.org}. https://www.npr.org/2018/11/13/667435326/facing-defeat-maine-republican-sues-to-block-states-ranked-choice-voting-law.
+Mistler, S. (2018, November). In Tight Race, Maine Republican Sues To Block State's Ranked-Choice Voting Law. \emph{NPR.org}. Retrieved from \url{https://www.npr.org/2018/11/13/667435326/facing-defeat-maine-republican-sues-to-block-states-ranked-choice-voting-law}
 
 \leavevmode\hypertarget{ref-morales_better_2018}{}%
 Morales, M. (2018, March). Better Voting Systems Boost Turnout. \emph{Sightline Institute}.
 
 \leavevmode\hypertarget{ref-morales_action_2017}{}%
 Morales, M., \& Eberhard, K. (2017, July). An Action Plan for Ranked-Choice-Ready Voting Equipment. \emph{Sightline Institute}.
+
+\leavevmode\hypertarget{ref-noauthor_multinomial_nodate}{}%
+Multinomial Logistic Regression \textbar{} R Data Analysis Examples. (n.d.). \emph{UCLA Institute for Digital Research \& Education}. Retrieved from \url{https://stats.idre.ucla.edu/r/dae/multinomial-logistic-regression/}
 
 \leavevmode\hypertarget{ref-murphy_new_2004}{}%
 Murphy, D. E. (2004). New Runoff System in San Francisco Has the Rival Candidates Cooperating. \emph{The New York Times}.
@@ -1874,65 +1948,77 @@ Neely, F., \& McDaniel, J. (2015). Overvoting and the Equality of Voice under In
 \leavevmode\hypertarget{ref-nikulin_unbiased_nodate}{}%
 Nikulin, M. S. (n.d.). Unbiased estimator. \emph{Encyclopedia of Mathematics}.
 
+\leavevmode\hypertarget{ref-pebesma_sf_nodate}{}%
+Pebesma, E., Bivand, R., Racine, E., Sumner, M., Cook, I., Keitt, T., \ldots{} Pedersen, T. L. (n.d.). Sf: Simple Features for R. Retrieved from \url{r-spatial}
+
 \leavevmode\hypertarget{ref-petrangelo_does_2013}{}%
-Petrangelo, T. (2013, October). Does ranked-choice voting guarantee a majority winner? \emph{MinnPost}. https://www.minnpost.com/minnesota-blog-cabin/2013/10/does-ranked-choice-voting-guarantee-majority-winner/.
+Petrangelo, T. (2013, October). Does ranked-choice voting guarantee a majority winner? \emph{MinnPost}. Retrieved from \url{https://www.minnpost.com/minnesota-blog-cabin/2013/10/does-ranked-choice-voting-guarantee-majority-winner/}
 
 \leavevmode\hypertarget{ref-noauthor_ranked-choice_2018-1}{}%
-Ranked-Choice Voting: Ballot Image. (2018a, June). \emph{San Francisco Department of Elections}. https://sfelections.org/results/20180605/data/20180627/20180627\_ballotimage.txt.
+Ranked-Choice Voting: Ballot Image. (2018a, June). \emph{San Francisco Department of Elections}. Retrieved from \url{https://sfelections.org/results/20180605/data/20180627/20180627/_ballotimage.txt}
 
 \leavevmode\hypertarget{ref-noauthor_ranked_2019}{}%
-Ranked Choice Voting in Maine. (2019, January). \emph{Maine State Legislature}. http://legislature.maine.gov/lawlibrary/ranked-choice-voting-in-maine/9509.
+Ranked Choice Voting in Maine. (2019, January). \emph{Maine State Legislature}. Retrieved from \url{http://legislature.maine.gov/lawlibrary/ranked-choice-voting-in-maine/9509}
 
 \leavevmode\hypertarget{ref-noauthor_ranked-choice_2018}{}%
-Ranked-Choice Voting: Master Lookup. (2018b, June). \emph{San Francisco Department of Elections}. https://sfelections.org/results/20180605/data/20180627/20180627\_masterlookup.txt.
+Ranked-Choice Voting: Master Lookup. (2018b, June). \emph{San Francisco Department of Elections}. Retrieved from \url{https://sfelections.org/results/20180605/data/20180627/20180627/_masterlookup.txt}
 
 \leavevmode\hypertarget{ref-noauthor_ranked_2018}{}%
-Ranked Choice Voting Results Table. (2018, June). \emph{San Francisco Board of Elections}. https://sfelections.org/results/20180605/data/20180627/mayor/20180627\_mayor.html.
+Ranked Choice Voting Results Table. (2018, June). \emph{San Francisco Board of Elections}. Retrieved from \url{https://sfelections.org/results/20180605/data/20180627/mayor/20180627/_mayor.html}
 
 \leavevmode\hypertarget{ref-ranney_turnout_1972}{}%
 Ranney, A. (1972). Turnout and Representation in Presidential Primary Elections. \emph{The American Political Science Review}, \emph{66}(1), 21--37. \url{http://doi.org/10.2307/1959276}
 
 \leavevmode\hypertarget{ref-richie_ranked_2017}{}%
-Richie, R., \& Brown, M. (2017, December). Ranked choice voting outperforms runoffs in upholding majority rule. \emph{FairVote}. https://www.fairvote.org/ranked\_choice\_voting\_outperforms\_runoffs\_in\_upholding\_majority\_rule.
+Richie, R., \& Brown, M. (2017, December). Ranked choice voting outperforms runoffs in upholding majority rule. \emph{FairVote}. Retrieved from \url{https://www.fairvote.org/ranked/_choice/_voting/_outperforms/_runoffs/_in/_upholding/_majority/_rule}
 
 \leavevmode\hypertarget{ref-rubin_characterizing_1974}{}%
 Rubin, D. B. (1974). Characterizing the Estimation of Parameters in Incomplete-Data Problems. \emph{Journal of the American Statistical Association}, \emph{69}(346), 467--474. \url{http://doi.org/10.2307/2285680}
 
 \leavevmode\hypertarget{ref-rush_cost_2015}{}%
-Rush, J. (2015, June). Cost of runoff election affects more than just candidates. \emph{Star Local}. https://starlocalmedia.com/planostarcourier/news/cost-of-runoff-election-affects-more-than-just-candidates/article\_bac2a0f2-ffaa-524c-9b87-6704f60e4468.html.
+Rush, J. (2015, June). Cost of runoff election affects more than just candidates. \emph{Star Local}. Retrieved from \url{https://starlocalmedia.com/planostarcourier/news/cost-of-runoff-election-affects-more-than-just-candidates/article/_bac2a0f2-ffaa-524c-9b87-6704f60e4468.html}
 
 \leavevmode\hypertarget{ref-santucci_party_2017}{}%
 Santucci, J. (2017). Party Splits, Not Progressives: The Origins of Proportional Representation in American Local Government. \emph{American Politics Research}, \emph{45}(3), 494--526. \url{http://doi.org/10.1177/1532673X16674774}
+
+\leavevmode\hypertarget{ref-schroeder_target-density_2007}{}%
+Schroeder, J. P. (2007). Target-Density Weighting Interpolation and Uncertainty Evaluation for Temporal Analysis of Census Data. \emph{Geographical Analysis}, \emph{39}(3), 311--335. \url{http://doi.org/10.1111/j.1538-4632.2007.00706.x}
 
 \leavevmode\hypertarget{ref-seaman_review_2013}{}%
 Seaman, S. R., \& White, I. R. (2013). Review of inverse probability weighting for dealing with missing data. \emph{Statistical Methods in Medical Research}, \emph{22}(3), 278--295. \url{http://doi.org/10.1177/0962280210395740}
 
 \leavevmode\hypertarget{ref-noauthor_sf_nodate-1}{}%
-SF Mayor's Race: Breed First Round \%. (n.d.-a). \emph{FairVote}. https://d3n8a8pro7vhmx.cloudfront.net/fairvote/pages/10829/attachments/original/1533072759/BreedFirstChoicesbyPrecinct.png?1533072759.
+SF Mayor's Race: Breed First Round \%. (n.d.-a). \emph{FairVote}. Retrieved from \url{https://d3n8a8pro7vhmx.cloudfront.net/fairvote/pages/10829/attachments/original/1533072759/BreedFirstChoicesbyPrecinct.png?1533072759}
 
 \leavevmode\hypertarget{ref-noauthor_sf_nodate}{}%
-SF Mayor's Race: Breed \% of Vote in Final Round. (n.d.-b). \emph{FairVote}. https://d3n8a8pro7vhmx.cloudfront.net/fairvote/pages/10829/attachments/original/1533067132/BreedandLenoFinalRoundbyPrecinct.png?1533067132.
+SF Mayor's Race: Breed \% of Vote in Final Round. (n.d.-b). \emph{FairVote}. Retrieved from \url{https://d3n8a8pro7vhmx.cloudfront.net/fairvote/pages/10829/attachments/original/1533067132/BreedandLenoFinalRoundbyPrecinct.png?1533067132}
 
 \leavevmode\hypertarget{ref-noauthor_sf_nodate-3}{}%
-SF Mayor's Race: Kim First Round \%. (n.d.-c). \emph{FairVote}. https://d3n8a8pro7vhmx.cloudfront.net/fairvote/pages/10829/attachments/original/1533072757/KimFirstChoicebyPrecinct.png?1533072757.
+SF Mayor's Race: Kim First Round \%. (n.d.-c). \emph{FairVote}. Retrieved from \url{https://d3n8a8pro7vhmx.cloudfront.net/fairvote/pages/10829/attachments/original/1533072757/KimFirstChoicebyPrecinct.png?1533072757}
 
 \leavevmode\hypertarget{ref-noauthor_sf_nodate-2}{}%
-SF Mayor's Race: Leno First Round \%. (n.d.-d). \emph{FairVote}. https://d3n8a8pro7vhmx.cloudfront.net/fairvote/pages/10829/attachments/original/1533072758/LenoFirstChoicebyPrecinct.png?1533072758.
+SF Mayor's Race: Leno First Round \%. (n.d.-d). \emph{FairVote}. Retrieved from \url{https://d3n8a8pro7vhmx.cloudfront.net/fairvote/pages/10829/attachments/original/1533072758/LenoFirstChoicebyPrecinct.png?1533072758}
 
 \leavevmode\hypertarget{ref-the_associated_press_runoff_2014}{}%
-The Associated Press. (2014, July). Runoff election Tuesday will cost Alabama \$3 million. \emph{al.com}. https://www.al.com/news/2014/07/runoff\_election\_tuesday\_will\_c.html.
+The Associated Press. (2014, July). Runoff election Tuesday will cost Alabama \$3 million. \emph{al.com}. Retrieved from \url{https://www.al.com/news/2014/07/runoff/_election/_tuesday/_will/_c.html}
+
+\leavevmode\hypertarget{ref-noauthor_tidyverse_nodate}{}%
+Tidyverse. (n.d.). Retrieved from \url{https://www.tidyverse.org/}
 
 \leavevmode\hypertarget{ref-us_census_bureau_2018_2018}{}%
-US Census Bureau, A. S. D. (2018, June). 2018 Planning Database. \emph{United States Census Bureau}. https://www.census.gov/research/data/planning\_database/2018/.
+US Census Bureau, A. S. D. (2018, June). 2018 Planning Database. \emph{United States Census Bureau}. Retrieved from \url{https://www.census.gov/research/data/planning/_database/2018/}
+
+\leavevmode\hypertarget{ref-vanderloo_simputation_2017}{}%
+Vanderloo, M. (2017, January). Simputation: Simple Imputation.
 
 \leavevmode\hypertarget{ref-noauthor_where_nodate}{}%
-Where is Ranked Choice Voting Used? (n.d.). \emph{FairVote}. https://www.fairvote.org/where\_is\_ranked\_choice\_voting\_used.
+Where is Ranked Choice Voting Used? (n.d.). \emph{FairVote}. Retrieved from \url{https://www.fairvote.org/where/_is/_ranked/_choice/_voting/_used}
 
 \leavevmode\hypertarget{ref-wilson_runoff_2014}{}%
-Wilson, R. (2014, June). Runoff elections a relic of the Democratic South. \emph{Washington Post}. https://www.washingtonpost.com/blogs/govbeat/wp/2014/06/04/runoff-elections-a-relic-of-the-democratic-south/.
+Wilson, R. (2014, June). Runoff elections a relic of the Democratic South. \emph{Washington Post}. Retrieved from \url{https://www.washingtonpost.com/blogs/govbeat/wp/2014/06/04/runoff-elections-a-relic-of-the-democratic-south/}
 
 \leavevmode\hypertarget{ref-woodard_how_2018}{}%
-Woodard, C. (2018, April). How ranked-choice voting effort became a partisan flash point. \emph{Lewiston Sun Journal}. https://www.sunjournal.com/2018/04/07/stark-divide-on-ranked-choice-voting/.
+Woodard, C. (2018, April). How ranked-choice voting effort became a partisan flash point. \emph{Lewiston Sun Journal}. Retrieved from \url{https://www.sunjournal.com/2018/04/07/stark-divide-on-ranked-choice-voting/}
 
 \leavevmode\hypertarget{ref-wright_voter_1989}{}%
 Wright, S. G. (1989). Voter Turnout in Runoff Elections. \emph{The Journal of Politics}, \emph{51}(2), 385--396. \url{http://doi.org/10.2307/2131348}

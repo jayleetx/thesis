@@ -6,11 +6,11 @@ library(here)
 
 ## What is ranked choice voting?
 
-*Ranked choice voting* (RCV), also known as the *alternative vote* or *instant-runoff voting* (IRV) is an alternative voting method to the *first-past-the-post* or *plurality* election system more familiar to American voters, where the candidate with the most votes wins. Each voter, instead of choosing their highest preference among a set of candidates for an office, ranks some subset of the candidates in order of preference. This system (or a close variant) is used in Australia, Maine, and some American municipalities: San Francisco, CA; Minneapolis, MN; and Cambridge, MA; among others.
+*Ranked choice voting* (RCV), also known as the *alternative vote* or *instant-runoff voting* (IRV) is an alternative voting method to the *first-past-the-post* or *plurality* election system more familiar to American voters, where the candidate with the most votes wins. Each voter, instead of choosing their highest preference among a set of candidates for an office, ranks some subset of the candidates in order of preference. This system (or a close variant) is used in Australia, Ireland, and some American jurisdictions: the state of Maine; San Francisco, CA; Minneapolis, MN; and Cambridge, MA; among others.
 
 The single-winner RCV tabulation algorithm generally proceeds as follows^[Modified from @arrow_handbook_2002.]:
 
-1. For each voter, identify their most preferred candidate that has not yet been eliminated. Count up these preferences by candidate.
+1. Identify each voter's most preferred candidate that has not yet been eliminated. Count up these preferences by candidate.
 
 2. If one candidate has a majority (50% + 1) of the unexhausted votes, they are declared the winner and counting stops.
 
@@ -20,7 +20,7 @@ The single-winner RCV tabulation algorithm generally proceeds as follows^[Modifi
 
 5. Return to 1.
 
-Most jurisdictions that use RCV have slightly different rules for edge cases and ballot errors, but this algorithm is what distinguishes RCV from other ranked voting systems^[E.g. Borda [@noauthor_borda_nodate], Condorcet [@noauthor_condorcet_2008], or Contingent [@noauthor_electoral_2013], etc.]. A close variant of RCV is the single transferable vote (STV) method^[More accurately, RCV is the single-winner implementation of the STV algorithm.], which can be used to elect multiple candidates, e.g. for a school board, instead of just one. In the US, this is used in Cambridge, MA and Minneapolis, MN to elect multi-member offices [@douglas_cambridge_2013].
+Most jurisdictions that use RCV have slightly different rules for edge cases and ballot errors, but this algorithm is what distinguishes RCV from other ranked voting systems^[E.g. Borda [@noauthor_borda_nodate], Condorcet [@noauthor_condorcet_2008], Contingent [@noauthor_electoral_2013], etc.]. A close variant of RCV is the single transferable vote (STV) method^[More accurately, RCV is the single-winner implementation of the STV algorithm.], which can be used to elect multiple candidates, e.g. for a school board, instead of just one. In the US, this is used in Cambridge, MA and Minneapolis, MN to elect multi-member offices [@douglas_cambridge_2013].
 
 ## Frequently Used Terms
 
@@ -30,7 +30,7 @@ Below are some definitions for frequently used terms later on. These are not all
 
 - *Undervote*: when a voter does not rank candidates in all of the slots available to them. This is not a problem in counting, and is explicitly allowed in the laws of most jurisdictions. A plurality election analog would be voting in high-profile races (e.g. presidential), but not down-ticket decisions (e.g. local water board). This is different than other definitions of "undervote", which refer to a voter participating in one election on a ballot but not another one.
 
-- *Skipped vote*: when a voter ranks no candidate at slot $x$, but ranks a candidate at slot $y > x$. This is typically not a problem in counting, but different jurisdictions have different rules about whether a voter's ballot is exhausted at this point or continues on to their next ranked choice. Plurality voting has no analog to this, because each race only has one "ranking" (first!).
+- *Skipped vote*: when a voter ranks no candidate at slot $x$, but ranks a candidate at slot $y > x$. This is typically not a problem in counting, but different jurisdictions have different rules about whether a voter's ballot is exhausted at this point or continues on to their next ranked choice. Plurality voting has no analog to this, because each race only has one "ranking"^[First!].
 
 - *Duplicated vote*: when a voter ranks the same candidate for distinct slots $x$ and $y$. This is typically not a problem for counting, and the first ranking for the candidate is used. Similar to a skipped vote, plurality voting has no analog to this. When we fit models to discuss undervoting, this category will be included as well under the heading of "undervoting" because it is also a form of not ranking as many unique candidates as offered.
 
@@ -40,7 +40,7 @@ Overvotes, skipped votes, and duplicated votes are really only interpretable as 
 
 ## Claims about RCV
 
-There are plenty of arguments both for and against implementing RCV in place of plurality in different jurisdictions (see [Part 1.5](#rcv-args)), but in this study we'll focus on evidence surrounding one major argument against it - RCV is harder for voters to participate in than a plurality system. There are two major reasons cited for this:
+There are plenty of arguments for and against implementing RCV in place of plurality in different jurisdictions (see [Part 1.5](#rcv-args)), both mathematical and practical, but in this study we'll focus on evidence surrounding one major argument against it - RCV is harder for voters to participate in than a plurality system. There are two major reasons cited for this:
 
 - The physical design of an RCV ballot is usually more complicated than a plurality ballot, because there has to be a system to encode a more full preference among the candidates than just selecting one candidate
 
@@ -79,6 +79,12 @@ In the United States, there have been two major periods of RCV implementation in
 
 ### Pros
 
+#### Mathematical benefits
+
+One of the primary mathematical benefits of RCV is that it ensures a majority winner in the final round, not just a plurality winner. In jurisdictions without rules for 50% minimums, a common phenomenon is a candidate winning an election with less than 50% of the vote (a plurality, rather than a majority). The major conceptual issue with this is that more people preferred a candidate other than the one who was elected^[The "ideal" for electoral systems is the Condorcet condition: the candidate elected should beat all other candidates in one-on-one contests.]. RCV requires that a winning candidate receive at least 50% of the votes remaining^[See below for issues with this "remaining" concept.], ensuring that a majority of voters prefer the elected candidate to other candidates. This is particularly important in jurisdictions with strong third-party support and more than two viable candidates, like Maine. Former Governor Paul LePage, a Republican, won his first election in 2010 with 38.1% of the vote, compared to Independent Eliot Cutler's 36.7%^[A margin of about 7,500 votes. Democrat Libby Mitchell received 19%.]. This was one of the reasons cited for Maine's recent move to RCV for statewide elections.
+
+RCV is also less vulnerable to strategic voting than plurality. Strategic voting^[Also known as "tactical" or "insincere" voting.] is a scenario where a voter does not reflect their true preferences on their cast ballot in order to affect the outcome of the election. For example, a third party supporter may cast their vote for one of the two major party candidates because otherwise they feel like it won't count. While not impossible, under RCV it is NP-complete^[A computer cannot find the solution "quickly", particularly as the number of voters increases. This makes such an event difficult to voluntarily induce.] for a given voter to determine if voting strategically (misrepresenting their true preferences) can help elect a more-preferred candidate [@bartholdi_single_1991]. This is true even if you know the full preferences of every other voter, which is often a practical impossibility on its own.
+
 #### No secondary elections
 
 There are two major types of "secondary elections" used in American voting: primary elections and runoff elections. Primaries are used by political parties to select their nominee for a general election, so the voters of any one party aren't split between different candidates. Runoffs are most often used when no candidate in the general election surpasses 50% of the vote total. Typically the top two candidates from the general election^[Or primary election - seven Southern states require primary winners to obtain 50% of the vote to get on the general election ballot, and some other states have a requirement of 40% [@wilson_runoff_2014].] advance to a later runoff. These secondary elections face two main challenges:
@@ -89,21 +95,13 @@ There are two major types of "secondary elections" used in American voting: prim
 
 Since RCV eliminates the need for primary and runoff elections while still ensuring majority rule (which is the main reason for these elections), it should avoid the problems of lower turnout and higher costs associated with secondary elections^[Or, at least part of these problems.]. Summed up, RCV decreases costs and and increases turnout by eliminating these low-turnout elections [@morales_better_2018].
 
-#### Ensures majority rule
-
-In jurisdictions without rules for 50% minimums, a common phenomenon is a candidate winning an election with less than 50% of the vote (a plurality, rather than a majority). The major conceptual issue with this is that more people preferred a candidate other than the one who was elected^[The "ideal" for electoral systems is the Condorcet condition: the candidate elected should beat all other candidates in one-on-one contests.]. RCV requires that a winning candidate receive at least 50% of the votes remaining^[See below for issues with this "remaining" concept.], ensuring that a majority of voters prefer the elected candidate to other candidates.
-
-This is particularly important in jurisdictions with strong third-party support and more than two viable candidates, like Maine. Former Governor Paul LePage, a Republican, won his first election in 2010 with 38.1% of the vote, compared to Independent Eliot Cutler's 36.7%^[A margin of about 7,500 votes. Democrat Libby Mitchell received 19%.]. This was one of the reasons cited for Maine's recent move to RCV for statewide elections.
-
 #### Reduces strategic voting - spoiler candidates and third parties
-
-Strategic voting^[Also known as "tactical" or "insincere" voting.] is a scenario where a voter does not reflect their true preferences on their cast ballot in order to affect the outcome of the election. For example, a third party supporter may cast their vote for one of the two major party candidates because otherwise they feel like it won't count.
 
 The "spoiler effect" is when a third party candidate draws votes away from the ideologically closest major party candidate, thus contributing to the election of the other major party candidate. The most famous large-scale accusation of this was in the 2000 US presidential election. Green Party candidate Ralph Nader drew about 3% of the national vote, more than the margin of victory for George W. Bush over Al Gore^[Admittedly, the margins are less clear-cut than this at the state level, where the margins actually matter for the Electoral College.]. In the especially consequential state of Florida, Nader took 1.6% of the vote, almost 200 times greater than the margin between the two major party candidates of less than .01 percentage points^[Not to point fingers at Nader alone in this case - while he was the most popular third party candidate by far, all 8 official third-party candidates received more votes than the major-candidate margin of only 537 votes.] [@noauthor_2000_2001]. Many believed that Nader, generally seen as more liberal than the Democrat Gore, drew votes from the Democratic base that would have helped Gore win the election otherwise. While research into third-party voters casts some doubt on this theory's applicability in 2000^[This doubt, summarized - while Nader's Florida voters potentially would have broken enough for Gore to put him over the top, this was more a factor of the unusually close margin between the two major candidates than anything that Nader aided in particular.], public opinion still rests on the idea that Nader cost Gore the presidency^[One of the sections of Nader's Wikipedia page is entitled "Spoiler controversy" in regards to this election.] [@herron_did_2007]. In fact, a pro-Republican PAC aired campaign ads promoting Nader in Democratic states in an attempt to pull votes from Gore [@meckler_gop_2000].
 
 One of the reasons for major party voters to support RCV is that it avoids this spoiler issue. Under a plurality system, voters are discouraged from voting for third-party candidates because it could help elect their least-preferred of the two major candidates - "the greater of two evils", so to speak. Under RCV, however, voters can be heard throughout multiple rounds across separate candidates. Third-party voters can thus vote for their most preferred candidate, then still have their vote count for a preferred major-party candidate if their first option is eliminated.
 
-Conversely, one of the reasons for third-party voters to support RCV is that it helps third party candidates get elected. Voters can ignore this aforementioned facet of strategic voting^[Or any strategic voting - while not impossible, it's infeasible to vote strategically under RCV [@bartholdi_single_1991].] and select their truly preferred candidate. Third-party supporters who were worried about the spoiler effect, then, can vote for their true preference of a third party and not inadvertently help a less-preferred major candidate get elected. As people abandon this strategy, third parties will receive more votes from people no longer worried about the spoiler effect, and this could get third party candidates elected.
+Conversely, one of the reasons for third-party voters to support RCV is that it helps third party candidates get elected. Voters can ignore this aforementioned facet of strategic voting and select their truly preferred candidate. Third-party supporters who were worried about the spoiler effect, then, can vote for their true preference of a third party and not inadvertently help a less-preferred major candidate get elected. As people abandon this strategy, third parties will receive more votes from people no longer worried about the spoiler effect, and this could get third party candidates elected.
 
 #### Disincentivizes negative campaigning
 
@@ -131,11 +129,27 @@ Another argument is a little less intuitive - "[IRV] boosts turnout via eliminat
 
 ### Cons
 
+#### Mathematical failings
+
+@arrow_social_1963 proved a fundamental result about voting theory. Any voting system where voters rank candidates, including RCV, cannot satisfy all of the following conditions^[Assuming at least 2 voters and at least 3 candidates.]:
+
+1. *Unrestricted scope*: a voter must be allowed to individually rank any ordering of candidates that they choose.
+
+2. *Monotonicity*: if a voter changes their vote to rank candidate A higher on their ballot, candidate A cannot perform worse in the election^[This condition is important in discouraging strategic voting.].
+
+3. *Independence of irrelevant alternatives* (IIA): if voters change their orderings but all maintain their respective preference between candidate A and candidate B, then A and B must stay in the same relative position in the final outcome. That is, the final outcome of A and B only depends on each voter's preference between A and B, not any of the other candidates.
+
+4. *Non-imposition*: every possible ordering of candidates is a potential election result^[Conditions 2 and 4 were later combined into the condition of *Pareto efficiency*: if every voter prefers candidate A to candidate B, the final outcome must also prefer A to B.].
+
+5. *Non-dictatorship*: there is no single voter whose preferences unilaterally dictate the election results. A dictator would be a voter such that if the dictator preferred A to B, the election would prefer A to B regardless of all other voters' choices.
+
+@lijphart_choosing_1984 shows that there are also cases when RCV does not produce a Condorcet winner. One ideal for a voting system is that it satisfies the *Condorcet condition*: if there is a candidate that beats every other candidate in a one-on-one contest^[This does not always happen. Sometimes a cycle can occur: rock beats scissors, scissors beats paper, paper beats rock.], that candidate should be elected (they are the Condorcet winner). Additionally, RCV fails Arrow's monotonicity condition: there are cases^[Theoretical, if not necessarily likely in a real election. As mentioned earlier, it is NP-complete to determine how to vote strategically in a given RCV election.] where an increased ranking for a candidate may hurt them overall.
+
 #### What is a majority, anyway?
 
 Under RCV, the problem of ballot elimination can result in "majorities" that actually aren't as such. Since it's not always possible for voters to rank every candidate^[This may be disallowed, as SF currently only allows 3 rankings (due to technical limitations), or it may just be infeasible - Cambridge often has 20+ candidates on the ballot.], there will almost certainly be some number of voters who did not list a ranking for any of the candidates still remaining in the final round of the election. Thus the majority that the winner has collected is only a majority of the unexhausted ballots, which may make it less than 50% of the total counted ballots [@petrangelo_does_2013]. This does introduce a less expansive form of the spoiler problem - while voters aren't "punished" for putting a less electable candidate for their first choice, they are punished for filling all three available slots with minor candidates. In a 2015 study of four RCV elections, Burnett and Kogan found that all four had enough eliminated ballots to only give the winner an overall plurality, not the majority sought after. This is a problem that requires a substantial fix, as "even individuals who mark three distinct choices often face the prospect of exhaustion, so education alone will not fix the problem" [@burnett_ballot_2015].
 
-A research question that might address this issue of majorities is whether the pluralities generated by RCV are generally "bigger" (closer to the ideal of a true majority) in some way than under plurality, and how this is affected by technical rules like the number of candidates that voters are allowed to rank. Some research^[From the pro-RCV advocacy group FairVote, admittedly.] shows that RCV does perform better than a two-round runoff in this case - as a percentage of the voters in the first round, RCV consistently has more voters counted in the final round compared to top-two runoffs [@richie_ranked_2017].
+A research question that might address this issue of majorities is whether the pluralities generated by RCV are generally "bigger" (closer to the ideal of a true majority) in some way than under plurality, and how this is affected by technical rules like the number of candidates that voters are allowed to rank. Some research shows that RCV does perform better than a two-round runoff in this case - as a percentage of the voters in the first round, RCV consistently has more voters counted in the final round compared to top-two runoffs [@richie_ranked_2017].
 
 #### Legal challenges
 

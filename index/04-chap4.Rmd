@@ -4,23 +4,23 @@
 
 Many statistical methods require complete data sets, that is data where every possible observation has a proper value, to work correctly (univariate means, regression, etc.). <!-- find better examples and a source for this --> In many fields of research, however, data collection often results in missing data. Respondents skipping questions (nonresponse), respondents not completing all phases of a multi-stage survey (attrition), government agencies not reporting certain data (redaction), and errors in data collection are all examples of reasons that data can be missing.
 
-Suppose we have a matrix $X$, with some missing data, which has $m$ rows and $n$ columns. Let $Y = (y_{ij})$ be the complete version of dataset $X$, that is every missing data point in $X$ is now observed. Let $A$ be an $m \times n$ matrix, where
+Suppose we have a matrix $A = (a_{ij})$ with some missing data, which has $m$ rows and $n$ columns. Let $\tilde{A}$ be the complete version of dataset $A$, where every missing data point in $A$ is now observed. Let $M$ be an $m \times n$ matrix such that
 
 \[
-A = (a_{ij}) \text{, where } a_{ij} =
+M = (m_{ij}) \text{, where } m_{ij} =
 \begin{cases}
-1, \text{ when }x_{ij}\text{ is missing}\\
-0, \text{ when }x_{ij}\text{ is not missing}
+1, \text{ when }a_{ij}\text{ is missing}\\
+0, \text{ when }a_{ij}\text{ is not missing}
 \end{cases}
 \]
 
-Let $Y_{obs}$ be the observed data in $Y$, that is the entries in $Y$ corresponding to the entries in $A$ that equal 0, and $Y_{mis}$ be the missing data in $Y$, that is the entries in $Y$ corresponding to the entries in $A$ that equal 1. Let $\phi$ denote some unknown parameters.
+Let $\tilde{A}_{obs}$ be the observed data in $\tilde{A}$, that is the entries in $\tilde{A}$ corresponding to the entries in $M$ that equal 0, and $\tilde{A}_{mis}$ be the unobserved data in $\tilde{A}$, that is the entries in $\tilde{A}$ corresponding to the entries in $M$ that equal 1. Let $\phi$ denote some unknown parameters.
 
 The literature on missing data has identified three distinct subtypes of missing data [@little_introduction_2014].
 
-- Missing completely at random (MCAR). The distribution of missing values does not depend on any data in $Y$, observed or missing. \[f(A|Y,\phi) = f(A|\phi) \;\forall\; Y,\phi\] An example of this is a survey where the respondent mislabeled a question answer by accident.
+- Missing completely at random (MCAR). The distribution of missing values does not depend on any data in $Y$, observed or missing. \[f(M|\tilde{A},\phi) = f(M|\phi) \;\forall\; Y,\phi\] An example of this is a survey where the respondent mislabeled a question answer by accident.
 
-- Missing at random (MAR). The distribution of missing values depends on the observed data, but not any missing data. \[f(A|Y,\phi) = f(A|Y_{obs},\phi) \;\forall\; Y_{mis},\phi\] An example of this is an election poll where members of one party are less likely to report their true vote choice than members of another party. The distribution of missing vote choice depends on an observed variable, party identification.
+- Missing at random (MAR). The distribution of missing values depends on the observed data, but not any missing data. \[f(M|\tilde{A},\phi) = f(M|Y_{obs},\phi) \;\forall\; \tilde{A}_{mis},\phi\] An example of this is an election poll where members of one party are less likely to report their true vote choice than members of another party. The distribution of missing vote choice depends on an observed variable, party identification.
 
 - Non-ignorable (NI), or missing not at random (MNAR). The distribution of missing values depends on the missing values themselves. An example of this is high-income respondents leaving the income field blank in a survey to obscure their true earnings.
 
@@ -133,6 +133,8 @@ In a FairVote report, @hill_exhausted_2018 find a similar result in the 2018 San
 [Earlier](#missing-data) we made the implicit assumption that every "missing" data point (unobserved value) has some true value. In the case of ranked choice voting, this is not necessarily true. It is a fully rational choice for a voter to only list one candidate when offered three options, if they truly only have one preference. While this would seem to make this study just an exercise in missing data methods, this is no more the case here than in other studies of imputing vote choice.
 
 @kroh_taking_2006 has a good discussion of methods for working with imputations when "Don't know" is a valid response, or there are valid reasons for the inapplicability of a survey question. While Kroh's study does not apply to our particular research question and data, it provides a nuanced take on the assumptions inherent in missing data imputation.
+
+Given these issues, we believe that our data is MAR and imputation will be a good method to use. Part 1 of the thesis showed that undervoting is dependent on the demographic qualities we're considering, so it's not MCAR. While it's quite difficult to tell if the data is MNAR^[Since the missing data itself is what affects missing-ness, we have no way of knowing what this mechanism is caused by from looking at the observed data alone.], we believe that people's hypothetical 2nd and 3rd preferences themselves are not what is causing these vote choices to be missing (with the exception of truly not having such a preference).
 
 ### Monotonicity
 

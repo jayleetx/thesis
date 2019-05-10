@@ -35,13 +35,14 @@ acknowledgements: |
    \bigskip
    \noindent To Mia, Monika, Jade, and Scottie's Gang, for each giving me a semblance of a social life and getting me off campus; \par
    \bigskip
-   \noindent To my family, for not getting *too* mad at me for not calling as much as I should; \par
+   \noindent To my family, for not getting too mad at me for not calling as much as I should; \par
    \bigskip
    \noindent Thank you.
 abbrevs: |
   \noindent ACS: American Community Survey \par
   \noindent BIC: Bayesian Information Criterion \par
   \noindent GIS: Geographic information system \par
+  \noindent IIA: Independence of irrelevant alternatives \par
   \noindent IPW: Inverse probability weighting \par
   \noindent IRV: Instant-runoff voting \par
   \noindent MAR: Missing at random \par
@@ -49,6 +50,7 @@ abbrevs: |
   \noindent MI: Multiple imputation \par
   \noindent MLE: Maximum likehood estimation \par
   \noindent MNAR / NI: Missing not at random / Non-ignorable \par
+  \noindent NP: Non-deterministic polynomial time \par
   \noindent PAC: Political action committee \par
   \noindent Q-Q: Quantile-quantile \par
   \noindent RCV: Ranked choice voting \par
@@ -114,7 +116,7 @@ on chapters.
 
 This thesis investigates issues in ranked choice voting (RCV), using a 2018 mayoral election in San Francisco as our observation. It is split into two major parts, each attempting to answer a separate research question. The motivation for these research questions comes out of previous work on RCV with Matthew Yancheff and Mia Leung, advised by Professors Andrew Bray (statistics) and Paul Gronke (political science) at Reed College. Multiple times while presenting this research into RCV, we were asked what the effect would be "if everybody voted". To these now-anonymous^[Two years ago, I did not think to write down their names for this purpose.] questioners, I am grateful.
 
-This thesis was written using the [`thesisdown`](https://github.com/ismayc/thesisdown) R Markdown template for Reed College [@ismay_thesisdown_nodate]. The computation was performed in the R programming language, with significant use of the following packages:
+This thesis was written using the [`thesisdown`](https://github.com/ismayc/thesisdown) R Markdown template for Reed College [@ismay_thesisdown_nodate]. The computation was performed in the R programming language [@r_core_team_r_2018], with significant use of the following packages:
 
 - [`rcv`](https://github.com/ds-elections/rcv), for tabulating the results of our ranked choice elections [@lee_rcv_2019].
 
@@ -135,7 +137,7 @@ Chapters 1-3 investigate the demographic trends associated with the phenomena of
 
 ## Part 2 {.unnumbered}
 
-Chapters 4-6 use missing data imputation methods to simulate a situation where there were no ballot errors, particularly undervoting and undervoting.
+Chapters 4-6 use missing data imputation methods to simulate a situation where there were no ballot errors, particularly overvoting and undervoting.
 [Chapter 4](#missing-litreview) covers the theory around missing data and a comparison of multiple possible methods to deal with this phenomenon.
 [Chapter 5](#missing-methods) explains the imputation methods used in this study, as well as problems encountered along the way which had to be dealt with.
 [Chapter 6](#missing-results) presents the conclusions from the analysis.

@@ -43,7 +43,7 @@ In dealing with our missing data, we chose here to use multiple imputation for a
 
 As expressed in the [previous chapter](#missing-litreview), single imputations underestimate variance because they place an unwarranted certainty upon the newly imputed data, which is then fed into a deterministic process to calculate an estimator. This is overcome through the use of multiple imputation.
 
-There are a set of methods to calculate the mean and variance of estimators from multiple imputation, known as "Rubin's Rules" [@heymans_applied_2009]. For a set of estimates $\{\hat{\theta}_i\}$ of a parameter $\theta$ and $m$ the number of imputations, the pooled mean can be calculated
+There are a set of methods to calculate the mean and variance of estimators from multiple imputation, known as "Rubin's Rules" [@rubin_multiple_1987]. For a set of estimates $\{\hat{\theta}_i\}$ of a parameter $\theta$ and $m$ the number of imputations, the pooled mean can be calculated
 \[
 \bar{\theta} = \frac{1}{m} \sum_{i=1}^m \hat{\theta}_i,
 \]
@@ -55,13 +55,13 @@ V_W = \frac{1}{m} \sum_{i=1}^m SE_i^2,
 \]
 the average squared standard error within an imputation. There is also variance *between* each dataset, which comes from uncertainty about what the true values are that we are attempting to impute. This is expressed as
 \[
-V_B = \sqrt{\frac{\sum_{i=1}^m (\theta_i - \bar{\theta})^2}{m-1}},
+V_B = \frac{\sum_{i=1}^m (\theta_i - \bar{\theta})^2}{m-1},
 \]
 that is the sample variance of the estimators. Then, the *total* variance of our estimate is 
 \[
-V_T = V_W + V_B + \frac{V_B}{m},
+V_T = V_W + V_B\left(1 + \frac{1}{m}\right),
 \]
-a combination of these two facets of variance. This is the way in which multiple imputation adjusts for the decreased variance that comes with single imputation.
+a combination of these two facets of variance^[The $\left(1 + \frac{1}{m}\right)$ term is a bias correction for the estimate of variance.]. This is the way in which multiple imputation adjusts for the decreased variance that comes with single imputation.
 
 While our RCV algorithm does not produce typical sample parameter estimates, these rules are still useful for obtaining an accurate sense of variability in our quantitative estimates.
 

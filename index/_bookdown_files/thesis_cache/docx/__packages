@@ -1,0 +1,15 @@
+base
+devtools
+usethis
+dplyr
+ggplot2
+bookdown
+knitr
+thesisdown
+here
+purrr
+sf
+patchwork
+broom
+rcv
+simputation

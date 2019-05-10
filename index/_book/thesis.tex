@@ -138,7 +138,7 @@ To Heather, for consistently keeping me on track to actually graduate and being 
 \par
  \bigskip
 
-\noindent To my family, for not getting \emph{too} mad at me for not calling as much as I should;
+\noindent To my family, for not getting too mad at me for not calling as much as I should;
 
 \par
  \bigskip
@@ -167,7 +167,7 @@ To Heather, for consistently keeping me on track to actually graduate and being 
 \par
  \bigskip
 
-\noindent To my family, for not getting \emph{too} mad at me for not calling as much as I should;
+\noindent To my family, for not getting too mad at me for not calling as much as I should;
 
 \par
  \bigskip
@@ -185,6 +185,10 @@ To Heather, for consistently keeping me on track to actually graduate and being 
 \par
 
 \noindent GIS: Geographic information system
+
+\par
+
+\noindent IIA: Independence of irrelevant alternatives
 
 \par
 
@@ -213,6 +217,10 @@ To Heather, for consistently keeping me on track to actually graduate and being 
 \par
 
 \noindent MNAR / NI: Missing not at random / Non-ignorable
+
+\par
+
+\noindent NP: Non-deterministic polynomial time
 
 \par
 
@@ -266,6 +274,10 @@ To Heather, for consistently keeping me on track to actually graduate and being 
 
 \par
 
+\noindent IIA: Independence of irrelevant alternatives
+
+\par
+
 \noindent IPW: Inverse probability weighting
 
 \par
@@ -291,6 +303,10 @@ To Heather, for consistently keeping me on track to actually graduate and being 
 \par
 
 \noindent MNAR / NI: Missing not at random / Non-ignorable
+
+\par
+
+\noindent NP: Non-deterministic polynomial time
 
 \par
 
@@ -376,7 +392,7 @@ We further investigate the impact of overvotes and undervotes on an RCV election
     \par
      \bigskip
     
-    \noindent To my family, for not getting \emph{too} mad at me for not calling as much as I should;
+    \noindent To my family, for not getting too mad at me for not calling as much as I should;
     
     \par
      \bigskip
@@ -393,6 +409,10 @@ We further investigate the impact of overvotes and undervotes on an RCV election
     \par
     
     \noindent GIS: Geographic information system
+    
+    \par
+    
+    \noindent IIA: Independence of irrelevant alternatives
     
     \par
     
@@ -421,6 +441,10 @@ We further investigate the impact of overvotes and undervotes on an RCV election
     \par
     
     \noindent MNAR / NI: Missing not at random / Non-ignorable
+    
+    \par
+    
+    \noindent NP: Non-deterministic polynomial time
     
     \par
     
@@ -484,7 +508,7 @@ We further investigate the impact of overvotes and undervotes on an RCV election
 
 This thesis investigates issues in ranked choice voting (RCV), using a 2018 mayoral election in San Francisco as our observation. It is split into two major parts, each attempting to answer a separate research question. The motivation for these research questions comes out of previous work on RCV with Matthew Yancheff and Mia Leung, advised by Professors Andrew Bray (statistics) and Paul Gronke (political science) at Reed College. Multiple times while presenting this research into RCV, we were asked what the effect would be ``if everybody voted''. To these now-anonymous\footnote{Two years ago, I did not think to write down their names for this purpose.} questioners, I am grateful.
 
-This thesis was written using the \href{https://github.com/ismayc/thesisdown}{\texttt{thesisdown}} R Markdown template for Reed College (Ismay \& Solomon, n.d.). The computation was performed in the R programming language, with significant use of the following packages:
+This thesis was written using the \href{https://github.com/ismayc/thesisdown}{\texttt{thesisdown}} R Markdown template for Reed College (Ismay \& Solomon, n.d.). The computation was performed in the R programming language (R Core Team, 2018), with significant use of the following packages:
 \begin{itemize}
 \item
   \href{https://github.com/ds-elections/rcv}{\texttt{rcv}}, for tabulating the results of our ranked choice elections (Lee \& Yancheff, 2019).
@@ -510,7 +534,7 @@ Chapters 1-3 investigate the demographic trends associated with the phenomena of
 \section*{Part 2}\label{part-2}}
 \addcontentsline{toc}{section}{Part 2}
 
-Chapters 4-6 use missing data imputation methods to simulate a situation where there were no ballot errors, particularly undervoting and undervoting.
+Chapters 4-6 use missing data imputation methods to simulate a situation where there were no ballot errors, particularly overvoting and undervoting.
 \protect\hyperlink{missing-litreview}{Chapter 4} covers the theory around missing data and a comparison of multiple possible methods to deal with this phenomenon.
 \protect\hyperlink{missing-methods}{Chapter 5} explains the imputation methods used in this study, as well as problems encountered along the way which had to be dealt with.
 \protect\hyperlink{missing-results}{Chapter 6} presents the conclusions from the analysis.
@@ -521,13 +545,13 @@ Chapters 4-6 use missing data imputation methods to simulate a situation where t
 \hypertarget{what-is-ranked-choice-voting}{%
 \section{What is ranked choice voting?}\label{what-is-ranked-choice-voting}}
 
-\emph{Ranked choice voting} (RCV), also known as the \emph{alternative vote} or \emph{instant-runoff voting} (IRV) is an alternative voting method to the \emph{first-past-the-post} or \emph{plurality} election system more familiar to American voters, where the candidate with the most votes wins. Each voter, instead of choosing their highest preference among a set of candidates for an office, ranks some subset of the candidates in order of preference. This system (or a close variant) is used in Australia, Maine, and some American municipalities: San Francisco, CA; Minneapolis, MN; and Cambridge, MA; among others.
+\emph{Ranked choice voting} (RCV), also known as the \emph{alternative vote} or \emph{instant-runoff voting} (IRV) is an alternative voting method to the \emph{first-past-the-post} or \emph{plurality} election system more familiar to American voters, where the candidate with the most votes wins. Each voter, instead of choosing their highest preference among a set of candidates for an office, ranks some subset of the candidates in order of preference. This system (or a close variant) is used in Australia, Ireland, and some American jurisdictions: the state of Maine; San Francisco, CA; Minneapolis, MN; and Cambridge, MA; among others.
 
 The single-winner RCV tabulation algorithm generally proceeds as follows\footnote{Modified from Arrow, Sen, \& Suzumura (2002).}:
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
 \item
-  For each voter, identify their most preferred candidate that has not yet been eliminated. Count up these preferences by candidate.
+  Identify each voter's most preferred candidate that has not yet been eliminated. Count up these preferences by candidate.
 \item
   If one candidate has a majority (50\% + 1) of the unexhausted votes, they are declared the winner and counting stops.
 \item
@@ -537,7 +561,7 @@ The single-winner RCV tabulation algorithm generally proceeds as follows\footnot
 \item
   Return to 1.
 \end{enumerate}
-Most jurisdictions that use RCV have slightly different rules for edge cases and ballot errors, but this algorithm is what distinguishes RCV from other ranked voting systems\footnote{E.g. Borda (``Borda Count,'' n.d.), Condorcet (``Condorcet Method,'' 2008), or Contingent (``Electoral Systems,'' 2013), etc.}. A close variant of RCV is the single transferable vote (STV) method\footnote{More accurately, RCV is the single-winner implementation of the STV algorithm.}, which can be used to elect multiple candidates, e.g.~for a school board, instead of just one. In the US, this is used in Cambridge, MA and Minneapolis, MN to elect multi-member offices (Douglas, 2013).
+Most jurisdictions that use RCV have slightly different rules for edge cases and ballot errors, but this algorithm is what distinguishes RCV from other ranked voting systems\footnote{E.g. Borda (``Borda Count,'' n.d.), Condorcet (``Condorcet Method,'' 2008), Contingent (``Electoral Systems,'' 2013), etc.}. A close variant of RCV is the single transferable vote (STV) method\footnote{More accurately, RCV is the single-winner implementation of the STV algorithm.}, which can be used to elect multiple candidates, e.g.~for a school board, instead of just one. In the US, this is used in Cambridge, MA and Minneapolis, MN to elect multi-member offices (Douglas, 2013).
 
 \hypertarget{frequently-used-terms}{%
 \section{Frequently Used Terms}\label{frequently-used-terms}}
@@ -549,7 +573,7 @@ Below are some definitions for frequently used terms later on. These are not all
 \item
   \emph{Undervote}: when a voter does not rank candidates in all of the slots available to them. This is not a problem in counting, and is explicitly allowed in the laws of most jurisdictions. A plurality election analog would be voting in high-profile races (e.g.~presidential), but not down-ticket decisions (e.g.~local water board). This is different than other definitions of ``undervote'', which refer to a voter participating in one election on a ballot but not another one.
 \item
-  \emph{Skipped vote}: when a voter ranks no candidate at slot \(x\), but ranks a candidate at slot \(y > x\). This is typically not a problem in counting, but different jurisdictions have different rules about whether a voter's ballot is exhausted at this point or continues on to their next ranked choice. Plurality voting has no analog to this, because each race only has one ``ranking'' (first!).
+  \emph{Skipped vote}: when a voter ranks no candidate at slot \(x\), but ranks a candidate at slot \(y > x\). This is typically not a problem in counting, but different jurisdictions have different rules about whether a voter's ballot is exhausted at this point or continues on to their next ranked choice. Plurality voting has no analog to this, because each race only has one ``ranking''\footnote{First!}.
 \item
   \emph{Duplicated vote}: when a voter ranks the same candidate for distinct slots \(x\) and \(y\). This is typically not a problem for counting, and the first ranking for the candidate is used. Similar to a skipped vote, plurality voting has no analog to this. When we fit models to discuss undervoting, this category will be included as well under the heading of ``undervoting'' because it is also a form of not ranking as many unique candidates as offered.
 \item
@@ -560,7 +584,7 @@ Overvotes, skipped votes, and duplicated votes are really only interpretable as 
 \hypertarget{claims-about-rcv}{%
 \section{Claims about RCV}\label{claims-about-rcv}}
 
-There are plenty of arguments both for and against implementing RCV in place of plurality in different jurisdictions (see \protect\hyperlink{rcv-args}{Part 1.5}), but in this study we'll focus on evidence surrounding one major argument against it - RCV is harder for voters to participate in than a plurality system. There are two major reasons cited for this:
+There are plenty of arguments for and against implementing RCV in place of plurality in different jurisdictions (see \protect\hyperlink{rcv-args}{Part 1.5}), both mathematical and practical, but in this study we'll focus on evidence surrounding one major argument against it - RCV is harder for voters to participate in than a plurality system. There are two major reasons cited for this:
 \begin{itemize}
 \item
   The physical design of an RCV ballot is usually more complicated than a plurality ballot, because there has to be a system to encode a more full preference among the candidates than just selecting one candidate
@@ -602,6 +626,13 @@ In the United States, there have been two major periods of RCV implementation in
 \hypertarget{pros}{%
 \subsection{Pros}\label{pros}}
 
+\hypertarget{mathematical-benefits}{%
+\subsubsection{Mathematical benefits}\label{mathematical-benefits}}
+
+One of the primary mathematical benefits of RCV is that it ensures a majority winner in the final round, not just a plurality winner. In jurisdictions without rules for 50\% minimums, a common phenomenon is a candidate winning an election with less than 50\% of the vote (a plurality, rather than a majority). The major conceptual issue with this is that more people preferred a candidate other than the one who was elected\footnote{The ``ideal'' for electoral systems is the Condorcet condition: the candidate elected should beat all other candidates in one-on-one contests.}. RCV requires that a winning candidate receive at least 50\% of the votes remaining\footnote{See below for issues with this ``remaining'' concept.}, ensuring that a majority of voters prefer the elected candidate to other candidates. This is particularly important in jurisdictions with strong third-party support and more than two viable candidates, like Maine. Former Governor Paul LePage, a Republican, won his first election in 2010 with 38.1\% of the vote, compared to Independent Eliot Cutler's 36.7\%\footnote{A margin of about 7,500 votes. Democrat Libby Mitchell received 19\%.}. This was one of the reasons cited for Maine's recent move to RCV for statewide elections.
+
+RCV is also less vulnerable to strategic voting than plurality. Strategic voting\footnote{Also known as ``tactical'' or ``insincere'' voting.} is a scenario where a voter does not reflect their true preferences on their cast ballot in order to affect the outcome of the election. For example, a third party supporter may cast their vote for one of the two major party candidates because otherwise they feel like it won't count. While not impossible, under RCV it is NP-complete\footnote{A computer cannot find the solution ``quickly'', particularly as the number of voters increases. This makes such an event difficult to voluntarily induce.} for a given voter to determine if voting strategically (misrepresenting their true preferences) can help elect a more-preferred candidate (Bartholdi \& Orlin, 1991). This is true even if you know the full preferences of every other voter, which is often a practical impossibility on its own.
+
 \hypertarget{no-secondary-elections}{%
 \subsubsection{No secondary elections}\label{no-secondary-elections}}
 
@@ -614,23 +645,14 @@ There are two major types of ``secondary elections'' used in American voting: pr
 \end{itemize}
 Since RCV eliminates the need for primary and runoff elections while still ensuring majority rule (which is the main reason for these elections), it should avoid the problems of lower turnout and higher costs associated with secondary elections\footnote{Or, at least part of these problems.}. Summed up, RCV decreases costs and and increases turnout by eliminating these low-turnout elections (Morales, 2018).
 
-\hypertarget{ensures-majority-rule}{%
-\subsubsection{Ensures majority rule}\label{ensures-majority-rule}}
-
-In jurisdictions without rules for 50\% minimums, a common phenomenon is a candidate winning an election with less than 50\% of the vote (a plurality, rather than a majority). The major conceptual issue with this is that more people preferred a candidate other than the one who was elected\footnote{The ``ideal'' for electoral systems is the Condorcet condition: the candidate elected should beat all other candidates in one-on-one contests.}. RCV requires that a winning candidate receive at least 50\% of the votes remaining\footnote{See below for issues with this ``remaining'' concept.}, ensuring that a majority of voters prefer the elected candidate to other candidates.
-
-This is particularly important in jurisdictions with strong third-party support and more than two viable candidates, like Maine. Former Governor Paul LePage, a Republican, won his first election in 2010 with 38.1\% of the vote, compared to Independent Eliot Cutler's 36.7\%\footnote{A margin of about 7,500 votes. Democrat Libby Mitchell received 19\%.}. This was one of the reasons cited for Maine's recent move to RCV for statewide elections.
-
 \hypertarget{reduces-strategic-voting---spoiler-candidates-and-third-parties}{%
 \subsubsection{Reduces strategic voting - spoiler candidates and third parties}\label{reduces-strategic-voting---spoiler-candidates-and-third-parties}}
-
-Strategic voting\footnote{Also known as ``tactical'' or ``insincere'' voting.} is a scenario where a voter does not reflect their true preferences on their cast ballot in order to affect the outcome of the election. For example, a third party supporter may cast their vote for one of the two major party candidates because otherwise they feel like it won't count.
 
 The ``spoiler effect'' is when a third party candidate draws votes away from the ideologically closest major party candidate, thus contributing to the election of the other major party candidate. The most famous large-scale accusation of this was in the 2000 US presidential election. Green Party candidate Ralph Nader drew about 3\% of the national vote, more than the margin of victory for George W. Bush over Al Gore\footnote{Admittedly, the margins are less clear-cut than this at the state level, where the margins actually matter for the Electoral College.}. In the especially consequential state of Florida, Nader took 1.6\% of the vote, almost 200 times greater than the margin between the two major party candidates of less than .01 percentage points\footnote{Not to point fingers at Nader alone in this case - while he was the most popular third party candidate by far, all 8 official third-party candidates received more votes than the major-candidate margin of only 537 votes.} (``2000 Presidential General Election Results,'' 2001). Many believed that Nader, generally seen as more liberal than the Democrat Gore, drew votes from the Democratic base that would have helped Gore win the election otherwise. While research into third-party voters casts some doubt on this theory's applicability in 2000\footnote{This doubt, summarized - while Nader's Florida voters potentially would have broken enough for Gore to put him over the top, this was more a factor of the unusually close margin between the two major candidates than anything that Nader aided in particular.}, public opinion still rests on the idea that Nader cost Gore the presidency\footnote{One of the sections of Nader's Wikipedia page is entitled ``Spoiler controversy'' in regards to this election.} (Herron \& Lewis, 2007). In fact, a pro-Republican PAC aired campaign ads promoting Nader in Democratic states in an attempt to pull votes from Gore (Meckler, 2000).
 
 One of the reasons for major party voters to support RCV is that it avoids this spoiler issue. Under a plurality system, voters are discouraged from voting for third-party candidates because it could help elect their least-preferred of the two major candidates - ``the greater of two evils'', so to speak. Under RCV, however, voters can be heard throughout multiple rounds across separate candidates. Third-party voters can thus vote for their most preferred candidate, then still have their vote count for a preferred major-party candidate if their first option is eliminated.
 
-Conversely, one of the reasons for third-party voters to support RCV is that it helps third party candidates get elected. Voters can ignore this aforementioned facet of strategic voting\footnote{Or any strategic voting - while not impossible, it's infeasible to vote strategically under RCV (Bartholdi \& Orlin, 1991).} and select their truly preferred candidate. Third-party supporters who were worried about the spoiler effect, then, can vote for their true preference of a third party and not inadvertently help a less-preferred major candidate get elected. As people abandon this strategy, third parties will receive more votes from people no longer worried about the spoiler effect, and this could get third party candidates elected.
+Conversely, one of the reasons for third-party voters to support RCV is that it helps third party candidates get elected. Voters can ignore this aforementioned facet of strategic voting and select their truly preferred candidate. Third-party supporters who were worried about the spoiler effect, then, can vote for their true preference of a third party and not inadvertently help a less-preferred major candidate get elected. As people abandon this strategy, third parties will receive more votes from people no longer worried about the spoiler effect, and this could get third party candidates elected.
 
 \hypertarget{disincentivizes-negative-campaigning}{%
 \subsubsection{Disincentivizes negative campaigning}\label{disincentivizes-negative-campaigning}}
@@ -660,12 +682,31 @@ Another argument is a little less intuitive - ``{[}IRV{]} boosts turnout via eli
 \hypertarget{cons}{%
 \subsection{Cons}\label{cons}}
 
+\hypertarget{mathematical-failings}{%
+\subsubsection{Mathematical failings}\label{mathematical-failings}}
+
+Arrow (1963) proved a fundamental result about voting theory. Any voting system where voters rank candidates, including RCV, cannot satisfy all of the following conditions\footnote{Assuming at least 2 voters and at least 3 candidates.}:
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \emph{Unrestricted scope}: a voter must be allowed to individually rank any ordering of candidates that they choose.
+\item
+  \emph{Monotonicity}: if a voter changes their vote to rank candidate A higher on their ballot, candidate A cannot perform worse in the election\footnote{This condition is important in discouraging strategic voting.}.
+\item
+  \emph{Independence of irrelevant alternatives} (IIA): if voters change their orderings but all maintain their respective preference between candidate A and candidate B, then A and B must stay in the same relative position in the final outcome. That is, the final outcome of A and B only depends on each voter's preference between A and B, not any of the other candidates.
+\item
+  \emph{Non-imposition}: every possible ordering of candidates is a potential election result\footnote{Conditions 2 and 4 were later combined into the condition of \emph{Pareto efficiency}: if every voter prefers candidate A to candidate B, the final outcome must also prefer A to B.}.
+\item
+  \emph{Non-dictatorship}: there is no single voter whose preferences unilaterally dictate the election results. A dictator would be a voter such that if the dictator preferred A to B, the election would prefer A to B regardless of all other voters' choices.
+\end{enumerate}
+Lijphart \& Grofman (1984) shows that there are also cases when RCV does not produce a Condorcet winner. One ideal for a voting system is that it satisfies the \emph{Condorcet condition}: if there is a candidate that beats every other candidate in a one-on-one contest\footnote{This does not always happen. Sometimes a cycle can occur: rock beats scissors, scissors beats paper, paper beats rock.}, that candidate should be elected (they are the Condorcet winner). Additionally, RCV fails Arrow's monotonicity condition: there are cases\footnote{Theoretical, if not necessarily likely in a real election. As mentioned earlier, it is NP-complete to determine how to vote strategically in a given RCV election.} where an increased ranking for a candidate may hurt them overall.
+
 \hypertarget{what-is-a-majority-anyway}{%
 \subsubsection{What is a majority, anyway?}\label{what-is-a-majority-anyway}}
 
 Under RCV, the problem of ballot elimination can result in ``majorities'' that actually aren't as such. Since it's not always possible for voters to rank every candidate\footnote{This may be disallowed, as SF currently only allows 3 rankings (due to technical limitations), or it may just be infeasible - Cambridge often has 20+ candidates on the ballot.}, there will almost certainly be some number of voters who did not list a ranking for any of the candidates still remaining in the final round of the election. Thus the majority that the winner has collected is only a majority of the unexhausted ballots, which may make it less than 50\% of the total counted ballots (Petrangelo, 2013). This does introduce a less expansive form of the spoiler problem - while voters aren't ``punished'' for putting a less electable candidate for their first choice, they are punished for filling all three available slots with minor candidates. In a 2015 study of four RCV elections, Burnett and Kogan found that all four had enough eliminated ballots to only give the winner an overall plurality, not the majority sought after. This is a problem that requires a substantial fix, as ``even individuals who mark three distinct choices often face the prospect of exhaustion, so education alone will not fix the problem'' (Burnett \& Kogan, 2015).
 
-A research question that might address this issue of majorities is whether the pluralities generated by RCV are generally ``bigger'' (closer to the ideal of a true majority) in some way than under plurality, and how this is affected by technical rules like the number of candidates that voters are allowed to rank. Some research\footnote{From the pro-RCV advocacy group FairVote, admittedly.} shows that RCV does perform better than a two-round runoff in this case - as a percentage of the voters in the first round, RCV consistently has more voters counted in the final round compared to top-two runoffs (Richie \& Brown, 2017).
+A research question that might address this issue of majorities is whether the pluralities generated by RCV are generally ``bigger'' (closer to the ideal of a true majority) in some way than under plurality, and how this is affected by technical rules like the number of candidates that voters are allowed to rank. Some research shows that RCV does perform better than a two-round runoff in this case - as a percentage of the voters in the first round, RCV consistently has more voters counted in the final round compared to top-two runoffs (Richie \& Brown, 2017).
 
 \hypertarget{legal-challenges}{%
 \subsubsection{Legal challenges}\label{legal-challenges}}
@@ -1178,24 +1219,24 @@ Overall, however, this analysis shows that the rates of overvoting and undervoti
 
 Many statistical methods require complete data sets, that is data where every possible observation has a proper value, to work correctly (univariate means, regression, etc.). In many fields of research, however, data collection often results in missing data. Respondents skipping questions (nonresponse), respondents not completing all phases of a multi-stage survey (attrition), government agencies not reporting certain data (redaction), and errors in data collection are all examples of reasons that data can be missing.
 
-Suppose we have a matrix \(X\), with some missing data, which has \(m\) rows and \(n\) columns. Let \(Y = (y_{ij})\) be the complete version of dataset \(X\), that is every missing data point in \(X\) is now observed. Let \(A\) be an \(m \times n\) matrix, where
+Suppose we have a matrix \(A = (a_{ij})\) with some missing data, which has \(m\) rows and \(n\) columns. Let \(\tilde{A}\) be the complete version of dataset \(A\), where every missing data point in \(A\) is now observed. Let \(M\) be an \(m \times n\) matrix such that
 
 \[
-A = (a_{ij}) \text{, where } a_{ij} =
+M = (m_{ij}) \text{, where } m_{ij} =
 \begin{cases}
-1, \text{ when }x_{ij}\text{ is missing}\\
-0, \text{ when }x_{ij}\text{ is not missing}
+1, \text{ when }a_{ij}\text{ is missing}\\
+0, \text{ when }a_{ij}\text{ is not missing}
 \end{cases}
 \]
 
-Let \(Y_{obs}\) be the observed data in \(Y\), that is the entries in \(Y\) corresponding to the entries in \(A\) that equal 0, and \(Y_{mis}\) be the missing data in \(Y\), that is the entries in \(Y\) corresponding to the entries in \(A\) that equal 1. Let \(\phi\) denote some unknown parameters.
+Let \(\tilde{A}_{obs}\) be the observed data in \(\tilde{A}\), that is the entries in \(\tilde{A}\) corresponding to the entries in \(M\) that equal 0, and \(\tilde{A}_{mis}\) be the unobserved data in \(\tilde{A}\), that is the entries in \(\tilde{A}\) corresponding to the entries in \(M\) that equal 1. Let \(\phi\) denote some unknown parameters.
 
 The literature on missing data has identified three distinct subtypes of missing data (Little \& Rubin, 2014).
 \begin{itemize}
 \item
-  Missing completely at random (MCAR). The distribution of missing values does not depend on any data in \(Y\), observed or missing. \[f(A|Y,\phi) = f(A|\phi) \;\forall\; Y,\phi\] An example of this is a survey where the respondent mislabeled a question answer by accident.
+  Missing completely at random (MCAR). The distribution of missing values does not depend on any data in \(Y\), observed or missing. \[f(M|\tilde{A},\phi) = f(M|\phi) \;\forall\; Y,\phi\] An example of this is a survey where the respondent mislabeled a question answer by accident.
 \item
-  Missing at random (MAR). The distribution of missing values depends on the observed data, but not any missing data. \[f(A|Y,\phi) = f(A|Y_{obs},\phi) \;\forall\; Y_{mis},\phi\] An example of this is an election poll where members of one party are less likely to report their true vote choice than members of another party. The distribution of missing vote choice depends on an observed variable, party identification.
+  Missing at random (MAR). The distribution of missing values depends on the observed data, but not any missing data. \[f(M|\tilde{A},\phi) = f(M|Y_{obs},\phi) \;\forall\; \tilde{A}_{mis},\phi\] An example of this is an election poll where members of one party are less likely to report their true vote choice than members of another party. The distribution of missing vote choice depends on an observed variable, party identification.
 \item
   Non-ignorable (NI), or missing not at random (MNAR). The distribution of missing values depends on the missing values themselves. An example of this is high-income respondents leaving the income field blank in a survey to obscure their true earnings.
 \end{itemize}
@@ -1319,6 +1360,8 @@ In a FairVote report, S. Hill \& Hernandez (2018) find a similar result in the 2
 
 Kroh (2006) has a good discussion of methods for working with imputations when ``Don't know'' is a valid response, or there are valid reasons for the inapplicability of a survey question. While Kroh's study does not apply to our particular research question and data, it provides a nuanced take on the assumptions inherent in missing data imputation.
 
+Given these issues, we believe that our data is MAR and imputation will be a good method to use. Part 1 of the thesis showed that undervoting is dependent on the demographic qualities we're considering, so it's not MCAR. While it's quite difficult to tell if the data is MNAR\footnote{Since the missing data itself is what affects missing-ness, we have no way of knowing what this mechanism is caused by from looking at the observed data alone.}, we believe that people's hypothetical 2nd and 3rd preferences themselves are not what is causing these vote choices to be missing (with the exception of truly not having such a preference).
+
 \hypertarget{monotonicity}{%
 \subsection{Monotonicity}\label{monotonicity}}
 
@@ -1387,7 +1430,7 @@ In dealing with our missing data, we chose here to use multiple imputation for a
 
 As expressed in the \protect\hyperlink{missing-litreview}{previous chapter}, single imputations underestimate variance because they place an unwarranted certainty upon the newly imputed data, which is then fed into a deterministic process to calculate an estimator. This is overcome through the use of multiple imputation.
 
-There are a set of methods to calculate the mean and variance of estimators from multiple imputation, known as ``Rubin's Rules'' (Heymans \& Eekhout, 2009). For a set of estimates \(\{\hat{\theta}_i\}\) of a parameter \(\theta\) and \(m\) the number of imputations, the pooled mean can be calculated
+There are a set of methods to calculate the mean and variance of estimators from multiple imputation, known as ``Rubin's Rules'' (Rubin, 1987). For a set of estimates \(\{\hat{\theta}_i\}\) of a parameter \(\theta\) and \(m\) the number of imputations, the pooled mean can be calculated
 \[
 \bar{\theta} = \frac{1}{m} \sum_{i=1}^m \hat{\theta}_i,
 \]
@@ -1399,13 +1442,13 @@ V_W = \frac{1}{m} \sum_{i=1}^m SE_i^2,
 \]
 the average squared standard error within an imputation. There is also variance \emph{between} each dataset, which comes from uncertainty about what the true values are that we are attempting to impute. This is expressed as
 \[
-V_B = \sqrt{\frac{\sum_{i=1}^m (\theta_i - \bar{\theta})^2}{m-1}},
+V_B = \frac{\sum_{i=1}^m (\theta_i - \bar{\theta})^2}{m-1},
 \]
 that is the sample variance of the estimators. Then, the \emph{total} variance of our estimate is
 \[
-V_T = V_W + V_B + \frac{V_B}{m},
+V_T = V_W + V_B\left(1 + \frac{1}{m}\right),
 \]
-a combination of these two facets of variance. This is the way in which multiple imputation adjusts for the decreased variance that comes with single imputation.
+a combination of these two facets of variance\footnote{The \(\left(1 + \frac{1}{m}\right)\) term is a bias correction for the estimate of variance.}. This is the way in which multiple imputation adjusts for the decreased variance that comes with single imputation.
 
 While our RCV algorithm does not produce typical sample parameter estimates, these rules are still useful for obtaining an accurate sense of variability in our quantitative estimates.
 
@@ -1542,7 +1585,7 @@ Multinomial logistic regression & 0.5031699 & 0.0006944 & 0 & 0.0006944\\
 \bottomrule
 \end{tabular}
 \end{table}
-When we apply Rubin's rules to correct our underestimate of variance, the situation changes wildly\footnote{Here the black and brown lines are the vote share for the original and listwise methods (respectively), which overlap at this scale.}. Looking at Figure \ref{fig:adj-breed-plot}, the overlap between the various methods is much more palpable. Breaking this down in Table \ref{tab:adj-breed-tab}, it is clear that the majority of the variance in these estimated distributions comes from the variance \emph{within} each imputation, as opposed to the variance \emph{between} the imputations\footnote{Given the high number of imputations we made (360), as opposed to the 5 that typically suffice for MI, this makes some sense.}. This explains why the unadjusted variance in Figure \ref{fig:unadj-breed} is so small: because it only considers the variance between each imputation.
+When we apply Rubin's rules to correct our underestimate of variance, the situation changes wildly\footnote{Here the black and brown lines are the vote share for the original and listwise methods (respectively), which overlap at this scale.}. Looking at Figure \ref{fig:adj-breed-plot}, the overlap between the various methods is much more palpable. Breaking this down in Table \ref{tab:adj-breed-tab}, it is clear that the majority of the variance in these estimated distributions comes from the variance \emph{within} each imputation\footnote{Given the high number of imputations we made (360), as opposed to the 5 that typically suffice for MI, this makes some sense.}, as opposed to the variance \emph{between} the imputations\footnote{This is not exactly zero across the board, as Table \ref{tab:adj-breed-tab} would suggest, but is quite small. For the four multiple-run methods, the variance between is on the order of \(10^{-8}\).}. This explains why the unadjusted variance in Figure \ref{fig:unadj-breed} is so small: because it only considers the variance between each imputation.
 \begin{figure}
 \includegraphics[width=6in]{thesis_files/figure-latex/adj-breed-plot-1} \caption{London Breed's simulated vote share - adjusted variances}\label{fig:adj-breed-plot}
 \end{figure}
@@ -1610,7 +1653,7 @@ Multinomial logistic regression & 0.0736782 & 0.0001896 & 0e+00 & 0.0001896\\
 \bottomrule
 \end{tabular}
 \end{table}
-When we apply Rubin's rules to correct our underestimate of variance, the situation changes wildly\footnote{Here the black and brown lines are the exhausted vote share for the original and listwise methods (respectively).}. Looking at Figure \ref{fig:adj-exhausted-plot}, the overlap between the various methods is much more palpable. Similar to Breed's vote share, Table \ref{tab:adj-exhausted-tab} shows that the majority of the variance in these estimated distributions of exhausted vote share comes from the variance \emph{within} each imputation, as opposed to the variance \emph{between} the imputations. In this case, however, the improvement in exhausted vote share compared to the original data is so high that there is a much clearer impact from the imputation.
+When we apply Rubin's rules to correct our underestimate of variance, the situation changes drastically\footnote{Here the black and brown lines are the exhausted vote share for the original and listwise methods (respectively).}. Looking at Figure \ref{fig:adj-exhausted-plot}, the overlap between the various methods is much more palpable. Similar to Breed's vote share, Table \ref{tab:adj-exhausted-tab} shows that the majority of the variance in these estimated distributions of exhausted vote share comes from the variance \emph{within} each imputation, as opposed to the variance \emph{between} the imputations. In this case, however, the improvement in exhausted vote share compared to the original data is so high that there is a much clearer impact from the imputation.
 \begin{figure}
 \includegraphics[width=1\linewidth]{thesis_files/figure-latex/adj-exhausted-plot-1} \caption{Simulated exhausted vote share - adjusted variances}\label{fig:adj-exhausted-plot}
 \end{figure}
@@ -1633,7 +1676,7 @@ We hoped that a more clear result here would be able to better inform voter educ
 \hypertarget{part-2-1}{%
 \subsection{Part 2}\label{part-2-1}}
 
-In Part 2, we saw that the more informed MI methods did not change the election results, though they did sometimes decrease the winner's margin of victory. This is the same result obtained by Bernhagen \& Marsh (2010) for a separate election.
+In Part 2, we saw that the more informed MI methods did not change the election results, though they did sometimes decrease the winner's margin of victory. This is the same result obtained by Bernhagen \& Marsh (2010) for a separate election. If our assumption that missing ballots are MAR is correct, this indicates that overvoting and undervoting did not impact the result of this election, though these phenomena did slightly help London Breed. When we correct for variance, our certainty that Breed always wins dramatically decreases. This is a weakness of the MI method as applied to this data: because there is no ``standard error'' in vote share in an election (since it's not functioning as a survey), this adjusted variance does not necessarily reflect the actual variance in our estimate.
 
 Given the disparity in undervote levels between different precincts (and the impact of demographic factors on these undervote levels), we expected one of the models with precinct or demographic to have more of an effect on the electoral results. We thought that if the precincts had different local preferences, then the now-higher weighting of underrepresented precincts might flip the election. One possible explanation as to why this did not occur is that this disparate precinct weighting did happen and it cancelled out between different precincts on the whole, leading to Breed's continued victory. Fairvote has produced some analysis that seems to indicate regional distinctions among candidates, which could support the claim about different local preferences (``SF Mayor's Race,'' n.d.-a; ``SF Mayor's Race,'' n.d.-b; ``SF Mayor's Race,'' n.d.-c; ``SF Mayor's Race,'' n.d.-d). Additionally, as indicated in S. Hill \& Hernandez (2018), the positioning of the undervotes themselves in this election may have limited the impact of full voting, and even under full voting Breed still would have won due to this positioning. Another answer is that MI itself may not produce enough variance to meaningfully affect these election results (even if there \emph{were} a true change in the election winner), given the large number of data points and the inherent closed loop of using the observed data to modify itself\footnote{The same problem faced by methods like the bootstrap.}. This may be a limitation of MI, as after correcting variance with Rubin's rules there was much more potential overlap in election results (\protect\hyperlink{missing-results}{Chapter 6}).
 
@@ -1786,6 +1829,9 @@ Allison, P. D. (2011). Missing Data. In R. E. Millsap \& A. Maydeu-Olivares (Eds
 \leavevmode\hypertarget{ref-amunategui_predicting_nodate}{}%
 Amunategui, M. (n.d.). Predicting Multiple Discrete Values with Multinomials, Neural Networks and the \{nnet\} Package. Retrieved from \url{https://amunategui.github.io/multinomial-neuralnetworks-walkthrough/index.html}
 
+\leavevmode\hypertarget{ref-arrow_social_1963}{}%
+Arrow, K. J. (1963). \emph{Social Choice and Individual Values} (2nd ed.). New Haven; London: Yale University Press.
+
 \leavevmode\hypertarget{ref-arrow_handbook_2002}{}%
 Arrow, K. J., Sen, A. K., \& Suzumura, K. (Eds.). (2002). \emph{Handbook of social choice and welfare} (Vol. 1). Amsterdam ; Boston: Elsevier.
 
@@ -1858,9 +1904,6 @@ Henry, M. A. (n.d.). \emph{THE IMPLEMENTATION AND EFFECTS OF RANKED CHOICE VOTIN
 \leavevmode\hypertarget{ref-herron_did_2007}{}%
 Herron, M. C., \& Lewis, J. B. (2007). Did Ralph Nader spoil Al Gore's presidential bid? A ballot-level study of green and reform party voters in the 2000 presidential election*. \emph{Quarterly Journal of Political Science}, \emph{2}(3), 205.
 
-\leavevmode\hypertarget{ref-heymans_applied_2009}{}%
-Heymans, M. W., \& Eekhout, I. (2009). \emph{Applied Missing Data Analysis with SPSS and (R)Studio}.
-
 \leavevmode\hypertarget{ref-hill_sf_2018}{}%
 Hill, C., Jerdonek, C., \& Mogi, V. (2018, June). SF elections are working - and getting even better. \emph{The San Francisco Examiner}. Retrieved from \url{http://www.sfexaminer.com/sf-elections-working-getting-even-better/}
 
@@ -1896,6 +1939,9 @@ Lee, J., \& Yancheff, M. (2019, April). Rcv: Ranked Choice Voting.
 
 \leavevmode\hypertarget{ref-levi_why_2018}{}%
 Levi, R. (2018, November). Why Is Part of Alameda Island in San Francisco? \emph{KQED}. Retrieved from \url{https://www.kqed.org/news/11702058/why-is-part-of-alameda-island-in-san-francisco}
+
+\leavevmode\hypertarget{ref-lijphart_choosing_1984}{}%
+Lijphart, A., \& Grofman, B. (1984). \emph{Choosing an Electoral System: Issues and Alternatives}. (G. M. Pomper, Ed.). New York, NY: Praeger Publishers.
 
 \leavevmode\hypertarget{ref-little_statistical_1987}{}%
 Little, R. J. A., \& Rubin, D. B. (1987). \emph{Statistical Analysis with Missing Data}. New York, NY: John Wiley \& Sons, Inc.
@@ -1969,11 +2015,17 @@ Ranked Choice Voting Results Table. (2018, June). \emph{San Francisco Board of E
 \leavevmode\hypertarget{ref-ranney_turnout_1972}{}%
 Ranney, A. (1972). Turnout and Representation in Presidential Primary Elections. \emph{The American Political Science Review}, \emph{66}(1), 21--37. \url{http://doi.org/10.2307/1959276}
 
+\leavevmode\hypertarget{ref-r_core_team_r_2018}{}%
+R Core Team. (2018). R: A Language and Environment for Statistical Computing. VIenna, Austria. Retrieved from \url{R\%20Foundation\%20for\%20Statistical\%20Computing}
+
 \leavevmode\hypertarget{ref-richie_ranked_2017}{}%
 Richie, R., \& Brown, M. (2017, December). Ranked choice voting outperforms runoffs in upholding majority rule. \emph{FairVote}. Retrieved from \url{https://www.fairvote.org/ranked/_choice/_voting/_outperforms/_runoffs/_in/_upholding/_majority/_rule}
 
 \leavevmode\hypertarget{ref-rubin_characterizing_1974}{}%
 Rubin, D. B. (1974). Characterizing the Estimation of Parameters in Incomplete-Data Problems. \emph{Journal of the American Statistical Association}, \emph{69}(346), 467--474. \url{http://doi.org/10.2307/2285680}
+
+\leavevmode\hypertarget{ref-rubin_multiple_1987}{}%
+Rubin, D. B. (1987). \emph{Multiple Imputation for Nonresponse in Surveys}. New York, NY: John Wiley \& Sons.
 
 \leavevmode\hypertarget{ref-rush_cost_2015}{}%
 Rush, J. (2015, June). Cost of runoff election affects more than just candidates. \emph{Star Local}. Retrieved from \url{https://starlocalmedia.com/planostarcourier/news/cost-of-runoff-election-affects-more-than-just-candidates/article/_bac2a0f2-ffaa-524c-9b87-6704f60e4468.html}

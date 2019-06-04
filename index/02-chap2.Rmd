@@ -62,9 +62,9 @@ precincts_shape <- st_read(dsn = here("raw_data", "sf_precinct_shp"),
 
 census_shape <- st_read(dsn = here("raw_data", "ca_census_shp"),
                         stringsAsFactors = FALSE, quiet = TRUE) %>%
-  filter(COUNTY == "075") %>%
+  dplyr::filter(COUNTY %in% c("075")) %>%
   st_transform(7132) %>% # foot-unit projection designed for SF, so it's the one I'll use
-  filter(lengths(st_within(st_centroid(.), precincts_shape)) > 0)
+  dplyr::filter(lengths(st_within(st_centroid(.), precincts_shape)) > 0)
 
 mapRange1 <- c(range(st_coordinates(precincts_shape)[,1]),range(st_coordinates(precincts_shape)[,2]))
 

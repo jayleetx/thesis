@@ -4,7 +4,7 @@ This repository contains the work completed for my senior thesis at Reed College
 
 The full thesis can be found in [`thesis_lee.pdf`](thesis_lee.pdf), the input documents to create it are in [`index`](index/), and various analysis scripts are in the [`code`](code/) folder.
 
-A [poster](aapor_poster.pptx) of this work was presented at the [2019 American Association of Public Opinion Research Conference](https://www.aapor.org/Conference-Events/Recent-Conferences.aspx) in Toronto, ON, and won the student poster competition.
+This work was presented at the [2019 American Association for Public Opinion Research Conference](https://www.aapor.org/Conference-Events/Recent-Conferences.aspx) in Toronto, ON, and won the student poster competition ([aapor_poster.pptx](aapor_poster.pptx)).
 
 ## Abstract
 

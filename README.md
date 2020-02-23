@@ -1,6 +1,6 @@
 # thesis
 
-This repository contains the work completed for my senior thesis at Reed College (Fall 2018 - Spring 2019), advised by [Dr. Heather Kitada Smalley](https://willamette.edu/cla/math/faculty/smalley/index.html) (now Williamette University).
+This repository contains the work completed for my senior thesis at Reed College (Fall 2018 - Spring 2019), advised by [Dr. Heather Kitada Smalley](https://willamette.edu/cla/math/faculty/smalley/index.html) (now Willamette University).
 
 The full thesis can be found in [`thesis_lee.pdf`](thesis_lee.pdf), the input documents to create it are in [`index`](index/), and various analysis scripts are in the [`code`](code/) folder.
 
